@@ -1,0 +1,441 @@
+{
+  "siteConfig": {
+    "name": "Rajan Prakash Chand",
+    "shortName": "RC",
+    "title": "Network Engineer & MSc IT Researcher",
+    "description": "5+ years managing large-scale ISP infrastructure — networks trusted by 500,000+ users at WorldLink and Dish Media. Currently pursuing MSc IT at UWS, Scotland.",
+    "email": "rajanchand48@gmail.com",
+    "calendlyUrl": "https://calendly.com/rajanchand48/1",
+    "location": "Scotland, UK",
+    "locationOrigin": "Nepal",
+    "resumeUrl": "#",
+    "profileImage": "/images/profile.jpg",
+    "url": "https://rajanchand.com.np"
+  },
+  "stats": [
+    {
+      "label": "Years Experience",
+      "value": 5,
+      "suffix": "+"
+    },
+    {
+      "label": "Users Served",
+      "value": 500,
+      "suffix": "K+"
+    },
+    {
+      "label": "ISP Companies",
+      "value": 2,
+      "suffix": ""
+    },
+    {
+      "label": "MSc Researcher",
+      "value": 0,
+      "suffix": "MSc",
+      "isText": true
+    }
+  ],
+  "services": [
+    {
+      "icon": "Globe",
+      "title": "Network Engineering",
+      "description": "Design, deploy, and optimize enterprise-grade network infrastructure with redundancy, scalability, and 99.9% uptime."
+    },
+    {
+      "icon": "Shield",
+      "title": "Cybersecurity",
+      "description": "Implement Zero Trust architectures, endpoint security, firewall configuration, and comprehensive security audits."
+    },
+    {
+      "icon": "Server",
+      "title": "System Administration",
+      "description": "Manage Linux/Windows servers, virtualization, 24/7 monitoring, and proactive maintenance for critical systems."
+    },
+    {
+      "icon": "Cloud",
+      "title": "Cloud & DevOps",
+      "description": "Cloud infrastructure provisioning, CI/CD pipeline automation, containerization with Docker, and scalable deployments."
+    }
+  ],
+  "experience": [
+    {
+      "period": "Current",
+      "title": "MSc Information Technology",
+      "company": "University of the West of Scotland",
+      "companyUrl": "https://www.uws.ac.uk/",
+      "type": "education",
+      "description": "Advanced studies in information technology with focus on modern computing systems, digital innovation, and network security research.",
+      "tags": [
+        "Research",
+        "Network Security",
+        "IT Management",
+        "Zero Trust"
+      ]
+    },
+    {
+      "period": "2019 — 2024",
+      "title": "Customer Support Supervisor",
+      "company": "Dish Media Network Ltd.",
+      "companyUrl": "https://www.dishhome.com.np/",
+      "type": "work",
+      "description": "Monitored and optimized network performance, diagnosing and resolving technical issues. Designed and implemented standard escalation processes for technical issue handling.",
+      "bullets": [
+        "Monitored and optimized network performance, diagnosing and resolving technical issues",
+        "Designed and implemented standard escalation processes for technical issue handling",
+        "Documented network inventory and tracked network failures",
+        "Led technical project implementation within the ISP, including pilot testing and progress monitoring",
+        "Coordinated with core IT & Networking teams to drive quality improvements"
+      ],
+      "tags": [
+        "Network Monitoring",
+        "Team Leadership",
+        "Escalation Design",
+        "IPTV"
+      ]
+    },
+    {
+      "period": "2017 — 2019",
+      "title": "Technical Supervisor",
+      "company": "WorldLink Communications Ltd.",
+      "companyUrl": "https://worldlink.com.np/",
+      "type": "work",
+      "description": "Designed and implemented new network solutions and improved existing infrastructure for 500,000+ users. Managed 24/7 monitoring and maintenance of complex network systems.",
+      "bullets": [
+        "Designed and implemented new network solutions and improved existing infrastructure",
+        "Developed system architecture diagrams and data models",
+        "Managed scheduled upgrades, installation, and configuration of network equipment",
+        "Configured routers, switches, and WAN devices for enterprise clients",
+        "Managed 24/7 monitoring and maintenance of complex network systems",
+        "Managed and optimized infrastructure for over 500,000 users"
+      ],
+      "tags": [
+        "Cisco",
+        "MikroTik",
+        "OSPF/BGP",
+        "Enterprise Networking"
+      ]
+    },
+    {
+      "period": "2013 — 2017",
+      "title": "BSc Computer Science & IT",
+      "company": "Asian College of Higher Studies",
+      "companyUrl": "https://achsnepal.edu.np/",
+      "type": "education",
+      "description": "Comprehensive undergraduate program covering fundamentals of computer science, information systems, and networking.",
+      "tags": [
+        "Computer Science",
+        "Networking",
+        "Programming"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "title": "Network Monitoring Integration with Chatbot, SMS & Viber",
+      "role": "Technical Lead & Integration Specialist",
+      "category": "Networking",
+      "description": "Developed an integrated alert system combining network monitoring with multi-channel notifications to improve incident response times.\nrknvrnvrlevre\n\nvrrkjvnjrevjerver\nervkr vreverv",
+      "impact": [
+        "Reduced incident response time by 30%",
+        "Automated alert delivery across multiple channels",
+        "Improved network uptime monitoring"
+      ],
+      "tags": [
+        "Python",
+        "API Integration",
+        "Nagios",
+        "Chatbot"
+      ],
+      "icon": "Bell"
+    },
+    {
+      "title": "Redundant Network Configuration",
+      "role": "Network Infrastructure Specialist",
+      "category": "Networking",
+      "description": "Implemented comprehensive redundant network infrastructure to ensure uninterrupted connectivity during hardware or link failures.\n vjrvrjv rjv rvrev\nvkj vrkv rekj vkrv rrvrv\nr vrvkrjvr",
+      "impact": [
+        "Achieved 99.9% network uptime",
+        "Eliminated single points of failure",
+        "Reduced service interruptions significantlyvknrlvev"
+      ],
+      "tags": [
+        "VLAN",
+        "OSPF",
+        "STP",
+        "Cisco"
+      ],
+      "icon": "Network"
+    },
+    {
+      "title": "Ignite Router Deployment & Optimization",
+      "role": "Network Engineer",
+      "category": "Networking",
+      "description": "Led the mass deployment and optimization of Ignite Routers to improve customer broadband experience and reduce support tickets.",
+      "impact": [
+        "Successfully deployed across 10,000+ customer premises",
+        "Reduced Wi-Fi related customer complaints by 40%",
+        "Improved remote troubleshooting capabilities"
+      ],
+      "tags": [
+        "MikroTik",
+        "Firmware",
+        "Wi-Fi",
+        "Deployment"
+      ],
+      "icon": "Wifi"
+    },
+    {
+      "title": "IPTV Infrastructure Scaling",
+      "role": "Network Engineer",
+      "category": "Networking",
+      "description": "Expanded and optimized the IPTV delivery network to support a growing subscriber base while maintaining high definition stream quality.",
+      "impact": [
+        "Supported 50% increase in active IPTV subscribers",
+        "Achieved zero buffering metrics during peak hours",
+        "Optimized multicast routing protocols"
+      ],
+      "tags": [
+        "Multicast",
+        "IGMP",
+        "QoS",
+        "IPTV"
+      ],
+      "icon": "Tv"
+    },
+    {
+      "title": "Zero Trust Architecture Prototype",
+      "role": "Lead Security Architect (Academic Project)",
+      "category": "Security",
+      "description": "Designed and implemented a Zero Trust Architecture (ZTA) prototype focusing on micro-segmentation and continuous authentication for enterprise networks.",
+      "impact": [
+        "Reduced attack surface area by 80% in simulated environment",
+        "Implemented continuous identity verification protocols",
+        "Created comprehensive deployment blueprint for enterprise adoption"
+      ],
+      "tags": [
+        "Zero Trust",
+        "Micro-segmentation",
+        "IAM",
+        "Security"
+      ],
+      "icon": "ShieldCheck"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Cisco IOS",
+      "category": "Networking",
+      "icon": "Router"
+    },
+    {
+      "name": "MikroTik",
+      "category": "Networking",
+      "icon": "Router"
+    },
+    {
+      "name": "VLAN/OSPF/BGP",
+      "category": "Networking",
+      "icon": "Network"
+    },
+    {
+      "name": "TCP/IP",
+      "category": "Networking",
+      "icon": "Globe"
+    },
+    {
+      "name": "Firewall",
+      "category": "Security",
+      "icon": "Shield"
+    },
+    {
+      "name": "Wireshark",
+      "category": "Security",
+      "icon": "Search"
+    },
+    {
+      "name": "Zero Trust",
+      "category": "Security",
+      "icon": "Lock"
+    },
+    {
+      "name": "Endpoint Security",
+      "category": "Security",
+      "icon": "ShieldCheck"
+    },
+    {
+      "name": "Linux",
+      "category": "Systems",
+      "icon": "Terminal"
+    },
+    {
+      "name": "Windows Server",
+      "category": "Systems",
+      "icon": "Monitor"
+    },
+    {
+      "name": "Docker",
+      "category": "Systems",
+      "icon": "Container"
+    },
+    {
+      "name": "Nagios/Zabbix",
+      "category": "Monitoring",
+      "icon": "Activity"
+    },
+    {
+      "name": "Python",
+      "category": "Programming",
+      "icon": "Code"
+    },
+    {
+      "name": "AWS",
+      "category": "Cloud",
+      "icon": "Cloud"
+    },
+    {
+      "name": "Git",
+      "category": "Tools",
+      "icon": "GitBranch"
+    },
+    {
+      "name": "DevOps",
+      "category": "Tools",
+      "icon": "Settings"
+    }
+  ],
+  "certifications": [
+    {
+      "title": "Network Basic",
+      "issuer": "Professional Certification"
+    },
+    {
+      "title": "Network Device",
+      "issuer": "Professional Certification"
+    },
+    {
+      "title": "Endpoint Security",
+      "issuer": "Professional Certification"
+    },
+    {
+      "title": "Service Desk",
+      "issuer": "Professional Certification"
+    },
+    {
+      "title": "DevOps",
+      "issuer": "Professional Certification"
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Rajan demonstrated exceptional technical leadership in managing our network infrastructure. His redundant network implementation achieved remarkable uptime results.",
+      "author": "Bikram Shrestha",
+      "role": "WorldLink Communications",
+      "linkedIn": "https://www.linkedin.com/in/bikram-shrestha"
+    },
+    {
+      "quote": "His integration of monitoring systems with multi-channel notifications transformed our incident response. The 30% improvement in response time speaks for itself.",
+      "author": "Sunil Karki",
+      "role": "Dish Media Network",
+      "linkedIn": "https://www.linkedin.com/in/sunil-karki"
+    },
+    {
+      "quote": "Rajan brings real-world ISP experience into his academic work, creating a unique blend of practical knowledge and research capability.",
+      "author": "Dr. James Smith",
+      "role": "University of the West of Scotland",
+      "linkedIn": "https://www.linkedin.com/in/dr-james-smith-uws"
+    }
+  ],
+  "blogPosts": [
+    {
+      "slug": "navigating-msc-it-landscape-uws",
+      "title": "Navigating the MSc IT Landscape at UWS",
+      "excerpt": "A deep dive into my academic journey, focusing on core network optimization and advanced system architectures.",
+      "date": "2024-12-15",
+      "category": "Academic",
+      "readTime": "5 min read",
+      "content": "# Navigating the MSc IT Landscape at UWS\n\nWelcome to my academic research journey. Pursuing an MSc in Information Technology at the University of the West of Scotland (UWS) has been an enriching experience that bridge the gap between heavy ISP operations and advanced academic methodology.\n\n## Core Focus Areas\n\n1. **Advanced Network Architecture**: Designing systems that scale.\n2. **Zero Trust Integration**: Securing the modern perimeter-less enterprise.\n3. **MSc Thesis**: Exploring modern container security and SD-WAN optimization.\n\nMore details will be updated as the research progresses!"
+    },
+    {
+      "slug": "optimizing-isp-infrastructure-500k-users",
+      "title": "Optimizing ISP Infrastructure for 500,000+ Users",
+      "excerpt": "Technical strategies and real-world challenges encountered while managing large-scale network deployments in Nepal's ISP sector.",
+      "date": "2024-10-20",
+      "category": "Networking",
+      "readTime": "8 min read",
+      "content": "# Optimizing ISP Infrastructure for 500,000+ Users\n\nManaging networks for WorldLink and Dish Media required robust systems, automated fault containment, and massive scalability. Here are the core insights from that journey.\n\n## High Availability Design\n\n* **Redundancy**: Dual-homing critical links with OSPF and BGP routing protocols.\n* **Fast Failover**: Reducing convergence times down to milliseconds.\n* **Proactive Alerting**: Automated integration of Nagios with Chatbots, SMS, and Viber."
+    },
+    {
+      "slug": "future-of-networking-beyond-5g-zero-trust",
+      "title": "The Future of Networking: Beyond 5G and Zero Trust",
+      "excerpt": "Exploring the evolution of network security and the shift towards Zero Trust architectures in modern enterprise environments.",
+      "date": "2024-08-05",
+      "category": "Security",
+      "readTime": "6 min read",
+      "content": "# The Future of Networking: Beyond 5G and Zero Trust\n\nAs enterprise applications move to the cloud, standard perimeter-based firewalls are no longer sufficient. This article outlines the paradigm shift to Zero Trust security.\n\n## Core Principles\n\n1. **Verify Explicitly**: Never trust, always verify.\n2. **Least Privilege Access**: Limit user access with Just-In-Time and Just-Enough-Access.\n3. **Assume Breach**: Minimize blast radius and segment access."
+    }
+  ],
+  "dissertions": [
+    {
+      "title": "Optimization of Zero Trust Security Framework in Hybrid Cloud Environments",
+      "description": "An academic research paper presenting the implementation, deployment, and performance analysis of Zero Trust network access (ZTNA) in hybrid clouds.",
+      "type": "MSc IT Research Dissertation",
+      "published": "May 2026",
+      "url": "#"
+    },
+    {
+      "title": "High-Performance Redundant Routing and Load Balancing in Large-Scale ISP Networks",
+      "description": "A technical research and operational blueprint demonstrating multi-homing routing designs with OSPF/BGP for 500k+ subscribers.",
+      "type": "Industry Technical Report",
+      "published": "Jan 2023",
+      "url": "#"
+    }
+  ],
+  "socialLinks": [
+    {
+      "name": "LinkedIn",
+      "url": "https://linkedin.com",
+      "icon": "Linkedin"
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com",
+      "icon": "Github"
+    },
+    {
+      "name": "Twitter",
+      "url": "https://twitter.com",
+      "icon": "Twitter"
+    },
+    {
+      "name": "Facebook",
+      "url": "https://facebook.com",
+      "icon": "Facebook"
+    }
+  ],
+  "navLinks": [
+    {
+      "label": "Home",
+      "href": "#home"
+    },
+    {
+      "label": "Expertise",
+      "href": "#services"
+    },
+    {
+      "label": "Experience",
+      "href": "#experience"
+    },
+    {
+      "label": "Projects",
+      "href": "#projects"
+    },
+    {
+      "label": "Skills",
+      "href": "#skills"
+    },
+    {
+      "label": "Blog",
+      "href": "#articles"
+    }
+  ]
+}
