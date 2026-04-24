@@ -2,7 +2,6 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { Hero } from "@/components/sections/hero";
-import { Stats } from "@/components/sections/stats";
 import { Services } from "@/components/sections/services";
 import { Experience } from "@/components/sections/experience";
 import { Projects } from "@/components/sections/projects";
@@ -19,7 +18,6 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <Stats />
         <Services />
         <Experience />
         <Projects />

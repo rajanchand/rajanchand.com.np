@@ -10,8 +10,8 @@ export function Services() {
   const column2 = services.slice(2, 4);
 
   return (
-    <section id="services" className="scroll-mt-16 py-16 md:py-20 z-10">
-      <div className="px-4 py-16 mx-auto max-w-7xl lg:px-8 lg:py-20">
+    <section id="services" className="scroll-mt-16 py-12 md:py-16 z-10">
+      <div className="px-4 mx-auto max-w-7xl lg:px-8">
         {/* Section Header */}
         <ScrollReveal>
           <div className="mb-10 md:mx-auto sm:text-center md:mb-12 max-w-3xl">

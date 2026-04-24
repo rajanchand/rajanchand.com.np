@@ -426,12 +426,22 @@ export default function AdminDashboard() {
                       />
                     </div>
 
-                    <div className="space-y-1.5 md:col-span-2">
+                    <div className="space-y-1.5">
                       <label className="text-[10px] font-bold tracking-wider uppercase text-[var(--muted-foreground)]">Resume PDF link (or #)</label>
                       <input
                         type="text"
                         value={data.siteConfig.resumeUrl}
                         onChange={(e) => handleConfigChange("resumeUrl", e.target.value)}
+                        className="w-full px-4 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold tracking-wider uppercase text-[var(--muted-foreground)]">Website URL</label>
+                      <input
+                        type="text"
+                        value={data.siteConfig.url || ""}
+                        onChange={(e) => handleConfigChange("url", e.target.value)}
                         className="w-full px-4 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                       />
                     </div>
