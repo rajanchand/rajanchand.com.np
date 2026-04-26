@@ -7,7 +7,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export function Skills() {
   return (
-    <section id="skills" className="relative z-10 py-20 md:py-28">
+    <section id="skills" className="relative z-10 pt-12 pb-20 md:pt-16 md:pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <SectionHeader
