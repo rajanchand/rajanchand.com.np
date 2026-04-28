@@ -2,96 +2,200 @@
 
 import { experience } from "@/lib/data";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { ArrowDown, Check } from "lucide-react";
+import { ArrowUp } from "lucide-react";
+
+interface ExperienceItem {
+  type: string;
+  period: string;
+  title: string;
+  company: string;
+  companyUrl?: string;
+  description: string;
+  bullets?: string[];
+  tags?: string[];
+}
 
 export function Experience() {
+  // Separate work and education items dynamically with type casting
+  const typedExperience = experience as ExperienceItem[];
+  const workExperience = typedExperience.filter((item) => item.type === "work");
+  const educationExperience = typedExperience.filter((item) => item.type === "education");
+
   return (
-    <section id="experience" className="px-4 py-16 sm:px-6 mx-auto lg:px-8 lg:py-20 max-w-5xl z-10 relative">
-      <div className="grid gap-6 row-gap-10 md:grid-cols-1">
-        <div className="md:pb-6">
-          {/* Timeline Title */}
-          <ScrollReveal>
-            <h2 className="mb-12 text-3xl lg:text-4xl font-extrabold font-[family-name:var(--font-inter)] tracking-tight text-gray-900 dark:text-gray-100">
-              Professional Work Experience Highlights
+    <section id="experience" className="px-4 pt-6 pb-10 sm:px-6 mx-auto lg:px-8 lg:pt-8 lg:pb-12 max-w-7xl z-10 relative bg-[var(--background)]">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <ScrollReveal>
+          <div className="text-center mb-16 select-none">
+            <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-blue-500 dark:text-blue-400 mb-4 font-mono">
+              <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+              HISTORY
+              <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+            </span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-5 font-[var(--font-display)] leading-tight">
+              Work &{" "}
+              <span className="relative inline-block pb-1">
+                Education
+                <span className="absolute bottom-0 left-0 w-full h-[3.5px] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
+              </span>
             </h2>
-          </ScrollReveal>
+            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-[15px] max-w-2xl mx-auto leading-relaxed">
+              A comprehensive overview of my professional trajectory in network operations and my academic path in information technology.
+            </p>
+          </div>
+        </ScrollReveal>
 
-          {/* Timeline Container */}
-          <div className="pl-2 md:pl-10">
-            {experience.map((item: any, i: number) => (
-              <ScrollReveal key={i} delay={i * 0.1}>
-                <div className="flex">
-                  {/* Left Column — Line & Arrow */}
-                  <div className="flex flex-col items-center mr-6">
-                    <div>
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-blue-600 dark:border-blue-400 border-2">
-                        <ArrowDown className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                    </div>
-                    {/* Line */}
-                    <div className="w-px h-full bg-gray-300 dark:bg-zinc-700 min-h-[40px]" />
-                  </div>
-
-                  {/* Right Column — Job Details */}
-                  <div className="pt-1 pb-10">
-                    <p className="mb-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 font-mono">
-                      {item.period}
-                    </p>
-                    <p className="mb-1 text-xl font-bold text-gray-900 dark:text-gray-100">
-                      {item.title}
-                    </p>
-                    <a
-                      href={item.companyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mb-3 text-base font-semibold text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    >
-                      {item.company}
-                    </a>
-                    <p className="text-sm text-gray-600 dark:text-slate-400 text-justify leading-relaxed max-w-3xl mb-4">
-                      {item.description}
-                    </p>
-
-                    {item.bullets && (
-                      <ul className="space-y-1.5 mb-4 list-disc pl-5">
-                        {item.bullets.map((bullet: string, j: number) => (
-                          <li key={j} className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed text-justify">
-                            {bullet}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {item.tags.map((tag: string) => (
-                        <span
-                          key={tag}
-                          className="px-2.5 py-1 text-xs font-medium rounded bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 border border-gray-200 dark:border-zinc-700"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-
-            {/* Final Timeline Element (Today) */}
-            <ScrollReveal delay={experience.length * 0.1}>
-              <div className="flex">
-                <div className="flex flex-col items-center mr-6">
-                  <div>
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border-blue-600 dark:border-blue-400 border-2 bg-blue-600 dark:bg-blue-700">
-                      <Check className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <p className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">Today</p>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-12 mt-12">
+          {/* Column 1 — Work Experience */}
+          <div className="space-y-8">
+            <ScrollReveal>
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-150 dark:border-slate-800/80 pb-3">
+                <span className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                Professional Work Experience
+              </h3>
             </ScrollReveal>
+
+            <div className="relative border-l border-gray-200 dark:border-slate-800 ml-4 space-y-10">
+              {workExperience.map((item, i) => (
+                <ScrollReveal key={i} delay={i * 0.1}>
+                  <div className="relative pl-8">
+                    {/* Circle Indicator Centered on Line */}
+                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-blue-500 dark:border-blue-400 border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
+                      <ArrowUp className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                    </div>
+
+                    <div>
+                      {/* Period Label */}
+                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/30 rounded-lg font-mono uppercase">
+                        {item.period}
+                      </span>
+                      
+                      {/* Job Title */}
+                      <h4 className="text-lg font-extrabold text-slate-850 dark:text-slate-100 font-[var(--font-display)] leading-snug">
+                        {item.title}
+                      </h4>
+                      
+                      {/* Company Name */}
+                      <a
+                        href={item.companyUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                      >
+                        {item.company}
+                      </a>
+                      
+                      {/* Description */}
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-450 leading-relaxed max-w-2xl mb-4 text-justify">
+                        {item.description}
+                      </p>
+
+                      {/* Bullet highlights */}
+                      {item.bullets && item.bullets.length > 0 && (
+                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-450">
+                          {item.bullets.map((bullet, j) => (
+                            <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 shrink-0 mt-2" />
+                              <span>{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Badges/Tags */}
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {item.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 2 — Education Details */}
+          <div className="space-y-8">
+            <ScrollReveal>
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-100 dark:border-slate-800/80 pb-3">
+                <span className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                Academic & Education Details
+              </h3>
+            </ScrollReveal>
+
+            <div className="relative border-l border-gray-200 dark:border-slate-800 ml-4 space-y-10">
+              {educationExperience.map((item, i) => (
+                <ScrollReveal key={i} delay={i * 0.1}>
+                  <div className="relative pl-8">
+                    {/* Circle Indicator Centered on Line */}
+                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-indigo-500 dark:border-indigo-400 border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
+                      <ArrowUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    </div>
+
+                    <div>
+                      {/* Period Label */}
+                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-lg font-mono uppercase">
+                        {item.period}
+                      </span>
+                      
+                      {/* Course/Degree Title */}
+                      <h4 className="text-lg font-extrabold text-slate-850 dark:text-slate-100 font-[var(--font-display)] leading-snug">
+                        {item.title}
+                      </h4>
+                      
+                      {/* Institution Name */}
+                      <a
+                        href={item.companyUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                      >
+                        {item.company}
+                      </a>
+                      
+                      {/* Description */}
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-450 leading-relaxed max-w-2xl mb-4 text-justify">
+                        {item.description}
+                      </p>
+
+                      {/* Bullet highlights */}
+                      {item.bullets && item.bullets.length > 0 && (
+                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-450">
+                          {item.bullets.map((bullet, j) => (
+                            <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/80 shrink-0 mt-2" />
+                              <span>{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Badges/Tags */}
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {item.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
           </div>
         </div>
       </div>

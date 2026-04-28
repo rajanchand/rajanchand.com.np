@@ -2,35 +2,52 @@
 
 import React, { useState, useEffect } from "react";
 import { siteConfig } from "@/lib/data";
-import { Mail, ArrowRight } from "lucide-react";
+import { Mail } from "lucide-react";
 
-// Typing animation to match the React Typing widget in ssg-personal-blog
+// Typing animation featuring a natural type-pause-delete-loop cycle
 function TypingAnimation({ text }: { text: string }) {
-  const [typedText, setTypedText] = useState("");
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const timerId = setTimeout(() => {
-      setTypedText(text.substring(0, currentTextIndex + 1));
-      setCurrentTextIndex((currentIndex) =>
-        currentIndex === text.length - 1 ? 0 : currentIndex + 1
-      );
-    }, 150); // Natural 150ms typing speed for high-end feel
+    const speed = isDeleting ? 75 : 150; // faster deletion than typing
 
-    return () => clearTimeout(timerId);
-  }, [currentTextIndex, text]);
+    if (!isDeleting && index === text.length) {
+      // Pause at full text
+      const pauseTimer = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2500); // 2.5 seconds read pause
+      return () => clearTimeout(pauseTimer);
+    }
+
+    if (isDeleting && index === 0) {
+      // Pause before typing again
+      const pauseTimer = setTimeout(() => {
+        setIsDeleting(false);
+      }, 500);
+      return () => clearTimeout(pauseTimer);
+    }
+
+    const timer = setTimeout(() => {
+      setIndex((prev) => prev + (isDeleting ? -1 : 1));
+    }, speed);
+
+    return () => clearTimeout(timer);
+  }, [index, isDeleting, text]);
+
+  const typedText = text.substring(0, index);
 
   return (
-    <span className="relative inline-block min-h-[40px]">
-      <span>Hi I&apos;m, {typedText}</span>
-      <span className="inline-block w-1.5 h-7 ml-1 bg-gray-400 dark:bg-zinc-500 animate-pulse align-middle" />
+    <span className="relative inline-block min-h-[44px]">
+      <span>Hi, I&apos;m {typedText}</span>
+      <span className="inline-block w-1 h-7 ml-1 bg-blue-500 dark:bg-blue-400 animate-pulse align-middle" />
     </span>
   );
 }
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-16 md:pt-40 md:pb-20 z-10">
+    <section id="home" className="relative pt-24 pb-8 md:pt-32 md:pb-12 z-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12">
           {/* Left Column — Picture (Moves to top on mobile) */}
@@ -53,19 +70,7 @@ export function Hero() {
 
             <div className="space-y-6">
               <p className="text-base text-gray-600 dark:text-slate-400 text-justify leading-relaxed">
-                As a network engineer and researcher, I am driven by my curiosity and desire to push the boundaries of what is possible
-                with network architecture. With over five years of experience working in the industry, I have gained a deep
-                understanding of infrastructure design, scalability, and security protocols, as well as expertise in various system
-                configurations and cloud technologies.
-                <br />
-                <br />
-                Throughout my career, I have worked on a variety of network deployments that have challenged me to think creatively and
-                develop redundant, high-uptime solutions for large-scale operations. What sets me apart as a network engineer is my passion
-                for using technology to improve user experiences and ensure secure, seamless connectivity across large infrastructures.
-                <br />
-                <br />
-                I believe that diversity and deep technical research are essential to creating truly innovative solutions, and I am committed
-                to bringing my unique operational background and research-driven perspective to every project I work on.
+                Highly motivated Network and IT Support Engineer with over 4 years of hands-on experience supporting ISP and enterprise networks, specializing in LAN/WAN, routing, switching, firewalls, VPNs, and wireless infrastructure. Promoted from L1 Technical Support to Technical Supervisor at WorldLink Communications, leading outdoor network operations, vendor escalations, and incident response. Proven ability to reduce Mean Time to Detect (MTTD) and Mean Time to Resolve (MTTR), produce clear technical documentation, and effectively communicate with technical and non-technical stakeholders. Currently pursuing an MSc in Information Technology, with hands-on research in Zero Trust Security adoption, including a prototype implementing risk-based authentication and device fingerprinting.
                 <br />
                 <br />
                 <span className="text-sm font-medium text-gray-500 dark:text-slate-500">

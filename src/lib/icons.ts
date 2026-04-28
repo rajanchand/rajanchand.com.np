@@ -21,6 +21,13 @@ import {
   Github,
   Twitter,
   Facebook,
+  Users,
+  Headphones,
+  Clock,
+  FileText,
+  TrendingUp,
+  ArrowUpRight,
+  MessageSquare,
 } from "lucide-react";
 import React from "react";
 
@@ -48,6 +55,13 @@ const icons: Record<string, React.ComponentType<{ className?: string }>> = {
   Github,
   Twitter,
   Facebook,
+  Users,
+  Headphones,
+  Clock,
+  FileText,
+  TrendingUp,
+  ArrowUpRight,
+  MessageSquare,
   Container: Server, // alias
 };
 

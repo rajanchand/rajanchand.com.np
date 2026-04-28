@@ -4,6 +4,7 @@ import { blogPosts } from "@/lib/data";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { ArrowRight, Clock } from "lucide-react";
+import Link from "next/link";
 
 const gradients = [
   "from-[#6d28d9] to-[#06b6d4]",
@@ -11,9 +12,20 @@ const gradients = [
   "from-[#a855f7] to-[#ec4899]",
 ];
 
+function formatDate(dateStr: string) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthIdx = parseInt(month, 10) - 1;
+  const formattedMonth = months[monthIdx] || month;
+  return `${formattedMonth} ${parseInt(day, 10)}, ${year}`;
+}
+
 export function Articles() {
   return (
-    <section id="articles" className="relative z-10 py-20 md:py-28">
+    <section id="articles" className="relative z-10 pt-6 pb-10 md:pt-8 md:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <SectionHeader
@@ -26,6 +38,7 @@ export function Articles() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogPosts.map((post, i) => (
             <ScrollReveal key={post.slug} delay={i * 0.12}>
+              <Link href={`/blog/${post.slug}`} className="block h-full">
               <article className="group glass rounded-2xl overflow-hidden hover:-translate-y-2 hover:border-[var(--accent)]/30 hover:shadow-[0_20px_50px_var(--glow-accent)] transition-all duration-500 h-full flex flex-col">
                 {/* Gradient header */}
                 <div className={`relative h-44 bg-gradient-to-br ${gradients[i % gradients.length]} overflow-hidden`}>
@@ -50,7 +63,7 @@ export function Articles() {
                 {/* Body */}
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)] mb-3">
-                    <span>{new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                    <span>{formatDate(post.date)}</span>
                     <span className="w-1 h-1 rounded-full bg-[var(--muted-foreground)]" />
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -72,6 +85,7 @@ export function Articles() {
                   </span>
                 </div>
               </article>
+              </Link>
             </ScrollReveal>
           ))}
         </div>

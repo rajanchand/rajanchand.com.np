@@ -9,7 +9,7 @@
     "location": "Scotland, UK",
     "locationOrigin": "Nepal",
     "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/edit?usp=sharing",
-    "profileImage": "/images/profile.jpg",
+    "profileImage": "/images/rajan-jpg-1780267497062.jpg",
     "url": "https://rajanchand.com.np"
   },
   "stats": [
@@ -80,11 +80,9 @@
       "type": "work",
       "description": "Monitored and optimized network performance, diagnosing and resolving technical issues. Designed and implemented standard escalation processes for technical issue handling.",
       "bullets": [
-        "Monitored and optimized network performance, diagnosing and resolving technical issues",
-        "Designed and implemented standard escalation processes for technical issue handling",
-        "Documented network inventory and tracked network failures",
-        "Led technical project implementation within the ISP, including pilot testing and progress monitoring",
-        "Coordinated with core IT & Networking teams to drive quality improvements"
+        "Managed vendor escalations and end-to-end technical case handling, acting as primary liaison between customers, internal engineering teams and external vendors.",
+        "Logged, analyzed and acted on incidents promptly; contributed to incident reports, RCA documentation and post-incident reviews.",
+        "Identified incidents quickly, assessed impact, classified severity and initiated response in line with defined SLAs."
       ],
       "tags": [
         "Network Monitoring",
@@ -134,7 +132,10 @@
       "title": "Network Monitoring Integration with Chatbot, SMS & Viber",
       "role": "Technical Lead & Integration Specialist",
       "category": "Networking",
-      "description": "Developed an integrated alert system combining network monitoring with multi-channel notifications to improve incident response times.\nrknvrnvrlevre\n\nvrrkjvnjrevjerver\nervkr vreverv",
+      "company": "Dish Media Network Ltd.",
+      "githubUrl": "https://github.com/rajanchand/network-monitor-alerts",
+      "websiteUrl": "https://dishhome.com.np",
+      "description": "Designed and developed an automated network monitoring integration connecting core alert telemetry with multi-channel chatbot notifications (Viber, SMS, and Telegram) to minimize response latency.",
       "impact": [
         "Reduced incident response time by 30%",
         "Automated alert delivery across multiple channels",
@@ -152,11 +153,14 @@
       "title": "Redundant Network Configuration",
       "role": "Network Infrastructure Specialist",
       "category": "Networking",
-      "description": "Implemented comprehensive redundant network infrastructure to ensure uninterrupted connectivity during hardware or link failures.\n vjrvrjv rjv rvrev\nvkj vrkv rekj vkrv rrvrv\nr vrvkrjvr",
+      "company": "WorldLink Communications Ltd.",
+      "githubUrl": "https://github.com/rajanchand/redundant-isp-routing",
+      "websiteUrl": "https://worldlink.com.np",
+      "description": "Designed and deployed full-scale redundant network infrastructure for enterprise clients, optimizing multi-homing routing topologies and routing protocol convergence times.",
       "impact": [
         "Achieved 99.9% network uptime",
         "Eliminated single points of failure",
-        "Reduced service interruptions significantlyvknrlvev"
+        "Reduced service interruptions significantly"
       ],
       "tags": [
         "VLAN",
@@ -170,7 +174,10 @@
       "title": "Ignite Router Deployment & Optimization",
       "role": "Network Engineer",
       "category": "Networking",
-      "description": "Led the mass deployment and optimization of Ignite Routers to improve customer broadband experience and reduce support tickets.",
+      "company": "Dish Media Network Ltd.",
+      "githubUrl": "",
+      "websiteUrl": "https://dishhome.com.np",
+      "description": "Spearheaded the mass technical deployment, testing, and optimization of custom Ignite broadband routers, significantly reducing Wi-Fi interference calls and customer complaints.",
       "impact": [
         "Successfully deployed across 10,000+ customer premises",
         "Reduced Wi-Fi related customer complaints by 40%",
@@ -188,7 +195,10 @@
       "title": "IPTV Infrastructure Scaling",
       "role": "Network Engineer",
       "category": "Networking",
-      "description": "Expanded and optimized the IPTV delivery network to support a growing subscriber base while maintaining high definition stream quality.",
+      "company": "Dish Media Network Ltd.",
+      "githubUrl": "",
+      "websiteUrl": "https://dishhome.com.np",
+      "description": "Expanded, configured, and optimized the core IPTV delivery backbone, tuning multicast protocols and network Quality of Service (QoS) parameters to scale concurrent high-definition subscriber capacity.",
       "impact": [
         "Supported 50% increase in active IPTV subscribers",
         "Achieved zero buffering metrics during peak hours",
@@ -206,7 +216,10 @@
       "title": "Zero Trust Architecture Prototype",
       "role": "Lead Security Architect (Academic Project)",
       "category": "Security",
-      "description": "Designed and implemented a Zero Trust Architecture (ZTA) prototype focusing on micro-segmentation and continuous authentication for enterprise networks.",
+      "company": "University of the West of Scotland (MSc Research)",
+      "githubUrl": "https://github.com/rajanchand/zero-trust-cloud-prototype",
+      "websiteUrl": "",
+      "description": "Researched and built a high-fidelity Zero Trust Architecture (ZTA) prototype, analyzing micro-segmentation capabilities and identity-based dynamic access controls in multi-tenant environments.",
       "impact": [
         "Reduced attack surface area by 80% in simulated environment",
         "Implemented continuous identity verification protocols",
@@ -223,84 +236,104 @@
   ],
   "skills": [
     {
-      "name": "Cisco IOS",
-      "category": "Networking",
+      "name": "Router & Switch Config",
+      "category": "Network Engineering",
       "icon": "Router"
     },
     {
-      "name": "MikroTik",
-      "category": "Networking",
-      "icon": "Router"
-    },
-    {
-      "name": "VLAN/OSPF/BGP",
-      "category": "Networking",
+      "name": "Redundant Networks",
+      "category": "Network Engineering",
       "icon": "Network"
     },
     {
-      "name": "TCP/IP",
-      "category": "Networking",
+      "name": "Network Design",
+      "category": "Network Engineering",
       "icon": "Globe"
     },
     {
-      "name": "Firewall",
-      "category": "Security",
-      "icon": "Shield"
+      "name": "Failover & Load Balancing",
+      "category": "Network Engineering",
+      "icon": "Settings"
     },
     {
-      "name": "Wireshark",
-      "category": "Security",
-      "icon": "Search"
-    },
-    {
-      "name": "Zero Trust",
-      "category": "Security",
-      "icon": "Lock"
-    },
-    {
-      "name": "Endpoint Security",
-      "category": "Security",
-      "icon": "ShieldCheck"
-    },
-    {
-      "name": "Linux",
-      "category": "Systems",
-      "icon": "Terminal"
-    },
-    {
-      "name": "Windows Server",
-      "category": "Systems",
-      "icon": "Monitor"
-    },
-    {
-      "name": "Docker",
-      "category": "Systems",
-      "icon": "Container"
-    },
-    {
-      "name": "Nagios/Zabbix",
-      "category": "Monitoring",
+      "name": "WAN Optimization",
+      "category": "Network Engineering",
       "icon": "Activity"
     },
     {
-      "name": "Python",
-      "category": "Programming",
-      "icon": "Code"
+      "name": "Network Monitoring",
+      "category": "Monitoring & Tools",
+      "icon": "Activity"
     },
     {
-      "name": "AWS",
-      "category": "Cloud",
-      "icon": "Cloud"
+      "name": "Observium",
+      "category": "Monitoring & Tools",
+      "icon": "Search"
     },
     {
-      "name": "Git",
-      "category": "Tools",
-      "icon": "GitBranch"
+      "name": "Cacti",
+      "category": "Monitoring & Tools",
+      "icon": "Monitor"
     },
     {
-      "name": "DevOps",
-      "category": "Tools",
+      "name": "Performance Analysis",
+      "category": "Monitoring & Tools",
+      "icon": "Activity"
+    },
+    {
+      "name": "Nagios",
+      "category": "Monitoring & Tools",
+      "icon": "Bell"
+    },
+    {
+      "name": "Technical Supervision",
+      "category": "Technical Leadership",
+      "icon": "ShieldCheck"
+    },
+    {
+      "name": "Project Leadership",
+      "category": "Technical Leadership",
       "icon": "Settings"
+    },
+    {
+      "name": "Team Management",
+      "category": "Technical Leadership",
+      "icon": "Users"
+    },
+    {
+      "name": "Stakeholder Communication",
+      "category": "Technical Leadership",
+      "icon": "MessageSquare"
+    },
+    {
+      "name": "Training & Development",
+      "category": "Technical Leadership",
+      "icon": "Terminal"
+    },
+    {
+      "name": "SLA Compliance",
+      "category": "Customer Support",
+      "icon": "Clock"
+    },
+    {
+      "name": "Enterprise Support",
+      "category": "Customer Support",
+      "icon": "Server"
+    },
+    {
+      "name": "Escalation Management",
+      "category": "Customer Support",
+      "icon": "ArrowUpRight"
+    },
+    {
+      "name": "Documentation",
+      "category": "Customer Support",
+      "icon": "FileText"
+    },
+    {
+      "name": "Quality Improvement",
+      "category": "Customer Support",
+      "icon": "TrendingUp"
     }
   ],
   "certifications": [
@@ -398,7 +431,7 @@
     },
     {
       "name": "GitHub",
-      "url": "https://github.com",
+      "url": "https://github.com/rajanchand",
       "icon": "Github"
     },
     {
@@ -419,7 +452,7 @@
     },
     {
       "label": "Expertise",
-      "href": "#services"
+      "href": "#skills"
     },
     {
       "label": "Experience",
@@ -428,10 +461,6 @@
     {
       "label": "Projects",
       "href": "#projects"
-    },
-    {
-      "label": "Skills",
-      "href": "#skills"
     },
     {
       "label": "Blog",

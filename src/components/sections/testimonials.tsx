@@ -7,7 +7,7 @@ import { Quote, ExternalLink } from "lucide-react";
 
 export function Testimonials() {
   return (
-    <section className="relative z-10 py-20 md:py-28">
+    <section className="relative z-10 py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <SectionHeader

@@ -1,15 +1,38 @@
 "use client";
 
-import { dissertions, siteConfig } from "@/lib/data";
+import { dissertions, updatePortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
-import { ArrowLeft, BookOpen, ExternalLink, Award } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
+interface DissertionItem {
+  title: string;
+  description: string;
+  type: string;
+  published: string;
+  url: string;
+}
 
 export default function DissertionsListing() {
+  const [dataList, setDataList] = useState<DissertionItem[]>(dissertions as DissertionItem[]);
+
+  useEffect(() => {
+    fetch("/api/portfolio")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.dissertions) {
+          setDataList(data.dissertions);
+          updatePortfolioData(data);
+        }
+      })
+      .catch((err) => console.error("Error syncing dissertions:", err));
+  }, []);
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
       <BackgroundOrbs />
@@ -36,7 +59,7 @@ export default function DissertionsListing() {
 
         {/* Papers list */}
         <div className="space-y-8 mt-12">
-          {dissertions.map((doc: any, i: number) => (
+          {dataList.map((doc, i) => (
             <ScrollReveal key={i} delay={i * 0.12}>
               <div className="glass rounded-3xl p-6 md:p-8 relative overflow-hidden hover:border-[var(--primary)]/25 hover:shadow-[0_8px_40px_var(--glow-primary)] transition-all duration-500 group">
                 <div className="absolute -top-1/2 -right-1/4 w-[250px] h-[250px] bg-[var(--primary)] rounded-full opacity-[0.03] blur-[80px] pointer-events-none" />

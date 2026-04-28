@@ -1,6 +1,6 @@
 "use client";
 
-import { blogPosts, siteConfig } from "@/lib/data";
+import { blogPosts, updatePortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
@@ -8,17 +8,52 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ArrowLeft, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface BlogPostItem {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  readTime: string;
+  content?: string;
+}
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthIdx = parseInt(month, 10) - 1;
+  const formattedMonth = months[monthIdx] || month;
+  return `${formattedMonth} ${parseInt(day, 10)}, ${year}`;
+}
 
 export default function BlogListing() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [postsList, setPostsList] = useState<BlogPostItem[]>(blogPosts as BlogPostItem[]);
 
-  const categories = ["All", ...Array.from(new Set(blogPosts.map((post: any) => post.category)))];
+  useEffect(() => {
+    fetch("/api/portfolio")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.blogPosts) {
+          setPostsList(data.blogPosts);
+          updatePortfolioData(data);
+        }
+      })
+      .catch((err) => console.error("Error syncing blog posts:", err));
+  }, []);
+
+  const categories = ["All", ...Array.from(new Set(postsList.map((post) => post.category)))];
 
   const filteredPosts =
     selectedCategory === "All"
-      ? blogPosts
-      : blogPosts.filter((post: any) => post.category === selectedCategory);
+      ? postsList
+      : postsList.filter((post) => post.category === selectedCategory);
+
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
@@ -65,7 +100,7 @@ export default function BlogListing() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post: any, i: number) => (
+          {filteredPosts.map((post, i) => (
             <ScrollReveal key={post.slug} delay={i * 0.1}>
               <Link href={`/blog/${post.slug}`} className="group block h-full">
                 <article className="glass rounded-2xl overflow-hidden h-full flex flex-col hover:border-[var(--primary)]/25 hover:shadow-[0_8px_40px_var(--glow-primary)] transition-all duration-500">
@@ -80,7 +115,7 @@ export default function BlogListing() {
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-4 text-xs text-[var(--muted-foreground)] mb-3">
-                        <time>{post.date}</time>
+                        <time>{formatDate(post.date)}</time>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
                           {post.readTime}

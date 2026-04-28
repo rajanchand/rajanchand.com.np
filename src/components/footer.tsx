@@ -1,26 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { siteConfig, socialLinks } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
-import { Mail, Globe, Radio } from "lucide-react";
+import { Mail } from "lucide-react";
+import Link from "next/link";
 
 const links = [
   {
     title: "Browse",
     items: [
       { title: "Projects", href: "#projects" },
-      { title: "Resources", href: "#" },
+      { title: "Skills", href: "#skills" },
       { title: "Work Experience", href: "#experience" },
-      { title: "Recent Posts", href: "#articles" },
+      { title: "Certifications", href: "#certifications" },
     ],
   },
   {
-    title: "Recommended Platforms",
+    title: "Content",
     items: [
-      { title: "ChatGPT", href: "https://chat.openai.com/chat" },
-      { title: "Partners", href: "#" },
-      { title: "Atom", href: "#" },
-      { title: "Electron", href: "#" },
+      { title: "Blog Articles", href: "/blog" },
+      { title: "Dissertations", href: "/dissertions" },
     ],
   },
   {
@@ -33,7 +33,14 @@ const links = [
 ];
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(2026);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentYear(new Date().getFullYear());
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-zinc-950 z-10 relative">
@@ -42,9 +49,9 @@ export function Footer() {
           {/* Column 1 — Brand info */}
           <div className="col-span-12 lg:col-span-4">
             <div className="mb-2">
-              <a className="inline-block font-bold text-xl text-gray-900 dark:text-gray-100" href="/">
+              <Link className="inline-block font-bold text-xl text-gray-900 dark:text-gray-100" href="/">
                 {siteConfig.name}
-              </a>
+              </Link>
             </div>
             <div className="text-sm text-gray-600 dark:text-slate-400">
               <a
@@ -105,7 +112,7 @@ export function Footer() {
           </ul>
 
           <div className="text-xs text-gray-500 mr-4 dark:text-slate-400">
-            &copy; {siteConfig.shortName.toLowerCase()}cs | {currentYear}
+            &copy; Rajan Prakash Chand | {currentYear}
           </div>
         </div>
       </div>

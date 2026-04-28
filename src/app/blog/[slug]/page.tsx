@@ -1,13 +1,35 @@
-import { blogPosts, siteConfig } from "@/lib/data";
+import { blogPosts, siteConfig, loadPortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PortfolioSync } from "@/components/portfolio-sync";
+
+interface BlogPostItem {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  readTime: string;
+  content?: string;
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthIdx = parseInt(month, 10) - 1;
+  const formattedMonth = months[monthIdx] || month;
+  return `${formattedMonth} ${parseInt(day, 10)}, ${year}`;
 }
 
 // Custom simple markdown renderer that is safe, fast, and works server-side
@@ -15,7 +37,6 @@ function renderMarkdown(content: string) {
   if (!content) return null;
   
   const lines = content.split("\n");
-  let inList = false;
   const renderedElements: React.ReactNode[] = [];
   let listItems: string[] = [];
 
@@ -29,7 +50,6 @@ function renderMarkdown(content: string) {
         </ul>
       );
       listItems = [];
-      inList = false;
     }
   };
 
@@ -58,14 +78,13 @@ function renderMarkdown(content: string) {
         </h3>
       );
     } else if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
-      inList = true;
       listItems.push(trimmed.substring(2));
     } else if (trimmed === "") {
       flushList(index);
     } else {
       flushList(index);
       // Process bold/italics
-      let text = trimmed;
+      const text = trimmed;
       // Basic bold transformation: **text**
       const boldRegex = /\*\*(.*?)\*\*/g;
       const parts = [];
@@ -97,8 +116,9 @@ function renderMarkdown(content: string) {
 
 export default async function BlogPost({ params }: PageProps) {
   const { slug } = await params;
+  const data = await loadPortfolioData();
   
-  const post = blogPosts.find((p: any) => p.slug === slug);
+  const post = (blogPosts as BlogPostItem[]).find((p) => p.slug === slug);
   
   if (!post) {
     notFound();
@@ -106,6 +126,7 @@ export default async function BlogPost({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
+      <PortfolioSync data={data} />
       <BackgroundOrbs />
       <Navbar />
 
@@ -132,7 +153,7 @@ export default async function BlogPost({ params }: PageProps) {
             </span>
             <span className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
-              {post.date}
+              {formatDate(post.date)}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />

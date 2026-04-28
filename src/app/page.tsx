@@ -2,18 +2,20 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { Hero } from "@/components/sections/hero";
-import { Services } from "@/components/sections/services";
 import { Experience } from "@/components/sections/experience";
 import { Projects } from "@/components/sections/projects";
 import { Skills } from "@/components/sections/skills";
-import { Testimonials } from "@/components/sections/testimonials";
 import { Certifications } from "@/components/sections/certifications";
 import { Articles } from "@/components/sections/articles";
-import { Contact } from "@/components/sections/contact";
+import { loadPortfolioData } from "@/lib/data";
+import { PortfolioSync } from "@/components/portfolio-sync";
 
-export default function Home() {
+export default async function Home() {
+  const data = await loadPortfolioData();
+
   return (
     <>
+      <PortfolioSync data={data} />
       <BackgroundOrbs />
       <Navbar />
       <main>
@@ -21,13 +23,11 @@ export default function Home() {
         <Skills />
         <Experience />
         <Projects />
-        <Services />
         <Certifications />
-        <Testimonials />
         <Articles />
-        <Contact />
       </main>
       <Footer />
     </>
   );
 }
+

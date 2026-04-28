@@ -35,7 +35,7 @@ export default function AdminLogin() {
         setError(data.error || "Incorrect password");
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again.");
       setLoading(false);
     }

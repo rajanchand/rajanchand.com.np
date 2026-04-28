@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -691,6 +692,9 @@ export default function AdminDashboard() {
                           title: "New Project",
                           role: "Lead Engineer",
                           category: "Networking",
+                          company: "Organization Name",
+                          githubUrl: "",
+                          websiteUrl: "",
                           description: "Short description of accomplishments.",
                           impact: ["Metric or impact milestone"],
                           tags: ["Python", "Cisco"],
@@ -826,6 +830,51 @@ export default function AdminDashboard() {
                               className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
                             />
                           </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">Executing Organization / Company</label>
+                            <input
+                              type="text"
+                              value={proj.company || ""}
+                              onChange={(e) => {
+                                const updated = [...data.projects];
+                                updated[idx].company = e.target.value;
+                                setData((prev: any) => ({ ...prev, projects: updated }));
+                              }}
+                              placeholder="e.g. WorldLink Communications Ltd."
+                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">GitHub URL (Optional)</label>
+                            <input
+                              type="text"
+                              value={proj.githubUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...data.projects];
+                                updated[idx].githubUrl = e.target.value;
+                                setData((prev: any) => ({ ...prev, projects: updated }));
+                              }}
+                              placeholder="https://github.com/..."
+                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs font-mono"
+                            />
+                          </div>
+
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">Live Website / Demo URL (Optional)</label>
+                            <input
+                              type="text"
+                              value={proj.websiteUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...data.projects];
+                                updated[idx].websiteUrl = e.target.value;
+                                setData((prev: any) => ({ ...prev, projects: updated }));
+                              }}
+                              placeholder="https://..."
+                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs font-mono"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -845,7 +894,7 @@ export default function AdminDashboard() {
                       onClick={() => {
                         const newSkill = {
                           name: "New Skill",
-                          category: "Networking",
+                          category: "Network Engineering",
                           icon: "Router"
                         };
                         setData((prev: any) => ({
@@ -893,13 +942,10 @@ export default function AdminDashboard() {
                             }}
                             className="px-2 py-1.5 bg-[var(--background)] border border-[var(--glass-border)] rounded-lg text-xs text-[var(--foreground)]"
                           >
-                            <option value="Networking">Networking</option>
-                            <option value="Security">Security</option>
-                            <option value="Systems">Systems</option>
-                            <option value="Monitoring">Monitoring</option>
-                            <option value="Programming">Programming</option>
-                            <option value="Cloud">Cloud</option>
-                            <option value="Tools">Tools</option>
+                            <option value="Network Engineering">Network Engineering</option>
+                            <option value="Monitoring & Tools">Monitoring & Tools</option>
+                            <option value="Technical Leadership">Technical Leadership</option>
+                            <option value="Customer Support">Customer Support</option>
                           </select>
                         </div>
                       </div>

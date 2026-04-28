@@ -26,7 +26,7 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="relative z-10 py-20 md:py-28">
+    <section id="contact" className="relative z-10 py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="glass rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
