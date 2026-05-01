@@ -16,6 +16,8 @@ interface DissertionItem {
   type: string;
   published: string;
   url: string;
+  websiteUrl?: string;
+  githubUrl?: string;
 }
 
 export default function DissertionsListing() {
@@ -84,15 +86,41 @@ export default function DissertionsListing() {
                     </p>
                   </div>
 
-                  <a
-                    href={doc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 glass rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/10 transition-all duration-300 self-start shrink-0 group-hover:shadow-[0_0_20px_var(--glow-primary)] cursor-pointer"
-                  >
-                    View Document
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  <div className="flex flex-wrap gap-3.5 self-start shrink-0">
+                    {doc.url && doc.url !== "#" && (
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_20px_var(--glow-primary)] text-white rounded-xl text-xs font-semibold transition-all duration-300 cursor-pointer"
+                      >
+                        View Document
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    {doc.websiteUrl && doc.websiteUrl !== "" && (
+                      <a
+                        href={doc.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 glass rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/10 transition-all duration-300 cursor-pointer"
+                      >
+                        Website
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    {doc.githubUrl && doc.githubUrl !== "" && (
+                      <a
+                        href={doc.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 glass rounded-xl text-xs font-semibold hover:border-[#333]/30 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer"
+                      >
+                        GitHub
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </ScrollReveal>

@@ -1118,7 +1118,9 @@ export default function AdminDashboard() {
                           description: "Detailed summary of the methodology, design, and findings.",
                           type: "Academic Research Paper",
                           published: "May 2026",
-                          url: "#"
+                          url: "#",
+                          websiteUrl: "",
+                          githubUrl: ""
                         };
                         setData((prev: any) => ({
                           ...prev,
@@ -1199,6 +1201,36 @@ export default function AdminDashboard() {
                                 updated[idx].url = e.target.value;
                                 setData((prev: any) => ({ ...prev, dissertions: updated }));
                               }}
+                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">Website link / URL (optional)</label>
+                            <input
+                              type="text"
+                              value={doc.websiteUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...data.dissertions];
+                                updated[idx].websiteUrl = e.target.value;
+                                setData((prev: any) => ({ ...prev, dissertions: updated }));
+                              }}
+                              placeholder="e.g. https://myproject-website.com"
+                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">GitHub link / URL (optional)</label>
+                            <input
+                              type="text"
+                              value={doc.githubUrl || ""}
+                              onChange={(e) => {
+                                const updated = [...data.dissertions];
+                                updated[idx].githubUrl = e.target.value;
+                                setData((prev: any) => ({ ...prev, dissertions: updated }));
+                              }}
+                              placeholder="e.g. https://github.com/username/repo"
                               className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
                             />
                           </div>

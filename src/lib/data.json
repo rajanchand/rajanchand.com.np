@@ -413,14 +413,18 @@
       "description": "An academic research paper presenting the implementation, deployment, and performance analysis of Zero Trust network access (ZTNA) in hybrid clouds.",
       "type": "MSc IT Research Dissertation",
       "published": "May 2026",
-      "url": "#"
+      "url": "#",
+      "websiteUrl": "",
+      "githubUrl": ""
     },
     {
       "title": "High-Performance Redundant Routing and Load Balancing in Large-Scale ISP Networks",
       "description": "A technical research and operational blueprint demonstrating multi-homing routing designs with OSPF/BGP for 500k+ subscribers.",
       "type": "Industry Technical Report",
       "published": "Jan 2023",
-      "url": "#"
+      "url": "#",
+      "websiteUrl": "",
+      "githubUrl": ""
     }
   ],
   "socialLinks": [
