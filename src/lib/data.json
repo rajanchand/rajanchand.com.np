@@ -1,17 +1,4 @@
 {
-  "siteConfig": {
-    "name": "Rajan Prakash Chand",
-    "shortName": "RC",
-    "title": "Network Engineer & MSc IT Researcher",
-    "description": "5+ years managing large-scale ISP infrastructure — networks trusted by 500,000+ users at WorldLink and Dish Media. Currently pursuing MSc IT at UWS, Scotland.",
-    "email": "rajanchand48@gmail.com",
-    "calendlyUrl": "https://calendly.com/rajanchand48/1",
-    "location": "Scotland, UK",
-    "locationOrigin": "Nepal",
-    "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/edit?usp=sharing",
-    "profileImage": "/images/rajan-jpg-1780267497062.jpg",
-    "url": "https://rajanchand.com.np"
-  },
   "stats": [
     {
       "label": "Years Experience",
@@ -31,8 +18,234 @@
     {
       "label": "MSc Researcher",
       "value": 0,
-      "suffix": "MSc",
-      "isText": true
+      "isText": true,
+      "suffix": "MSc"
+    }
+  ],
+  "skills": [
+    {
+      "icon": "Router",
+      "name": "Router & Switch Config",
+      "category": "Network Engineering"
+    },
+    {
+      "icon": "Network",
+      "name": "Redundant Networks",
+      "category": "Network Engineering"
+    },
+    {
+      "icon": "Globe",
+      "name": "Network Design",
+      "category": "Network Engineering"
+    },
+    {
+      "icon": "Settings",
+      "name": "Failover & Load Balancing",
+      "category": "Network Engineering"
+    },
+    {
+      "icon": "Activity",
+      "name": "WAN Optimization",
+      "category": "Network Engineering"
+    },
+    {
+      "icon": "Activity",
+      "name": "Network Monitoring",
+      "category": "Monitoring & Tools"
+    },
+    {
+      "icon": "Search",
+      "name": "Observium",
+      "category": "Monitoring & Tools"
+    },
+    {
+      "icon": "Monitor",
+      "name": "Cacti",
+      "category": "Monitoring & Tools"
+    },
+    {
+      "icon": "Activity",
+      "name": "Performance Analysis",
+      "category": "Monitoring & Tools"
+    },
+    {
+      "icon": "Bell",
+      "name": "Nagios",
+      "category": "Monitoring & Tools"
+    },
+    {
+      "icon": "ShieldCheck",
+      "name": "Technical Supervision",
+      "category": "Technical Leadership"
+    },
+    {
+      "icon": "Settings",
+      "name": "Project Leadership",
+      "category": "Technical Leadership"
+    },
+    {
+      "icon": "Users",
+      "name": "Team Management",
+      "category": "Technical Leadership"
+    },
+    {
+      "icon": "MessageSquare",
+      "name": "Stakeholder Communication",
+      "category": "Technical Leadership"
+    },
+    {
+      "icon": "Terminal",
+      "name": "Training & Development",
+      "category": "Technical Leadership"
+    },
+    {
+      "icon": "Clock",
+      "name": "SLA Compliance",
+      "category": "Customer Support"
+    },
+    {
+      "icon": "Server",
+      "name": "Enterprise Support",
+      "category": "Customer Support"
+    },
+    {
+      "icon": "ArrowUpRight",
+      "name": "Escalation Management",
+      "category": "Customer Support"
+    },
+    {
+      "icon": "FileText",
+      "name": "Documentation",
+      "category": "Customer Support"
+    },
+    {
+      "icon": "TrendingUp",
+      "name": "Quality Improvement",
+      "category": "Customer Support"
+    }
+  ],
+  "navLinks": [
+    {
+      "href": "#home",
+      "label": "Home"
+    },
+    {
+      "href": "#skills",
+      "label": "Expertise"
+    },
+    {
+      "href": "#experience",
+      "label": "Experience"
+    },
+    {
+      "href": "#projects",
+      "label": "Projects"
+    },
+    {
+      "href": "#articles",
+      "label": "Blog"
+    }
+  ],
+  "projects": [
+    {
+      "icon": "Bell",
+      "role": "Supervisor",
+      "tags": [
+        "Python",
+        "API Integration",
+        "Nagios",
+        "Chatbot"
+      ],
+      "title": "Network Monitoring Integration with Chatbot, SMS & Viber",
+      "impact": [
+        "Reduced incident response time by 30%",
+        "Automated alert delivery across multiple channels",
+        "Improved network uptime monitoring"
+      ],
+      "company": "Dish Media Network Ltd.",
+      "category": "Networking",
+      "githubUrl": "",
+      "websiteUrl": "",
+      "description": "Designed and developed an automated network monitoring integration connecting core alert telemetry with multi-channel chatbot notifications (Viber, SMS, and Telegram) to minimize response latency."
+    },
+    {
+      "icon": "Network",
+      "role": "Outdoor Network management",
+      "tags": [],
+      "title": "Redundant Network Configuration",
+      "impact": [
+        "Achieved 99.9% network uptime",
+        "Eliminated single points of failure",
+        "Reduced service interruptions significantly"
+      ],
+      "company": "WorldLink Communications Ltd.",
+      "category": "Networking",
+      "githubUrl": "",
+      "websiteUrl": "",
+      "description": "Designed and deployed full-scale redundant network infrastructure for enterprise clients, optimizing multi-homing routing topologies and routing protocol convergence times."
+    },
+    {
+      "icon": "Wifi",
+      "role": "Outdoor Network Management",
+      "tags": [
+        "MikroTik",
+        "Firmware",
+        "Wi-Fi",
+        "Deployment",
+        "Nokia",
+        "Dualband"
+      ],
+      "title": "Ignite ,Dual Band RouterbDeployment & Optimization",
+      "impact": [
+        "Successfully deployed across 10,000+ customer premises",
+        "Reduced Wi-Fi related customer complaints by 40%",
+        "Improved remote troubleshooting capabilities"
+      ],
+      "company": "WorldLink Communication Ltd",
+      "category": "Networking",
+      "githubUrl": "",
+      "websiteUrl": "",
+      "description": "Spearheaded the mass technical deployment, testing, and optimization of custom Ignite broadband routers, significantly reducing Wi-Fi interference calls and customer complaints."
+    },
+    {
+      "icon": "Tv",
+      "role": "Outdoor Network Supervisor",
+      "tags": [
+        "Multicast",
+        "IPTV"
+      ],
+      "title": "IPTV Infrastructure Scaling",
+      "impact": [
+        "Supported 50% increase in active IPTV subscribers",
+        "Achieved zero buffering metrics during peak hours",
+        "Optimized multicast routing protocols"
+      ],
+      "company": "WorldLink Communication Ltd",
+      "category": "Networking",
+      "githubUrl": "",
+      "websiteUrl": "",
+      "description": "Expanded, configured, and optimized the core IPTV delivery backbone, tuning multicast protocols and network Quality of Service (QoS) parameters to scale concurrent high-definition subscriber capacity."
+    },
+    {
+      "icon": "ShieldCheck",
+      "role": "Student",
+      "tags": [
+        "Zero Trust",
+        "Micro-segmentation",
+        "IAM",
+        "Security"
+      ],
+      "title": "Zero Trust Security in Remote work Environment",
+      "impact": [
+        "Reduced attack surface area by 80% in simulated environment",
+        "Implemented continuous identity verification protocols",
+        "Created comprehensive deployment blueprint for enterprise adoption"
+      ],
+      "company": "University of the West of Scotland (MSc Research)",
+      "category": "Academic",
+      "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
+      "websiteUrl": "https://zero-trust-security.org/login",
+      "description": "Researched and built a high-fidelity Zero Trust Architecture (ZTA) prototype, analyzing micro-segmentation capabilities and identity-based dynamic access controls in multi-tenant environments."
     }
   ],
   "services": [
@@ -57,283 +270,186 @@
       "description": "Cloud infrastructure provisioning, CI/CD pipeline automation, containerization with Docker, and scalable deployments."
     }
   ],
+  "blogPosts": [
+    {
+      "slug": "new-article-173",
+      "title": "Untitled Article",
+      "excerpt": "Overview of what this article covers.",
+      "date": "2026-06-01",
+      "category": "Networking",
+      "readTime": "5 min read",
+      "content": "# Heading 1\n\nWrite article content in Markdown here."
+    }
+  ],
   "experience": [
     {
-      "period": "Current",
-      "title": "MSc Information Technology",
-      "company": "University of the West of Scotland",
-      "companyUrl": "https://www.uws.ac.uk/",
+      "tags": [
+        "Mathis",
+        "Biology",
+        "Chemistry"
+      ],
       "type": "education",
-      "description": "Advanced studies in information technology with focus on modern computing systems, digital innovation, and network security research.",
+      "title": "Science-Higher secondary School",
+      "period": "2013-2015",
+      "bullets": [
+        "Key responsibility or accomplishment"
+      ],
+      "company": "Gorkha Secondary School",
+      "companyUrl": "https://gorkhagroup.org.np/gorkha-secondary-school/",
+      "description": "Role overview goes here."
+    },
+    {
       "tags": [
         "Research",
         "Network Security",
         "IT Management",
-        "Zero Trust"
-      ]
+        "Zero Trust",
+        "Project Management",
+        "Database"
+      ],
+      "type": "education",
+      "title": "MSc Information Technology",
+      "period": "Current",
+      "company": "University of the West of Scotland",
+      "companyUrl": "https://www.uws.ac.uk/",
+      "description": "Advanced studies in information technology with focus on modern computing systems, digital innovation, and network security research."
     },
     {
-      "period": "2019 — 2024",
-      "title": "Customer Support Supervisor",
-      "company": "Dish Media Network Ltd.",
-      "companyUrl": "https://www.dishhome.com.np/",
-      "type": "work",
-      "description": "Monitored and optimized network performance, diagnosing and resolving technical issues. Designed and implemented standard escalation processes for technical issue handling.",
-      "bullets": [
-        "Managed vendor escalations and end-to-end technical case handling, acting as primary liaison between customers, internal engineering teams and external vendors.",
-        "Logged, analyzed and acted on incidents promptly; contributed to incident reports, RCA documentation and post-incident reviews.",
-        "Identified incidents quickly, assessed impact, classified severity and initiated response in line with defined SLAs."
-      ],
       "tags": [
         "Network Monitoring",
         "Team Leadership",
         "Escalation Design",
-        "IPTV"
-      ]
+        "IPTV",
+        "Vendor coordinate",
+        "Issue esclated",
+        "Network desing",
+        "Planning",
+        "Customer support",
+        "Team management"
+      ],
+      "type": "work",
+      "title": "Supervisor-Customer Service",
+      "period": "2022— 2024",
+      "bullets": [
+        "Managed vendor escalations and end-to-end technical case handling, acting as primary liaison between customers, internal engineering teams and external vendors.",
+        "Logged, analyzed and acted on incidents promptly; contributed to incident reports, RCA documentation and post-incident reviews.",
+        "Identified incidents quickly, assessed impact, classified severity and initiated response in line with defined SLAs.",
+        "Responded to customer and internal stakeholder enquiries, providing clear technical assistance and updates throughout the resolution lifecycle.",
+        "Active participation in technical project implementation within the ISP, involving the team in monitoring progress, and conducting essential pilot projects as per the ISP's needs.",
+        "Develop and maintain diagnostic and troubleshooting mechanisms for escalation issues according to a structured protocol."
+      ],
+      "company": "Dish Media Network Ltd.",
+      "companyUrl": "https://www.dishhome.com.np/",
+      "description": ""
     },
     {
-      "period": "2017 — 2019",
-      "title": "Technical Supervisor",
-      "company": "WorldLink Communications Ltd.",
-      "companyUrl": "https://worldlink.com.np/",
-      "type": "work",
-      "description": "Designed and implemented new network solutions and improved existing infrastructure for 500,000+ users. Managed 24/7 monitoring and maintenance of complex network systems.",
-      "bullets": [
-        "Designed and implemented new network solutions and improved existing infrastructure",
-        "Developed system architecture diagrams and data models",
-        "Managed scheduled upgrades, installation, and configuration of network equipment",
-        "Configured routers, switches, and WAN devices for enterprise clients",
-        "Managed 24/7 monitoring and maintenance of complex network systems",
-        "Managed and optimized infrastructure for over 500,000 users"
-      ],
       "tags": [
         "Cisco",
         "MikroTik",
-        "OSPF/BGP",
-        "Enterprise Networking"
-      ]
+        "Enterprise Networking",
+        "Raisecom",
+        "Nokia",
+        "OLT configurations",
+        "Network desing",
+        "Planning",
+        "Router",
+        "Customer support"
+      ],
+      "type": "work",
+      "title": "Technical Supervisor-Outdoor Network Management",
+      "period": "2019 — 2022",
+      "bullets": [
+        " Supported and maintained core network infrastructure including switches, firewalls, VPNs and wireless networks across multiple regional sites, ensuring high availability and reliability.",
+        "Performed network configurations and implemented changes on routers, switches, firewalls and security appliances; carried out routine testing, monitoring and configuration backups.",
+        "Collaborated with network architects to design and implement enterprise LAN/WAN solutions, and prepared network diagrams and operational documentation reflecting current state.",
+        "Used DHCP, DNS and basic enterprise LAN/WAN concepts to diagnose and resolve connectivity issues at customer and office sites.",
+        "Identified recurring incidents and implemented improvements that reduced MTTD and MTTR; contributed to root cause analysis and trend reporting.",
+        "Documented incidents, problems and resolutions in the ticketing/ITSM system, contributing to the knowledge base and feeding into recurring-issue reviews.",
+        "Delivered hands-and-feet support to backend Network, Server and Application teams, carrying out smart-hand activities at sites under instruction.",
+        "Provided on-site and remote technical support, troubleshooting hardware, operating system and firmware issues for end users"
+      ],
+      "company": "WorldLink Communications Ltd.",
+      "companyUrl": "https://worldlink.com.np/",
+      "description": ""
     },
     {
-      "period": "2013 — 2017",
-      "title": "BSc Computer Science & IT",
-      "company": "Asian College of Higher Studies",
-      "companyUrl": "https://achsnepal.edu.np/",
-      "type": "education",
-      "description": "Comprehensive undergraduate program covering fundamentals of computer science, information systems, and networking.",
       "tags": [
         "Computer Science",
         "Networking",
         "Programming"
-      ]
+      ],
+      "type": "education",
+      "title": "BSc Computer Science & IT",
+      "period": "2015 — 2019",
+      "company": "Asian College of Higher Studies",
+      "companyUrl": "https://achsnepal.edu.np/",
+      "description": ""
     }
   ],
-  "projects": [
+  "siteConfig": {
+    "url": "https://rajanchand.com.np",
+    "name": "Rajan Prakash Chand",
+    "email": "rajanchand48@gmail.com",
+    "title": "Network Engineer & MSc IT Researcher",
+    "location": "Scotland, UK",
+    "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/edit?usp=sharing",
+    "shortName": "RC",
+    "calendlyUrl": "https://calendly.com/rajanchand48/1",
+    "description": "5+ years managing large-scale ISP infrastructure — networks trusted by 500,000+ users at WorldLink and Dish Media. Currently pursuing MSc IT at UWS, Scotland.",
+    "profileImage": "/images/rajan-jpg-1780267497062.jpg",
+    "locationOrigin": "Nepal"
+  },
+  "dissertions": [
     {
-      "title": "Network Monitoring Integration with Chatbot, SMS & Viber",
-      "role": "Technical Lead & Integration Specialist",
-      "category": "Networking",
-      "company": "Dish Media Network Ltd.",
-      "githubUrl": "https://github.com/rajanchand/network-monitor-alerts",
-      "websiteUrl": "https://dishhome.com.np",
-      "description": "Designed and developed an automated network monitoring integration connecting core alert telemetry with multi-channel chatbot notifications (Viber, SMS, and Telegram) to minimize response latency.",
-      "impact": [
-        "Reduced incident response time by 30%",
-        "Automated alert delivery across multiple channels",
-        "Improved network uptime monitoring"
-      ],
-      "tags": [
-        "Python",
-        "API Integration",
-        "Nagios",
-        "Chatbot"
-      ],
-      "icon": "Bell"
-    },
-    {
-      "title": "Redundant Network Configuration",
-      "role": "Network Infrastructure Specialist",
-      "category": "Networking",
-      "company": "WorldLink Communications Ltd.",
-      "githubUrl": "https://github.com/rajanchand/redundant-isp-routing",
-      "websiteUrl": "https://worldlink.com.np",
-      "description": "Designed and deployed full-scale redundant network infrastructure for enterprise clients, optimizing multi-homing routing topologies and routing protocol convergence times.",
-      "impact": [
-        "Achieved 99.9% network uptime",
-        "Eliminated single points of failure",
-        "Reduced service interruptions significantly"
-      ],
-      "tags": [
-        "VLAN",
-        "OSPF",
-        "STP",
-        "Cisco"
-      ],
-      "icon": "Network"
-    },
-    {
-      "title": "Ignite Router Deployment & Optimization",
-      "role": "Network Engineer",
-      "category": "Networking",
-      "company": "Dish Media Network Ltd.",
-      "githubUrl": "",
-      "websiteUrl": "https://dishhome.com.np",
-      "description": "Spearheaded the mass technical deployment, testing, and optimization of custom Ignite broadband routers, significantly reducing Wi-Fi interference calls and customer complaints.",
-      "impact": [
-        "Successfully deployed across 10,000+ customer premises",
-        "Reduced Wi-Fi related customer complaints by 40%",
-        "Improved remote troubleshooting capabilities"
-      ],
-      "tags": [
-        "MikroTik",
-        "Firmware",
-        "Wi-Fi",
-        "Deployment"
-      ],
-      "icon": "Wifi"
-    },
-    {
-      "title": "IPTV Infrastructure Scaling",
-      "role": "Network Engineer",
-      "category": "Networking",
-      "company": "Dish Media Network Ltd.",
-      "githubUrl": "",
-      "websiteUrl": "https://dishhome.com.np",
-      "description": "Expanded, configured, and optimized the core IPTV delivery backbone, tuning multicast protocols and network Quality of Service (QoS) parameters to scale concurrent high-definition subscriber capacity.",
-      "impact": [
-        "Supported 50% increase in active IPTV subscribers",
-        "Achieved zero buffering metrics during peak hours",
-        "Optimized multicast routing protocols"
-      ],
-      "tags": [
-        "Multicast",
-        "IGMP",
-        "QoS",
-        "IPTV"
-      ],
-      "icon": "Tv"
-    },
-    {
-      "title": "Zero Trust Architecture Prototype",
-      "role": "Lead Security Architect (Academic Project)",
-      "category": "Security",
-      "company": "University of the West of Scotland (MSc Research)",
-      "githubUrl": "https://github.com/rajanchand/zero-trust-cloud-prototype",
-      "websiteUrl": "",
-      "description": "Researched and built a high-fidelity Zero Trust Architecture (ZTA) prototype, analyzing micro-segmentation capabilities and identity-based dynamic access controls in multi-tenant environments.",
-      "impact": [
-        "Reduced attack surface area by 80% in simulated environment",
-        "Implemented continuous identity verification protocols",
-        "Created comprehensive deployment blueprint for enterprise adoption"
-      ],
-      "tags": [
-        "Zero Trust",
-        "Micro-segmentation",
-        "IAM",
-        "Security"
-      ],
-      "icon": "ShieldCheck"
+      "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
+      "type": "Academic Research Paper",
+      "title": "Dissertartions",
+      "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
+      "published": "May 2026",
+      "websiteUrl": "https://zero-trust-security.org/login",
+      "description": "Zero Trust Security in remote work environments ensures secure access by continuously validating user identity, device posture, and contextual risk, thereby reducing the attack surface compared to traditional perimeter-based models."
     }
   ],
-  "skills": [
+  "socialLinks": [
     {
-      "name": "Router & Switch Config",
-      "category": "Network Engineering",
-      "icon": "Router"
+      "url": "https://linkedin.com",
+      "icon": "Linkedin",
+      "name": "LinkedIn"
     },
     {
-      "name": "Redundant Networks",
-      "category": "Network Engineering",
-      "icon": "Network"
+      "url": "https://github.com/rajanchand",
+      "icon": "Github",
+      "name": "GitHub"
     },
     {
-      "name": "Network Design",
-      "category": "Network Engineering",
-      "icon": "Globe"
+      "url": "https://twitter.com",
+      "icon": "Twitter",
+      "name": "Twitter"
     },
     {
-      "name": "Failover & Load Balancing",
-      "category": "Network Engineering",
-      "icon": "Settings"
+      "url": "https://facebook.com",
+      "icon": "Facebook",
+      "name": "Facebook"
+    }
+  ],
+  "testimonials": [
+    {
+      "role": "WorldLink Communications",
+      "quote": "Rajan demonstrated exceptional technical leadership in managing our network infrastructure. His redundant network implementation achieved remarkable uptime results.",
+      "author": "Bikram Shrestha",
+      "linkedIn": "https://www.linkedin.com/in/bikram-shrestha"
     },
     {
-      "name": "WAN Optimization",
-      "category": "Network Engineering",
-      "icon": "Activity"
+      "role": "Dish Media Network",
+      "quote": "His integration of monitoring systems with multi-channel notifications transformed our incident response. The 30% improvement in response time speaks for itself.",
+      "author": "Sunil Karki",
+      "linkedIn": "https://www.linkedin.com/in/sunil-karki"
     },
     {
-      "name": "Network Monitoring",
-      "category": "Monitoring & Tools",
-      "icon": "Activity"
-    },
-    {
-      "name": "Observium",
-      "category": "Monitoring & Tools",
-      "icon": "Search"
-    },
-    {
-      "name": "Cacti",
-      "category": "Monitoring & Tools",
-      "icon": "Monitor"
-    },
-    {
-      "name": "Performance Analysis",
-      "category": "Monitoring & Tools",
-      "icon": "Activity"
-    },
-    {
-      "name": "Nagios",
-      "category": "Monitoring & Tools",
-      "icon": "Bell"
-    },
-    {
-      "name": "Technical Supervision",
-      "category": "Technical Leadership",
-      "icon": "ShieldCheck"
-    },
-    {
-      "name": "Project Leadership",
-      "category": "Technical Leadership",
-      "icon": "Settings"
-    },
-    {
-      "name": "Team Management",
-      "category": "Technical Leadership",
-      "icon": "Users"
-    },
-    {
-      "name": "Stakeholder Communication",
-      "category": "Technical Leadership",
-      "icon": "MessageSquare"
-    },
-    {
-      "name": "Training & Development",
-      "category": "Technical Leadership",
-      "icon": "Terminal"
-    },
-    {
-      "name": "SLA Compliance",
-      "category": "Customer Support",
-      "icon": "Clock"
-    },
-    {
-      "name": "Enterprise Support",
-      "category": "Customer Support",
-      "icon": "Server"
-    },
-    {
-      "name": "Escalation Management",
-      "category": "Customer Support",
-      "icon": "ArrowUpRight"
-    },
-    {
-      "name": "Documentation",
-      "category": "Customer Support",
-      "icon": "FileText"
-    },
-    {
-      "name": "Quality Improvement",
-      "category": "Customer Support",
-      "icon": "TrendingUp"
+      "role": "University of the West of Scotland",
+      "quote": "Rajan brings real-world ISP experience into his academic work, creating a unique blend of practical knowledge and research capability.",
+      "author": "Dr. James Smith",
+      "linkedIn": "https://www.linkedin.com/in/dr-james-smith-uws"
     }
   ],
   "certifications": [
@@ -356,119 +472,6 @@
     {
       "title": "DevOps",
       "issuer": "Professional Certification"
-    }
-  ],
-  "testimonials": [
-    {
-      "quote": "Rajan demonstrated exceptional technical leadership in managing our network infrastructure. His redundant network implementation achieved remarkable uptime results.",
-      "author": "Bikram Shrestha",
-      "role": "WorldLink Communications",
-      "linkedIn": "https://www.linkedin.com/in/bikram-shrestha"
-    },
-    {
-      "quote": "His integration of monitoring systems with multi-channel notifications transformed our incident response. The 30% improvement in response time speaks for itself.",
-      "author": "Sunil Karki",
-      "role": "Dish Media Network",
-      "linkedIn": "https://www.linkedin.com/in/sunil-karki"
-    },
-    {
-      "quote": "Rajan brings real-world ISP experience into his academic work, creating a unique blend of practical knowledge and research capability.",
-      "author": "Dr. James Smith",
-      "role": "University of the West of Scotland",
-      "linkedIn": "https://www.linkedin.com/in/dr-james-smith-uws"
-    }
-  ],
-  "blogPosts": [
-    {
-      "slug": "navigating-msc-it-landscape-uws",
-      "title": "Navigating the MSc IT Landscape at UWS",
-      "excerpt": "A deep dive into my academic journey, focusing on core network optimization and advanced system architectures.",
-      "date": "2024-12-15",
-      "category": "Academic",
-      "readTime": "5 min read",
-      "content": "# Navigating the MSc IT Landscape at UWS\n\nWelcome to my academic research journey. Pursuing an MSc in Information Technology at the University of the West of Scotland (UWS) has been an enriching experience that bridge the gap between heavy ISP operations and advanced academic methodology.\n\n## Core Focus Areas\n\n1. **Advanced Network Architecture**: Designing systems that scale.\n2. **Zero Trust Integration**: Securing the modern perimeter-less enterprise.\n3. **MSc Thesis**: Exploring modern container security and SD-WAN optimization.\n\nMore details will be updated as the research progresses!"
-    },
-    {
-      "slug": "optimizing-isp-infrastructure-500k-users",
-      "title": "Optimizing ISP Infrastructure for 500,000+ Users",
-      "excerpt": "Technical strategies and real-world challenges encountered while managing large-scale network deployments in Nepal's ISP sector.",
-      "date": "2024-10-20",
-      "category": "Networking",
-      "readTime": "8 min read",
-      "content": "# Optimizing ISP Infrastructure for 500,000+ Users\n\nManaging networks for WorldLink and Dish Media required robust systems, automated fault containment, and massive scalability. Here are the core insights from that journey.\n\n## High Availability Design\n\n* **Redundancy**: Dual-homing critical links with OSPF and BGP routing protocols.\n* **Fast Failover**: Reducing convergence times down to milliseconds.\n* **Proactive Alerting**: Automated integration of Nagios with Chatbots, SMS, and Viber."
-    },
-    {
-      "slug": "future-of-networking-beyond-5g-zero-trust",
-      "title": "The Future of Networking: Beyond 5G and Zero Trust",
-      "excerpt": "Exploring the evolution of network security and the shift towards Zero Trust architectures in modern enterprise environments.",
-      "date": "2024-08-05",
-      "category": "Security",
-      "readTime": "6 min read",
-      "content": "# The Future of Networking: Beyond 5G and Zero Trust\n\nAs enterprise applications move to the cloud, standard perimeter-based firewalls are no longer sufficient. This article outlines the paradigm shift to Zero Trust security.\n\n## Core Principles\n\n1. **Verify Explicitly**: Never trust, always verify.\n2. **Least Privilege Access**: Limit user access with Just-In-Time and Just-Enough-Access.\n3. **Assume Breach**: Minimize blast radius and segment access."
-    }
-  ],
-  "dissertions": [
-    {
-      "title": "Optimization of Zero Trust Security Framework in Hybrid Cloud Environments",
-      "description": "An academic research paper presenting the implementation, deployment, and performance analysis of Zero Trust network access (ZTNA) in hybrid clouds.",
-      "type": "MSc IT Research Dissertation",
-      "published": "May 2026",
-      "url": "#",
-      "websiteUrl": "",
-      "githubUrl": ""
-    },
-    {
-      "title": "High-Performance Redundant Routing and Load Balancing in Large-Scale ISP Networks",
-      "description": "A technical research and operational blueprint demonstrating multi-homing routing designs with OSPF/BGP for 500k+ subscribers.",
-      "type": "Industry Technical Report",
-      "published": "Jan 2023",
-      "url": "#",
-      "websiteUrl": "",
-      "githubUrl": ""
-    }
-  ],
-  "socialLinks": [
-    {
-      "name": "LinkedIn",
-      "url": "https://linkedin.com",
-      "icon": "Linkedin"
-    },
-    {
-      "name": "GitHub",
-      "url": "https://github.com/rajanchand",
-      "icon": "Github"
-    },
-    {
-      "name": "Twitter",
-      "url": "https://twitter.com",
-      "icon": "Twitter"
-    },
-    {
-      "name": "Facebook",
-      "url": "https://facebook.com",
-      "icon": "Facebook"
-    }
-  ],
-  "navLinks": [
-    {
-      "label": "Home",
-      "href": "#home"
-    },
-    {
-      "label": "Expertise",
-      "href": "#skills"
-    },
-    {
-      "label": "Experience",
-      "href": "#experience"
-    },
-    {
-      "label": "Projects",
-      "href": "#projects"
-    },
-    {
-      "label": "Blog",
-      "href": "#articles"
     }
   ]
 }

@@ -15,11 +15,52 @@ interface ExperienceItem {
   tags?: string[];
 }
 
+// Helper to parse starting and ending years from a period string (e.g. "2013-2015", "Current")
+function parsePeriodYears(period: string): { start: number; end: number } {
+  const normalized = (period || "").trim().toUpperCase();
+  
+  if (normalized === "CURRENT" || normalized === "PRESENT") {
+    // Standalone ongoing periods sort last (most recent)
+    return { start: 9999, end: 9999 };
+  }
+  
+  const years = normalized.match(/\b(19|20)\d{2}\b/g);
+  if (!years || years.length === 0) {
+    return { start: 0, end: 0 };
+  }
+  
+  const start = parseInt(years[0], 10);
+  let end = start;
+  
+  if (years.length > 1) {
+    end = parseInt(years[1], 10);
+  } else if (normalized.includes("CURRENT") || normalized.includes("PRESENT") || normalized.includes("NOW")) {
+    end = 9999;
+  }
+  
+  return { start, end };
+}
+
+// Compare function for sorting items in descending chronological order (newest to oldest)
+const sortDescending = (a: ExperienceItem, b: ExperienceItem) => {
+  const aYears = parsePeriodYears(a.period);
+  const bYears = parsePeriodYears(b.period);
+  
+  if (aYears.start !== bYears.start) {
+    return bYears.start - aYears.start;
+  }
+  return bYears.end - aYears.end;
+};
+
 export function Experience() {
-  // Separate work and education items dynamically with type casting
+  // Separate work and education items dynamically with type casting and sort them in descending order (newest first)
   const typedExperience = experience as ExperienceItem[];
-  const workExperience = typedExperience.filter((item) => item.type === "work");
-  const educationExperience = typedExperience.filter((item) => item.type === "education");
+  const workExperience = typedExperience
+    .filter((item) => item.type === "work")
+    .sort(sortDescending);
+  const educationExperience = typedExperience
+    .filter((item) => item.type === "education")
+    .sort(sortDescending);
 
   return (
     <section id="experience" className="px-4 pt-6 pb-10 sm:px-6 mx-auto lg:px-8 lg:pt-8 lg:pb-12 max-w-7xl z-10 relative bg-[var(--background)]">

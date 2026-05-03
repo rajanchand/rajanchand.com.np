@@ -26,8 +26,9 @@ const links = [
   {
     title: "Communities",
     items: [
-      { title: "Rotaract Club of Dillibazar Kathmandu", href: "https://www.rotary.org/en/about-rotary" },
-      { title: "Robotics Association of Nepal", href: "https://roboticsassociationofnepal.business.site/" },
+      { title: "CSIT Associations of Nepal", href: "https://csitan.org.np/" },
+      { title: "Robotics Association of Nepal", href: "https://www.ran.org.np/" },
+
     ],
   },
 ];

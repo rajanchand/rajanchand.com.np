@@ -657,19 +657,49 @@ export default function AdminDashboard() {
                           </div>
 
                           {/* Tags editor */}
-                          <div className="space-y-1 md:col-span-3">
-                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">Tags (comma separated)</label>
-                            <input
-                              type="text"
-                              value={item.tags ? item.tags.join(", ") : ""}
-                              onChange={(e) => {
-                                const updated = [...data.experience];
-                                updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              placeholder="e.g. Cisco, Security, Routing"
-                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
-                            />
+                          <div className="space-y-1.5 md:col-span-3">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase block">Tags & Labels (Type comma or press Enter to add)</label>
+                            <div className="flex flex-wrap gap-1.5 p-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl min-h-[42px] items-center">
+                              {(item.tags || []).map((tag: string, tIdx: number) => (
+                                <span key={tIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold rounded bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 select-none">
+                                  {tag}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...data.experience];
+                                      updated[idx].tags = (updated[idx].tags || []).filter((_: any, i: number) => i !== tIdx);
+                                      setData((prev: any) => ({ ...prev, experience: updated }));
+                                    }}
+                                    className="text-[var(--muted-foreground)] hover:text-rose-500 transition-colors cursor-pointer text-[14px] leading-none font-bold"
+                                  >
+                                    &times;
+                                  </button>
+                                </span>
+                              ))}
+                              <input
+                                type="text"
+                                placeholder="Add tags..."
+                                className="flex-1 min-w-[120px] bg-transparent border-none text-xs outline-none px-1 text-[var(--foreground)]"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === ",") {
+                                    e.preventDefault();
+                                    const val = e.currentTarget.value.trim();
+                                    if (val) {
+                                      const updated = [...data.experience];
+                                      if (!updated[idx].tags) updated[idx].tags = [];
+                                      const newTags = val.split(/[,\.]+/)
+                                        .map((s) => s.trim())
+                                        .filter((s) => s && !updated[idx].tags.includes(s));
+                                      if (newTags.length > 0) {
+                                        updated[idx].tags.push(...newTags);
+                                      }
+                                      setData((prev: any) => ({ ...prev, experience: updated }));
+                                    }
+                                    e.currentTarget.value = "";
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -817,18 +847,49 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase">Tags (comma separated)</label>
-                            <input
-                              type="text"
-                              value={proj.tags ? proj.tags.join(", ") : ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-3 py-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl text-xs"
-                            />
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label className="text-[10px] text-[var(--muted-foreground)] font-bold uppercase block">Tags & Labels (Type comma or press Enter to add)</label>
+                            <div className="flex flex-wrap gap-1.5 p-2 bg-[var(--background)] border border-[var(--glass-border)] rounded-xl min-h-[42px] items-center">
+                              {(proj.tags || []).map((tag: string, tIdx: number) => (
+                                <span key={tIdx} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold rounded bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 select-none">
+                                  {tag}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...data.projects];
+                                      updated[idx].tags = (updated[idx].tags || []).filter((_: any, i: number) => i !== tIdx);
+                                      setData((prev: any) => ({ ...prev, projects: updated }));
+                                    }}
+                                    className="text-[var(--muted-foreground)] hover:text-rose-500 transition-colors cursor-pointer text-[14px] leading-none font-bold"
+                                  >
+                                    &times;
+                                  </button>
+                                </span>
+                              ))}
+                              <input
+                                type="text"
+                                placeholder="Add tags..."
+                                className="flex-1 min-w-[120px] bg-transparent border-none text-xs outline-none px-1 text-[var(--foreground)]"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === ",") {
+                                    e.preventDefault();
+                                    const val = e.currentTarget.value.trim();
+                                    if (val) {
+                                      const updated = [...data.projects];
+                                      if (!updated[idx].tags) updated[idx].tags = [];
+                                      const newTags = val.split(/[,\.]+/)
+                                        .map((s) => s.trim())
+                                        .filter((s) => s && !updated[idx].tags.includes(s));
+                                      if (newTags.length > 0) {
+                                        updated[idx].tags.push(...newTags);
+                                      }
+                                      setData((prev: any) => ({ ...prev, projects: updated }));
+                                    }
+                                    e.currentTarget.value = "";
+                                  }
+                                }}
+                              />
+                            </div>
                           </div>
 
                           <div className="space-y-1">
