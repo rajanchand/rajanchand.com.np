@@ -53,7 +53,7 @@ export function Contact() {
                     </div>
                     <div>
                       <span className="text-xs text-[var(--muted-foreground)] block">Email</span>
-                      <a href={`mailto:${siteConfig.email}`} className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
+                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
                         {siteConfig.email}
                       </a>
                     </div>

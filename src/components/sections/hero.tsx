@@ -82,7 +82,7 @@ export function Hero() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4 sm:justify-start">
                 <a
                   className="inline-flex items-center justify-center rounded-md shadow-md border-gray-400 dark:border-slate-500 border bg-transparent font-medium text-center text-sm text-gray-700 dark:text-slate-300 py-3 px-6 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:border-gray-600 dark:hover:border-slate-800 transition duration-200 cursor-pointer w-full sm:w-auto"
-                  href={`mailto:${siteConfig.email}`}
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -101,9 +101,9 @@ export function Footer() {
                   <a
                     className="text-blue-500 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center"
                     aria-label={social.name}
-                    href={social.url === "#" ? `mailto:${siteConfig.email}` : social.url}
-                    target={social.url === "#" ? undefined : "_blank"}
-                    rel={social.url === "#" ? undefined : "noopener noreferrer"}
+                    href={social.url === "#" ? `https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}` : social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <Icon className="w-5 h-5" />
                   </a>
