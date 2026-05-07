@@ -19,7 +19,18 @@ import {
   ChevronRight,
   Sparkles,
   Link2,
-  Upload
+  Upload,
+  TrendingUp,
+  Eye,
+  Globe,
+  Shield,
+  Terminal,
+  RefreshCw,
+  BarChart2,
+  Laptop,
+  Smartphone,
+  Tablet,
+  MapPin
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
@@ -29,7 +40,33 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState({ success: false, message: "" });
   const [activeTab, setActiveTab] = useState("profile");
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsRange, setAnalyticsRange] = useState("7d");
   const router = useRouter();
+
+  // Load analytics data when activeTab is 'analytics' or range changes
+  useEffect(() => {
+    if (activeTab === "analytics") {
+      async function loadAnalytics() {
+        setAnalyticsLoading(true);
+        try {
+          const res = await fetch(`/api/admin/analytics?range=${analyticsRange}`);
+          if (res.ok) {
+            const json = await res.json();
+            setAnalyticsData(json);
+          } else {
+            console.error("Failed to load analytics");
+          }
+        } catch (err) {
+          console.error("Analytics fetch error:", err);
+        } finally {
+          setAnalyticsLoading(false);
+        }
+      }
+      loadAnalytics();
+    }
+  }, [activeTab, analyticsRange]);
 
   // Load portfolio data from API
   useEffect(() => {
@@ -259,6 +296,20 @@ export default function AdminDashboard() {
               >
                 <div className="flex items-center gap-2">
                   <Briefcase className="w-4 h-4" /> Dissertations
+                </div>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => setActiveTab("analytics")}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === "analytics"
+                    ? "bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white"
+                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--glass-border)]"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <BarChart2 className="w-4 h-4" /> Visitor Analytics
                 </div>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -1468,6 +1519,293 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* === VISITOR ANALYTICS TAB === */}
+              {activeTab === "analytics" && (
+                <div className="space-y-6">
+                  <div className="border-b border-[var(--glass-border)] pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-bold font-[family-name:var(--font-outfit)]">Visitor Analytics & Security Log</h2>
+                      <p className="text-xs text-[var(--muted-foreground)]">Real-time telemetry, geographic tracking, and device environments</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={analyticsRange}
+                        onChange={(e) => setAnalyticsRange(e.target.value)}
+                        className="px-3 py-1.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-xs font-semibold text-[var(--foreground)] focus:outline-none"
+                      >
+                        <option value="today">Today</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="all">All Time</option>
+                      </select>
+                      <button
+                        onClick={async () => {
+                          setAnalyticsLoading(true);
+                          try {
+                            const res = await fetch(`/api/admin/analytics?range=${analyticsRange}`);
+                            if (res.ok) {
+                              const json = await res.json();
+                              setAnalyticsData(json);
+                            }
+                          } catch (err) {
+                            console.error(err);
+                          } finally {
+                            setAnalyticsLoading(false);
+                          }
+                        }}
+                        disabled={analyticsLoading}
+                        className="p-1.5 border border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded-lg transition-colors cursor-pointer"
+                        title="Refresh Data"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${analyticsLoading ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {analyticsLoading && !analyticsData ? (
+                    <div className="py-20 text-center space-y-3">
+                      <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-xs text-[var(--muted-foreground)]">Fetching visitor telemetry...</p>
+                    </div>
+                  ) : !analyticsData ? (
+                    <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                      No analytics data loaded. Click Refresh or check your Supabase connection.
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Metric cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all duration-300">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[var(--primary)]/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/15 flex items-center justify-center text-[var(--primary)]">
+                              <Eye className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--muted-foreground)]">Total Page Views</span>
+                              <h3 className="text-2xl font-black font-[family-name:var(--font-outfit)] mt-0.5">{analyticsData.totalVisits}</h3>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl relative overflow-hidden group hover:border-[var(--accent)]/30 transition-all duration-300">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[var(--accent)]/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/15 flex items-center justify-center text-[var(--accent)]">
+                              <User className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--muted-foreground)]">Unique Visitors</span>
+                              <h3 className="text-2xl font-black font-[family-name:var(--font-outfit)] mt-0.5">{analyticsData.uniqueIPs}</h3>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 pointer-events-none" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400">
+                              <Shield className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--muted-foreground)]">Security Firewall</span>
+                              <h3 className="text-sm font-semibold text-emerald-400 mt-1 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" /> Active & Guarded
+                              </h3>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Charts Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Top Pages */}
+                        <div className="p-6 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl space-y-4">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+                            <TrendingUp className="w-3.5 h-3.5 text-[var(--primary)]" /> Top Visited Pages
+                          </h4>
+                          <div className="space-y-3">
+                            {analyticsData.topPages.length === 0 ? (
+                              <p className="text-[11px] text-[var(--muted-foreground)] italic">No page data recorded.</p>
+                            ) : (
+                              analyticsData.topPages.map((item: any, idx: number) => {
+                                const maxVal = analyticsData.topPages[0]?.count || 1;
+                                const pct = Math.round((item.count / maxVal) * 100);
+                                return (
+                                  <div key={idx} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span className="font-mono truncate max-w-[70%]">{item.page}</span>
+                                      <span className="font-bold text-[var(--muted-foreground)]">{item.count} views</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                      <div className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full" style={{ width: `${pct}%` }} />
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Top Countries */}
+                        <div className="p-6 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl space-y-4">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5 text-[var(--accent)]" /> Top Countries
+                          </h4>
+                          <div className="space-y-3">
+                            {analyticsData.topCountries.length === 0 ? (
+                              <p className="text-[11px] text-[var(--muted-foreground)] italic">No country data recorded.</p>
+                            ) : (
+                              analyticsData.topCountries.map((item: any, idx: number) => {
+                                const maxVal = analyticsData.topCountries[0]?.count || 1;
+                                const pct = Math.round((item.count / maxVal) * 100);
+                                return (
+                                  <div key={idx} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span className="font-semibold">{item.country}</span>
+                                      <span className="font-bold text-[var(--muted-foreground)]">{item.count} visitors</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                      <div className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--primary)] rounded-full" style={{ width: `${pct}%` }} />
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Top Devices */}
+                        <div className="p-6 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl space-y-4">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Device Breakdown</h4>
+                          <div className="flex items-center justify-around py-4">
+                            {analyticsData.topDevices.map((item: any, idx: number) => {
+                              const dev = item.device?.toLowerCase() || "unknown";
+                              const IconComponent = dev === "desktop" ? Laptop : dev === "mobile" ? Smartphone : dev === "tablet" ? Tablet : Laptop;
+                              const total = analyticsData.totalVisits || 1;
+                              const share = Math.round((item.count / total) * 100);
+                              return (
+                                <div key={idx} className="text-center space-y-1.5">
+                                  <div className="w-12 h-12 rounded-full border border-[var(--glass-border)] bg-[var(--background)] flex items-center justify-center mx-auto text-[var(--primary)]">
+                                    <IconComponent className="w-5 h-5" />
+                                  </div>
+                                  <span className="text-[10px] font-bold block capitalize text-[var(--muted-foreground)]">{dev}</span>
+                                  <span className="text-xs font-black block">{share}%</span>
+                                </div>
+                              );
+                            })}
+                            {analyticsData.topDevices.length === 0 && (
+                              <p className="text-[11px] text-[var(--muted-foreground)] italic w-full text-center">No device data.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Top Browsers */}
+                        <div className="p-6 border border-[var(--glass-border)] bg-[var(--glass-bg)] rounded-2xl space-y-4">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+                            <Terminal className="w-3.5 h-3.5 text-emerald-400" /> Browsers & Environments
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {analyticsData.topBrowsers.slice(0, 4).map((item: any, idx: number) => (
+                              <div key={idx} className="p-3 border border-[var(--glass-border)] bg-[var(--background)]/30 rounded-xl">
+                                <span className="text-[10px] text-[var(--muted-foreground)] font-semibold truncate block max-w-full" title={item.browser}>
+                                  {item.browser}
+                                </span>
+                                <h5 className="text-sm font-black mt-0.5">{item.count} sessions</h5>
+                              </div>
+                            ))}
+                            {analyticsData.topBrowsers.length === 0 && (
+                              <p className="text-[11px] text-[var(--muted-foreground)] italic col-span-2">No browser data.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Recent Telemetry Log Table */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5 pl-1">
+                          <Terminal className="w-3.5 h-3.5" /> Recent Telemetry Stream (Last 50 Visits)
+                        </h4>
+                        <div className="border border-[var(--glass-border)] rounded-2xl overflow-hidden bg-[var(--glass-bg)] shadow-md">
+                          <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead className="bg-[var(--glass-border)]/20 sticky top-0 backdrop-blur-md z-10">
+                                <tr>
+                                  <th className="p-3.5 font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider">IP / Device</th>
+                                  <th className="p-3.5 font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider">Location</th>
+                                  <th className="p-3.5 font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider">Visited Page</th>
+                                  <th className="p-3.5 font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider">Referrer</th>
+                                  <th className="p-3.5 font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider text-right">Time</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[var(--glass-border)]/40 font-mono">
+                                {analyticsData.recentVisitors.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={5} className="p-8 text-center text-[var(--muted-foreground)] italic">
+                                      No traffic recorded yet.
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  analyticsData.recentVisitors.map((v: any, idx: number) => {
+                                    const timeStr = new Date(v.visited_at).toLocaleString();
+                                    const dev = v.device_type?.toLowerCase() || "unknown";
+                                    const DevIcon = dev === "desktop" ? Laptop : dev === "mobile" ? Smartphone : dev === "tablet" ? Tablet : Laptop;
+
+                                    return (
+                                      <tr key={idx} className="hover:bg-[var(--primary)]/5 transition-colors">
+                                        <td className="p-3.5 space-y-1">
+                                          <div className="flex items-center gap-1.5">
+                                            <DevIcon className="w-3.5 h-3.5 text-[var(--muted-foreground)] shrink-0" />
+                                            <span className="font-bold text-[var(--foreground)]">{v.ip_address}</span>
+                                          </div>
+                                          <div className="text-[10px] text-[var(--muted-foreground)] flex items-center gap-1">
+                                            <span>{v.browser}</span>
+                                            <span>•</span>
+                                            <span>{v.os}</span>
+                                          </div>
+                                        </td>
+                                        <td className="p-3.5 space-y-1">
+                                          <div className="font-semibold text-[var(--foreground)]">
+                                            {v.city ? `${v.city}, ` : ""}
+                                            {v.region ? `${v.region}, ` : ""}
+                                            {v.country || "Unknown Location"}
+                                          </div>
+                                          {v.latitude && v.longitude && (
+                                            <a
+                                              href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-[var(--primary)] hover:underline flex items-center gap-1 text-[10px]"
+                                            >
+                                              <MapPin className="w-3 h-3" /> View Map
+                                            </a>
+                                          )}
+                                        </td>
+                                        <td className="p-3.5 truncate max-w-[200px]" title={v.page_url}>
+                                          <span className="px-1.5 py-0.5 rounded bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-bold">
+                                            {v.page_url || "/"}
+                                          </span>
+                                        </td>
+                                        <td className="p-3.5 text-[10px] text-[var(--muted-foreground)] truncate max-w-[150px]" title={v.referrer || "Direct"}>
+                                          {v.referrer || "Direct / Bookmark"}
+                                        </td>
+                                        <td className="p-3.5 text-right text-[10px] text-[var(--muted-foreground)]">
+                                          {timeStr}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

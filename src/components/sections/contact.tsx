@@ -1,28 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import { siteConfig, socialLinks } from "@/lib/data";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { Send, Mail, MapPin, Globe, Calendar, CheckCircle } from "lucide-react";
+import { Send, Mail, MapPin, Globe, Calendar } from "lucide-react";
 import { getIcon } from "@/lib/icons";
 
 export function Contact() {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const contactEmail = siteConfig.email || "rajanchand48@gmail.com";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Build Gmail compose URL with pre-filled fields
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormState({ name: "", email: "", subject: "", message: "" });
-    }, 3000);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const name = (formData.get("name") as string) || "";
+    const email = (formData.get("email") as string) || "";
+    const subject = (formData.get("subject") as string) || "";
+    const message = (formData.get("message") as string) || "";
+
+    const body = `Hi Rajan,\n\n${message}\n\n---\nFrom: ${name}\nEmail: ${email}`;
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contactEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.open(gmailUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -53,8 +54,8 @@ export function Contact() {
                     </div>
                     <div>
                       <span className="text-xs text-[var(--muted-foreground)] block">Email</span>
-                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
-                        {siteConfig.email}
+                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contactEmail)}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
+                        {contactEmail}
                       </a>
                     </div>
                   </div>
@@ -114,71 +115,56 @@ export function Contact() {
               </div>
 
               {/* Right — Form */}
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <form onSubmit={handleSendMessage} className="flex flex-col gap-5">
                 <div>
                   <input
                     type="text"
+                    name="name"
                     id="contact-name"
                     placeholder="Your Name"
                     required
-                    value={formState.name}
-                    onChange={(e) => setFormState({ ...formState, name: e.target.value })}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                   />
                 </div>
                 <div>
                   <input
                     type="email"
+                    name="email"
                     id="contact-email"
                     placeholder="Your Email"
                     required
-                    value={formState.email}
-                    onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                   />
                 </div>
                 <div>
                   <input
                     type="text"
+                    name="subject"
                     id="contact-subject"
                     placeholder="Subject"
-                    value={formState.subject}
-                    onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                   />
                 </div>
                 <div>
                   <textarea
+                    name="message"
                     id="contact-message"
                     placeholder="Your Message"
                     required
                     rows={5}
-                    value={formState.message}
-                    onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors resize-y min-h-[120px]"
                   />
                 </div>
                 <button
                   type="submit"
-                  disabled={submitted}
-                  className={`inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 cursor-pointer ${
-                    submitted
-                      ? "bg-gradient-to-r from-emerald-500 to-[var(--accent)]"
-                      : "bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_35px_var(--glow-primary)] hover:-translate-y-0.5"
-                  }`}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 cursor-pointer bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_35px_var(--glow-primary)] hover:-translate-y-0.5"
                 >
-                  {submitted ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      Message Sent!
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Send Message
-                    </>
-                  )}
+                  <Send className="w-4 h-4" />
+                  Send Message
                 </button>
+                <p className="text-[10px] text-[var(--muted-foreground)] text-center -mt-2">
+                  Opens Gmail with your message pre-filled
+                </p>
               </form>
             </div>
           </div>

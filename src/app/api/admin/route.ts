@@ -76,9 +76,43 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid data structure" }, { status: 400 });
     }
 
+    // Input sanitization to prevent XSS (recursive stripper)
+    function sanitizeObject(obj: any): any {
+      if (!obj) return obj;
+      if (typeof obj === "string") {
+        return obj
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+          .replace(/javascript:/gi, "")
+          .replace(/on\w+\s*=/gi, "");
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(item => sanitizeObject(item));
+      }
+      if (typeof obj === "object") {
+        const sanitized: any = {};
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            sanitized[key] = sanitizeObject(obj[key]);
+          }
+        }
+        return sanitized;
+      }
+      return obj;
+    }
+
+    const sanitizedData = sanitizeObject(updatedData);
+
+    // Validate email format if provided
+    if (sanitizedData.siteConfig.email) {
+      const email = sanitizedData.siteConfig.email.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return NextResponse.json({ error: "Invalid email address format" }, { status: 400 });
+      }
+    }
+
     // 1. Write to the local JSON file (so local environment stays in sync)
     try {
-      fs.writeFileSync(dataFilePath, JSON.stringify(updatedData, null, 2), "utf8");
+      fs.writeFileSync(dataFilePath, JSON.stringify(sanitizedData, null, 2), "utf8");
     } catch (fsErr) {
       console.warn("Local filesystem write skipped/failed (likely serverless environment):", fsErr);
     }
@@ -88,7 +122,7 @@ export async function POST(request: Request) {
       .from("portfolio")
       .upsert({ 
         id: 1, 
-        content: updatedData, 
+        content: sanitizedData, 
         updated_at: new Date().toISOString() 
       });
 

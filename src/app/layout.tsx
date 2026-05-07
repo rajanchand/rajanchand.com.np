@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Fira_Code, Outfit } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { VisitorTracker } from "@/components/visitor-tracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -72,6 +73,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <VisitorTracker />
         </ThemeProvider>
       </body>
     </html>

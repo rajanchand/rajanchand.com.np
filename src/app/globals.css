@@ -48,8 +48,12 @@
   --input: #334155;
   --ring: #60a5fa;
 
-  --glass-bg: #1e293b;
-  --glass-border: #334155;
+  --gradient-primary: linear-gradient(135deg, #60a5fa, #818cf8);
+  --gradient-hover: linear-gradient(135deg, #818cf8, #60a5fa);
+  --glow-primary: rgba(96, 165, 250, 0.25);
+  --glow-accent: rgba(129, 140, 248, 0.2);
+  --glass-bg: rgba(30, 41, 59, 0.8);
+  --glass-border: rgba(51, 65, 85, 0.6);
 }
 
 @theme inline {
@@ -107,10 +111,12 @@ body {
   color: white;
 }
 
-/* ===== GLASSMORPHISM (FLAT MATCH) ===== */
+/* ===== GLASSMORPHISM ===== */
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* ===== GRADIENT TEXT ===== */
@@ -253,4 +259,29 @@ body {
 .prose img {
   border-radius: var(--radius);
   margin: 1.5em 0;
+}
+
+/* ===== CUSTOM SCROLLBAR UTILITY ===== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) transparent;
 }
