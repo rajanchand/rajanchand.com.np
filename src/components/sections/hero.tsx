@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { siteConfig } from "@/lib/data";
 import { Mail } from "lucide-react";
+import Image from "next/image";
 
 // Typing animation featuring a natural type-pause-delete-loop cycle
 function TypingAnimation({ text }: { text: string }) {
@@ -52,12 +53,13 @@ export function Hero() {
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12">
           {/* Left Column — Picture (Moves to top on mobile) */}
           <div className="w-full lg:w-1/3 flex justify-center lg:justify-start">
-            <div className="relative max-w-[220px] sm:max-w-[240px]">
-              <img
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+              <Image
                 src={siteConfig.profileImage || "/images/profile.jpg"}
-                className="rounded-full w-48 h-48 sm:w-56 sm:h-56 border-8 border-slate-100 dark:border-zinc-800 shadow-inner bg-gradient-to-r from-slate-100 to-white dark:from-gray-900 dark:to-zinc-900 object-cover"
+                className="rounded-full border-8 border-slate-100 dark:border-zinc-800 shadow-inner bg-gradient-to-r from-slate-100 to-white dark:from-gray-900 dark:to-zinc-900 object-cover"
                 alt="Rajan Prakash Chand"
-                loading="eager"
+                fill
+                priority
               />
             </div>
           </div>
