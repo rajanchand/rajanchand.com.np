@@ -73,9 +73,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const adminPassword = process.env.ADMIN_PASSWORD || "rajan123";
+    // Cryptographically secure password verification via SHA-256 Web Crypto API
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encodedData);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-    if (password === adminPassword) {
+    // The fallback is the SHA-256 hash of "rajan123"
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || "62657e2bbd92ad592b23a9d94943f651fe246960d70559f13a0c007137f8f9e7";
+
+    if (hashHex === adminPasswordHash) {
       // Clear rate limit on successful login
       loginAttempts.delete(clientIP);
 

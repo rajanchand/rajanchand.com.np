@@ -79,17 +79,17 @@ CREATE TABLE public.visitors (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   visited_at timestamptz DEFAULT now() NOT NULL,
   ip_address text NOT NULL,
-  user_agent text,
-  browser text,
-  device_type text,
-  os text,
-  country text,
-  region text,
   city text,
-  latitude numeric,
-  longitude numeric,
+  country text,
+  isp text,
+  device_type text,
+  browser text,
+  browser_version text,
+  os text,
+  os_version text,
   page_url text,
-  referrer text
+  referrer text,
+  user_agent text
 );
 
 -- Index the tracking time to ensure high-performance query speeds

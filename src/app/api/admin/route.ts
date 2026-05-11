@@ -20,19 +20,28 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Try fetching from Supabase
-    const { data: dbData, error } = await supabase
-      .from("portfolio")
-      .select("content")
-      .eq("id", 1)
-      .maybeSingle();
+    // Try fetching from Supabase with safe try-catch wrapper
+    let dbData = null;
+    let dbError: any = null;
+    try {
+      const response = await supabase
+        .from("portfolio")
+        .select("content")
+        .eq("id", 1)
+        .maybeSingle();
+      dbData = response.data;
+      dbError = response.error;
+    } catch (e: any) {
+      console.warn("Supabase network crash in GET (using local data.json fallback):", e.message || e);
+      dbError = e;
+    }
 
-    if (!error && dbData && dbData.content) {
+    if (!dbError && dbData && dbData.content) {
       return NextResponse.json(dbData.content);
     }
 
-    if (error) {
-      console.warn("Supabase query warning in GET (falling back to data.json):", error.message);
+    if (dbError) {
+      console.warn("Supabase query warning in GET (falling back to data.json):", dbError.message || dbError);
     }
 
     // Fallback to local data.json
@@ -43,16 +52,20 @@ export async function GET() {
     const fileContent = fs.readFileSync(dataFilePath, "utf8");
     const localData = JSON.parse(fileContent);
 
-    // Auto-seed Supabase if table exists but is empty
-    if (!error && !dbData) {
-      console.log("Auto-seeding Supabase in GET admin API...");
-      const { error: seedError } = await supabase
-        .from("portfolio")
-        .insert({ id: 1, content: localData });
-      if (seedError) {
-        console.error("Auto-seeding failed:", seedError.message);
-      } else {
-        console.log("Auto-seeding succeeded!");
+    // Auto-seed Supabase if table exists but is empty (wrapped in try-catch)
+    if (!dbError && !dbData) {
+      try {
+        console.log("Auto-seeding Supabase in GET admin API...");
+        const { error: seedError } = await supabase
+          .from("portfolio")
+          .insert({ id: 1, content: localData });
+        if (seedError) {
+          console.error("Auto-seeding failed:", seedError.message);
+        } else {
+          console.log("Auto-seeding succeeded!");
+        }
+      } catch (seedErr: any) {
+        console.error("Auto-seeding crash:", seedErr.message || seedErr);
       }
     }
 
@@ -117,19 +130,27 @@ export async function POST(request: Request) {
       console.warn("Local filesystem write skipped/failed (likely serverless environment):", fsErr);
     }
 
-    // 2. Write to Supabase database
-    const { error: dbError } = await supabase
-      .from("portfolio")
-      .upsert({ 
-        id: 1, 
-        content: sanitizedData, 
-        updated_at: new Date().toISOString() 
-      });
+    // 2. Write to Supabase database with safe try-catch wrapper
+    let dbError = null;
+    try {
+      const response = await supabase
+        .from("portfolio")
+        .upsert({ 
+          id: 1, 
+          content: sanitizedData, 
+          updated_at: new Date().toISOString() 
+        });
+      dbError = response.error;
+    } catch (dbErr: any) {
+      console.error("Supabase upsert crashed:", dbErr.message || dbErr);
+      dbError = dbErr;
+    }
 
     let message = "Data updated successfully!";
     if (dbError) {
-      console.error("Supabase upsert error:", dbError.message);
-      message = `Data updated locally, but Supabase update failed: ${dbError.message}. Make sure the 'portfolio' table has been created in your Supabase database.`;
+      const errMsg = dbError.message || "Connection refused";
+      console.error("Supabase upsert error:", errMsg);
+      message = `Data updated locally, but Supabase update failed: ${errMsg}. Make sure the 'portfolio' table has been created in your Supabase database.`;
     }
 
     // Force revalidation of all site pages
