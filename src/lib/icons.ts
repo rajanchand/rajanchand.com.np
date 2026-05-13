@@ -28,6 +28,7 @@ import {
   TrendingUp,
   ArrowUpRight,
   MessageSquare,
+  Mail,
 } from "lucide-react";
 import React from "react";
 
@@ -62,6 +63,7 @@ const icons: Record<string, React.ComponentType<{ className?: string }>> = {
   TrendingUp,
   ArrowUpRight,
   MessageSquare,
+  Mail,
   Container: Server, // alias
 };
 

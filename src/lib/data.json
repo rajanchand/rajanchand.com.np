@@ -412,7 +412,7 @@
   ],
   "socialLinks": [
     {
-      "url": "https://linkedin.com",
+      "url": "https://www.linkedin.com/in/rajanchand",
       "icon": "Linkedin",
       "name": "LinkedIn"
     },
@@ -422,14 +422,9 @@
       "name": "GitHub"
     },
     {
-      "url": "https://twitter.com",
-      "icon": "Twitter",
-      "name": "Twitter"
-    },
-    {
-      "url": "https://facebook.com",
-      "icon": "Facebook",
-      "name": "Facebook"
+      "url": "mailto:rajanchand48@gmail.com",
+      "icon": "Mail",
+      "name": "Email"
     }
   ],
   "testimonials": [
