@@ -166,6 +166,7 @@
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
+      "image": "/images/project-monitoring.png",
       "description": "Designed and developed an automated network monitoring integration connecting core alert telemetry with multi-channel chatbot notifications (Viber, SMS, and Telegram) to minimize response latency."
     },
     {
@@ -182,6 +183,7 @@
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
+      "image": "/images/project-network.png",
       "description": "Designed and deployed full-scale redundant network infrastructure for enterprise clients, optimizing multi-homing routing topologies and routing protocol convergence times."
     },
     {
@@ -245,6 +247,7 @@
       "category": "Academic",
       "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
       "websiteUrl": "https://zero-trust-security.org/login",
+      "image": "/images/project-zerotrust.png",
       "description": "Researched and built a high-fidelity Zero Trust Architecture (ZTA) prototype, analyzing micro-segmentation capabilities and identity-based dynamic access controls in multi-tenant environments."
     }
   ],
@@ -272,13 +275,13 @@
   ],
   "blogPosts": [
     {
-      "slug": "new-article-173",
-      "title": "Untitled Article",
-      "excerpt": "Overview of what this article covers.",
+      "slug": "zero-trust-network-access-isp-enterprise",
+      "title": "Adopting Zero Trust Network Access (ZTNA) in ISP and Enterprise Infrastructure",
+      "excerpt": "An in-depth analysis of migrating from perimeter-based VPN models to risk-adaptive Zero Trust framework models in modern carrier-grade networks.",
       "date": "2026-06-01",
-      "category": "Networking",
-      "readTime": "5 min read",
-      "content": "# Heading 1\n\nWrite article content in Markdown here."
+      "category": "Network Security",
+      "readTime": "8 min read",
+      "content": "# Adopting Zero Trust Network Access (ZTNA) in ISP and Enterprise Infrastructure\n\nIn modern networking, the traditional perimeter-based security model—often described as 'castle-and-moat'—is no longer sufficient. Enterprise networks have expanded beyond physical office walls, driven by cloud-first architectures, distributed remote workforces, and dynamic endpoint environments. As a network supervisor leading large-scale operations, I have witnessed first-hand how legacy VPNs introduce severe security blindspots. The solution is migrating to **Zero Trust Network Access (ZTNA)**.\n\n## The Fallacy of Perimeter-Based VPNs\n\nLegacy Virtual Private Networks (VPNs) grant users broad network-level access once authenticated. This implicit trust model has major vulnerabilities:\n- **Lateral Movement**: Once an attacker compromises a single VPN endpoint, they gain visibility and routing paths to the entire internal subnet.\n- **Static Authentication**: Standard credentials or basic tokens are checked only at the initial tunnel establishment, ignoring continuous risk changes.\n- **Performance Bottlenecks**: Backhauling all traffic through a centralized VPN gateway degrades bandwidth and increases MTTR for network anomalies.\n\n## The Core Pillars of Zero Trust Architecture\n\nZero Trust operates on a simple, absolute rule: **Never Trust, Always Verify**. In an ISP or enterprise environment, this is achieved through five core pillars:\n\n1. **Identity Provider (IdP) Integration**: Binding user authentication with Multi-Factor Authentication (MFA) and Identity and Access Management (IAM) systems.\n2. **Device Posture Assessment**: Checking the health, OS patches, compliance, and active antivirus of the requesting client *before* and *during* the session.\n3. **Micro-segmentation**: Isolating network zones so that a compromise in Zone A (e.g., HR data) cannot impact Zone B (e.g., development subnets).\n4. **Adaptive Trust Engine**: Continuously scoring connection requests based on geolocation, anomalous traffic patterns, and user activity.\n5. **Secure Edge Gateways**: Leveraging distributed policy decision points to enforce rules closer to the user, reducing routing overhead.\n\n## Implementing Risk-Adaptive Authentication: A Prototype\n\nAs part of my MSc research in Information Technology at the University of the West of Scotland (UWS), I developed a prototype implementing **risk-based authentication** and **device fingerprinting**. The prototype captures device metadata (operating system, browser headers, screen resolution, active network hops) to compute a dynamic *risk score*. If the risk score exceeds defined thresholds—for instance, if an access request originates from an unusual country or an unpatched browser version—the system automatically triggers additional MFA challenges or completely restricts network access.\n\n## Conclusion\n\nTransitioning to Zero Trust is not merely about installing new hardware; it is a fundamental shift in network security culture. By treating every packet and every device as untrusted, ISPs and enterprise network managers can drastically reduce their threat surface area while delivering a faster, more reliable experience to their end-users."
     }
   ],
   "experience": [
@@ -449,24 +452,24 @@
   ],
   "certifications": [
     {
-      "title": "Network Basic",
-      "issuer": "Professional Certification"
+      "title": "Cisco Certified Network Associate (CCNA)",
+      "issuer": "Cisco"
     },
     {
-      "title": "Network Device",
-      "issuer": "Professional Certification"
+      "title": "MikroTik Certified Network Associate (MTCNA)",
+      "issuer": "MikroTik"
     },
     {
-      "title": "Endpoint Security",
-      "issuer": "Professional Certification"
+      "title": "MikroTik Certified Routing Engineer (MTCRE)",
+      "issuer": "MikroTik"
     },
     {
-      "title": "Service Desk",
-      "issuer": "Professional Certification"
+      "title": "Zero Trust Security Architecture Professional",
+      "issuer": "Palo Alto Networks"
     },
     {
-      "title": "DevOps",
-      "issuer": "Professional Certification"
+      "title": "Juniper Networks Certified Associate (JNCIA-Junos)",
+      "issuer": "Juniper Networks"
     }
   ]
 }

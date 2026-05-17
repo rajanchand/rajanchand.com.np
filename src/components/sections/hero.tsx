@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { siteConfig } from "@/lib/data";
-import { Mail } from "lucide-react";
+import { Mail, FileText } from "lucide-react";
 import Image from "next/image";
 
 // Typing animation featuring a natural type-pause-delete-loop cycle
@@ -83,7 +83,15 @@ export function Hero() {
               {/* Action Buttons to match subashcs layout */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4 sm:justify-start">
                 <a
-                  className="inline-flex items-center justify-center rounded-md shadow-md border-gray-400 dark:border-slate-500 border bg-transparent font-medium text-center text-sm text-gray-700 dark:text-slate-300 py-3 px-6 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:border-gray-600 dark:hover:border-slate-800 transition duration-200 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-[0_0_25px_var(--glow-primary)] text-white font-semibold text-center text-sm py-3 px-6 hover:scale-105 transition-all duration-200 cursor-pointer w-full sm:w-auto"
+                  href={siteConfig.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FileText className="w-4 h-4 mr-2" /> Download CV
+                </a>
+                <a
+                  className="inline-flex items-center justify-center rounded-md shadow-md border-gray-400 dark:border-slate-500 border bg-transparent font-medium text-center text-sm text-gray-700 dark:text-slate-300 py-3 px-6 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:border-gray-600 dark:hover:border-slate-800 transition duration-200 cursor-pointer w-full sm:w-auto hover:scale-105"
                   href={`https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -91,7 +99,7 @@ export function Hero() {
                   <Mail className="w-4 h-4 mr-2" /> Message
                 </a>
                 <a
-                  className="inline-flex items-center justify-center rounded-md shadow-md bg-blue-600 dark:bg-blue-700 text-white font-medium text-center text-sm py-3 px-6 hover:bg-blue-700 dark:hover:bg-blue-800 transition duration-200 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md shadow-md border border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-zinc-150 dark:hover:bg-zinc-800 font-semibold text-center text-sm text-slate-700 dark:text-slate-200 py-3 px-6 hover:-translate-y-0.5 transition duration-200 cursor-pointer w-full sm:w-auto"
                   href="#projects"
                   onClick={(e) => {
                     e.preventDefault();
