@@ -166,7 +166,6 @@
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
-      "image": "/images/project-monitoring.png",
       "description": "Designed and developed an automated network monitoring integration connecting core alert telemetry with multi-channel chatbot notifications (Viber, SMS, and Telegram) to minimize response latency."
     },
     {
@@ -183,7 +182,6 @@
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
-      "image": "/images/project-network.png",
       "description": "Designed and deployed full-scale redundant network infrastructure for enterprise clients, optimizing multi-homing routing topologies and routing protocol convergence times."
     },
     {
@@ -247,7 +245,6 @@
       "category": "Academic",
       "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
       "websiteUrl": "https://zero-trust-security.org/login",
-      "image": "/images/project-zerotrust.png",
       "description": "Researched and built a high-fidelity Zero Trust Architecture (ZTA) prototype, analyzing micro-segmentation capabilities and identity-based dynamic access controls in multi-tenant environments."
     }
   ],

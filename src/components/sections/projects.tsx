@@ -4,7 +4,6 @@ import { projects } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
-import Image from "next/image";
 
 export function Projects() {
   return (
@@ -41,19 +40,7 @@ export function Projects() {
               const Icon = getIcon(proj.icon || "FolderGit2") || FolderGit2;
               return (
                 <ScrollReveal key={proj.title} delay={i * 0.1}>
-                  <div className="group relative flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-900/60 rounded-[24px] border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 hover:shadow-[0_15px_45px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_15px_45px_rgba(59,130,246,0.15)] transition-all duration-500 ease-out cursor-default overflow-hidden">
-                    
-                    {/* Project Image Header */}
-                    {proj.image && (
-                      <div className="relative w-full h-44 rounded-2xl overflow-hidden mb-6 border border-slate-100 dark:border-slate-800/80 shrink-0">
-                        <Image
-                          src={proj.image}
-                          alt={proj.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
+                  <div className="group relative flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-900/60 rounded-[24px] border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 hover:shadow-[0_15px_45px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_15px_45px_rgba(59,130,246,0.15)] transition-all duration-500 ease-out cursor-default">
                     
                     {/* Top Content */}
                     <div>
