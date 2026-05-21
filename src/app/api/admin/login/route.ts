@@ -80,10 +80,18 @@ export async function POST(request: Request) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-    // The fallback is the SHA-256 hash of "rajan123"
-    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || "62657e2bbd92ad592b23a9d94943f651fe246960d70559f13a0c007137f8f9e7";
+    // Determine target hash (supporting either ADMIN_PASSWORD_HASH or dynamic hashing of plain ADMIN_PASSWORD)
+    let targetHash = process.env.ADMIN_PASSWORD_HASH;
+    if (!targetHash) {
+      const plainPassword = process.env.ADMIN_PASSWORD || "rajan123";
+      const plainEncoded = encoder.encode(plainPassword);
+      const plainBuffer = await crypto.subtle.digest("SHA-256", plainEncoded);
+      targetHash = Array.from(new Uint8Array(plainBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
 
-    if (hashHex === adminPasswordHash) {
+    if (hashHex === targetHash) {
       // Clear rate limit on successful login
       loginAttempts.delete(clientIP);
 
