@@ -5,8 +5,8 @@ import { headers } from "next/headers";
 // Key: IP address, Value: { attempts, resetAt }
 const loginAttempts = new Map<string, { attempts: number; resetAt: number }>();
 
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_ATTEMPTS = process.env.NODE_ENV === "development" ? 100 : 5;
+const WINDOW_MS = process.env.NODE_ENV === "development" ? 1000 : 15 * 60 * 1000; // 1 second in development, 15 minutes in production
 
 function getClientIP(headersList: Headers): string {
   const forwarded = headersList.get("x-forwarded-for");
@@ -80,15 +80,25 @@ export async function POST(request: Request) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-    // Determine target hash (supporting either ADMIN_PASSWORD_HASH or dynamic hashing of plain ADMIN_PASSWORD)
+    // Determine target hash (supporting either ADMIN_PASSWORD_HASH, dynamic hashing of plain ADMIN_PASSWORD, or falling back to either "rajan123" or "rajan123!")
     let targetHash = process.env.ADMIN_PASSWORD_HASH;
     if (!targetHash) {
-      const plainPassword = process.env.ADMIN_PASSWORD || "rajan123";
-      const plainEncoded = encoder.encode(plainPassword);
-      const plainBuffer = await crypto.subtle.digest("SHA-256", plainEncoded);
-      targetHash = Array.from(new Uint8Array(plainBuffer))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
+      const plainPassword = process.env.ADMIN_PASSWORD;
+      if (plainPassword) {
+        const plainEncoded = encoder.encode(plainPassword);
+        const plainBuffer = await crypto.subtle.digest("SHA-256", plainEncoded);
+        targetHash = Array.from(new Uint8Array(plainBuffer))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("");
+      } else {
+        const hashRajan123 = "13fe158da362195393a7cb1679b45999f7438c46965e20c728422f2632551180";
+        const hashRajan123Excl = "9176b591b61a832ad4761c8e8a14e8e167736a63a77c2d9be09dc5c487fd9585";
+        if (hashHex === hashRajan123 || hashHex === hashRajan123Excl) {
+          targetHash = hashHex; // Direct match
+        } else {
+          targetHash = hashRajan123; // Will fail naturally
+        }
+      }
     }
 
     if (hashHex === targetHash) {
