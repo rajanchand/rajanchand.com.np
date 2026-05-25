@@ -22,6 +22,13 @@ const firaCode = Fira_Code({
   display: "swap",
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "Rajan Prakash Chand — Network Engineer & MSc IT Researcher",
   description:

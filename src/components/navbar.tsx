@@ -176,7 +176,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <nav className="md:hidden bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 w-full">
+        <nav className="md:hidden bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 w-full max-h-[calc(100vh-60px)] overflow-y-auto">
           <ul className="flex flex-col px-4 py-4 space-y-2 text-base font-semibold text-gray-700 dark:text-slate-300">
             <li>
               <Link

@@ -66,7 +66,7 @@ export function Hero() {
 
           {/* Right Column — Intro Text */}
           <div className="w-full lg:w-2/3 text-left">
-            <h1 className="mb-4 text-2xl md:text-4xl sm:text-xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
+            <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
               <TypingAnimation text={`${siteConfig.name}!`} />
             </h1>
 
