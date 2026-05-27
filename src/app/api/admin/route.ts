@@ -22,7 +22,7 @@ export async function GET() {
 
     // Try fetching from Supabase with safe try-catch wrapper
     let dbData = null;
-    let dbError: any = null;
+    let dbError: unknown = null;
     try {
       const response = await supabase
         .from("portfolio")
@@ -31,9 +31,10 @@ export async function GET() {
         .maybeSingle();
       dbData = response.data;
       dbError = response.error;
-    } catch (e: any) {
-      console.warn("Supabase network crash in GET (using local data.json fallback):", e.message || e);
-      dbError = e;
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.warn("Supabase network crash in GET (using local data.json fallback):", error.message || error);
+      dbError = error;
     }
 
     if (!dbError && dbData && dbData.content) {
@@ -64,8 +65,9 @@ export async function GET() {
         } else {
           console.log("Auto-seeding succeeded!");
         }
-      } catch (seedErr: any) {
-        console.error("Auto-seeding crash:", seedErr.message || seedErr);
+      } catch (seedErr: unknown) {
+        const error = seedErr as Error;
+        console.error("Auto-seeding crash:", error.message || error);
       }
     }
 
@@ -90,6 +92,7 @@ export async function POST(request: Request) {
     }
 
     // Input sanitization to prevent XSS (recursive stripper)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function sanitizeObject(obj: any): any {
       if (!obj) return obj;
       if (typeof obj === "string") {
@@ -102,6 +105,7 @@ export async function POST(request: Request) {
         return obj.map(item => sanitizeObject(item));
       }
       if (typeof obj === "object") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sanitized: any = {};
         for (const key in obj) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -141,9 +145,10 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString() 
         });
       dbError = response.error;
-    } catch (dbErr: any) {
-      console.error("Supabase upsert crashed:", dbErr.message || dbErr);
-      dbError = dbErr;
+    } catch (dbErr: unknown) {
+      const error = dbErr as Error;
+      console.error("Supabase upsert crashed:", error.message || error);
+      dbError = error;
     }
 
     let message = "Data updated successfully!";

@@ -42,6 +42,7 @@ export function updatePortfolioData(newData: any) {
   if (newData.siteConfig) {
     // Clear existing keys and copy new ones
     for (const key in siteConfig) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (siteConfig as any)[key];
     }
     Object.assign(siteConfig, newData.siteConfig);

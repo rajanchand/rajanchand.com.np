@@ -33,6 +33,7 @@ export function BackgroundOrbs() {
       delay: i * 2.5,
     }));
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrbs(generated);
   }, []);
 

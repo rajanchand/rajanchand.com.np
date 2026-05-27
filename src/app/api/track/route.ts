@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     const parsed = parseUserAgent(userAgent);
 
     // Geolocation lookup (fire-and-forget, non-blocking)
-    let geo = { city: "Unknown", country: "Unknown", isp: "Unknown" };
+    const geo = { city: "Unknown", country: "Unknown", isp: "Unknown" };
     try {
       // ip-api.com is free for non-commercial use, 45 req/min
       // Use the IP directly; for localhost/dev, it returns the server's public IP info
