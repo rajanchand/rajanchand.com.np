@@ -22,7 +22,8 @@ export async function GET() {
 
     // Try fetching from Supabase with safe try-catch wrapper
     let dbData = null;
-    let dbError: unknown = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let dbError: any = null;
     try {
       const response = await supabase
         .from("portfolio")
@@ -135,7 +136,8 @@ export async function POST(request: Request) {
     }
 
     // 2. Write to Supabase database with safe try-catch wrapper
-    let dbError = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let dbError: any = null;
     try {
       const response = await supabase
         .from("portfolio")
