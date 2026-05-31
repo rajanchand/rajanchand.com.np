@@ -1,6 +1,4 @@
-"use client";
-
-import { dissertions, updatePortfolioData } from "@/lib/data";
+import { dissertions, loadPortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
@@ -8,7 +6,6 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 
 interface DissertionItem {
   title: string;
@@ -20,20 +17,9 @@ interface DissertionItem {
   githubUrl?: string;
 }
 
-export default function DissertionsListing() {
-  const [dataList, setDataList] = useState<DissertionItem[]>(dissertions as DissertionItem[]);
-
-  useEffect(() => {
-    fetch("/api/portfolio")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.dissertions) {
-          setDataList(data.dissertions);
-          updatePortfolioData(data);
-        }
-      })
-      .catch((err) => console.error("Error syncing dissertions:", err));
-  }, []);
+export default async function DissertionsListing() {
+  const data = await loadPortfolioData();
+  const dataList = (data?.dissertions || dissertions) as DissertionItem[];
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
