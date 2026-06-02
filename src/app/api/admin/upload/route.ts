@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import fs from "fs";
 import path from "path";
+import { supabase } from "@/lib/supabase";
 
 // Helper to check authentication
 async function isAuthenticated() {
@@ -83,28 +83,36 @@ export async function POST(request: Request) {
     // Generate a secure, sanitized filename
     const baseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 50);
     const safeName = `${baseName}-${Date.now()}${ext}`;
-    const publicPath = path.join(process.cwd(), "public/images", safeName);
+    const bucketName = "images";
 
-    // Ensure public/images directory exists
-    const imagesDir = path.join(process.cwd(), "public/images");
-    if (!fs.existsSync(imagesDir)) {
-      fs.mkdirSync(imagesDir, { recursive: true });
+    // Ensure bucket exists (best-effort, might fail if using Anon Key but bucket is missing)
+    try {
+      await supabase.storage.createBucket(bucketName, { public: true });
+    } catch (e) {
+      // Ignore - bucket likely exists or lack permissions
     }
 
-    // Verify the resolved path is within public/images to prevent path traversal
-    const resolvedPath = path.resolve(publicPath);
-    const resolvedImagesDir = path.resolve(imagesDir);
-    if (!resolvedPath.startsWith(resolvedImagesDir)) {
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from(bucketName)
+      .upload(safeName, buffer, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage Error:", uploadError);
       return NextResponse.json(
-        { error: "Invalid file path detected" },
-        { status: 400 }
+        { error: `Storage failed: ${uploadError.message}. Please ensure a public bucket named '${bucketName}' exists in Supabase Storage.` },
+        { status: 500 }
       );
     }
 
-    fs.writeFileSync(publicPath, buffer);
-    const imageUrl = `/images/${safeName}`;
+    const { data: publicUrlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(safeName);
 
-    return NextResponse.json({ success: true, url: imageUrl });
+    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
