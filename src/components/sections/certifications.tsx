@@ -26,7 +26,7 @@ export function Certifications() {
   }, [selectedPhoto]);
 
   return (
-    <section className="relative z-10 pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern" id="certifications">
+    <section className={`relative pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern ${selectedPhoto ? 'z-[60]' : 'z-10'}`} id="certifications">
       {/* Background shape */}
       <div className="absolute inset-0 bg-blue-50/10 dark:bg-zinc-950/10 pointer-events-none mb-32" aria-hidden="true" />
       
