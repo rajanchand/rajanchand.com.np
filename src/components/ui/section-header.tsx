@@ -17,7 +17,7 @@ export function SectionHeader({
         <span className="inline-block w-7 h-0.5 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full" />
         {label}
       </span>
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-[var(--font-outfit)] gradient-text leading-tight mb-4">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold font-[var(--font-display)] text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
         {title}
       </h2>
       {description && (

@@ -71,7 +71,7 @@ export function Articles() {
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold font-[family-name:var(--font-outfit)] mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">
+                  <h3 className="text-base font-bold font-[family-name:var(--font-outfit)] text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">
                     {post.title}
                   </h3>
 
