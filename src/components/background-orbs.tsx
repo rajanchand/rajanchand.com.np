@@ -52,7 +52,6 @@ export function BackgroundOrbs() {
             height: `${orb.size}px`,
             background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
             animation: `orb-drift ${orb.duration}s ease-in-out ${orb.delay}s infinite`,
-            filter: `blur(${60 + orb.size * 0.15}px)`,
             willChange: "transform",
           }}
         />
