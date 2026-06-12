@@ -90,18 +90,26 @@ export async function POST(request: Request) {
     const parsed = parseUserAgent(userAgent);
 
     // Geolocation lookup (fire-and-forget, non-blocking)
-    const geo = { city: "Unknown", country: "Unknown", isp: "Unknown" };
+    const geo: { city: string; country: string; region: string; lat: number | null; lon: number | null } = {
+      city: "Unknown",
+      country: "Unknown",
+      region: "",
+      lat: null,
+      lon: null,
+    };
     try {
       // ip-api.com is free for non-commercial use, 45 req/min
       // Use the IP directly; for localhost/dev, it returns the server's public IP info
-      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,isp`, {
+      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,regionName,lat,lon`, {
         signal: AbortSignal.timeout(3000), // 3 second timeout
       });
       if (geoRes.ok) {
         const geoData = await geoRes.json();
         if (geoData.city) geo.city = geoData.city;
         if (geoData.country) geo.country = geoData.country;
-        if (geoData.isp) geo.isp = geoData.isp;
+        if (geoData.regionName) geo.region = geoData.regionName;
+        if (geoData.lat != null) geo.lat = geoData.lat;
+        if (geoData.lon != null) geo.lon = geoData.lon;
       }
     } catch {
       // Geolocation failed — continue with defaults
@@ -112,12 +120,12 @@ export async function POST(request: Request) {
       ip_address: ip,
       city: geo.city,
       country: geo.country,
-      isp: geo.isp,
+      region: geo.region || null,
+      latitude: geo.lat,
+      longitude: geo.lon,
       device_type: parsed.deviceType,
-      browser: parsed.browser,
-      browser_version: parsed.browserVersion,
-      os: parsed.os,
-      os_version: parsed.osVersion,
+      browser: `${parsed.browser}${parsed.browserVersion ? ` ${parsed.browserVersion}` : ""}`,
+      os: `${parsed.os}${parsed.osVersion ? ` ${parsed.osVersion}` : ""}`,
       page_url: body.pageUrl || "/",
       referrer: body.referrer || "",
       user_agent: userAgent.slice(0, 500), // Cap UA string length
