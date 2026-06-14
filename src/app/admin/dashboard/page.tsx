@@ -30,7 +30,8 @@ import {
   Laptop,
   Smartphone,
   Tablet,
-  MapPin
+  MapPin,
+  Wifi
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
@@ -1773,16 +1774,23 @@ export default function AdminDashboard() {
                                             {v.region ? `${v.region}, ` : ""}
                                             {v.country || "Unknown Location"}
                                           </div>
-                                          {v.latitude && v.longitude && (
-                                            <a
-                                              href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-[var(--primary)] hover:underline flex items-center gap-1 text-[10px]"
-                                            >
-                                              <MapPin className="w-3 h-3" /> View Map
-                                            </a>
-                                          )}
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            {v.latitude && v.longitude && (
+                                              <a
+                                                href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-[var(--primary)] hover:underline flex items-center gap-1 text-[10px]"
+                                              >
+                                                <MapPin className="w-3 h-3" /> View Map
+                                              </a>
+                                            )}
+                                            {v.isp && (
+                                              <span className="flex items-center gap-1 text-[10px] text-[var(--muted-foreground)]">
+                                                <Wifi className="w-3 h-3" /> {v.isp}
+                                              </span>
+                                            )}
+                                          </div>
                                         </td>
                                         <td className="p-3.5 truncate max-w-[200px]" title={v.page_url}>
                                           <span className="px-1.5 py-0.5 rounded bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] font-bold">

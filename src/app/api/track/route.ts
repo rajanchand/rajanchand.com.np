@@ -89,30 +89,60 @@ export async function POST(request: Request) {
 
     const parsed = parseUserAgent(userAgent);
 
-    // Geolocation lookup (fire-and-forget, non-blocking)
-    const geo: { city: string; country: string; region: string; lat: number | null; lon: number | null } = {
+    // Geolocation lookup — request full field set for max accuracy
+    const geo = {
       city: "Unknown",
       country: "Unknown",
       region: "",
-      lat: null,
-      lon: null,
+      lat: null as number | null,
+      lon: null as number | null,
+      isp: "",
     };
+
     try {
-      // ip-api.com is free for non-commercial use, 45 req/min
-      // Use the IP directly; for localhost/dev, it returns the server's public IP info
-      const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,regionName,lat,lon`, {
-        signal: AbortSignal.timeout(3000), // 3 second timeout
-      });
+      // ip-api.com: request status + all useful fields for precise location
+      // district gives sub-city accuracy; zip helps refine; isp/org for network name
+      const geoRes = await fetch(
+        `http://ip-api.com/json/${ip}?fields=status,city,country,regionName,district,zip,lat,lon,isp,org,as`,
+        { signal: AbortSignal.timeout(3000) }
+      );
       if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        if (geoData.city) geo.city = geoData.city;
-        if (geoData.country) geo.country = geoData.country;
-        if (geoData.regionName) geo.region = geoData.regionName;
-        if (geoData.lat != null) geo.lat = geoData.lat;
-        if (geoData.lon != null) geo.lon = geoData.lon;
+        const g = await geoRes.json();
+        if (g.status === "success") {
+          // Use district (sub-city area) if available for more precise location
+          geo.city = g.district || g.city || "Unknown";
+          geo.country = g.country || "Unknown";
+          geo.region = g.regionName || "";
+          if (g.lat != null) geo.lat = g.lat;
+          if (g.lon != null) geo.lon = g.lon;
+          // Network name: prefer org, fallback to isp, then AS
+          geo.isp = g.org || g.isp || g.as || "";
+        }
       }
     } catch {
-      // Geolocation failed — continue with defaults
+      // Primary geo failed — try fallback
+    }
+
+    // Fallback: if primary returned "Unknown" city, try ipapi.co (more accurate for some IPs)
+    if (geo.city === "Unknown" && ip !== "unknown") {
+      try {
+        const fallbackRes = await fetch(`https://ipapi.co/${ip}/json/`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (fallbackRes.ok) {
+          const fb = await fallbackRes.json();
+          if (!fb.error) {
+            geo.city = fb.city || geo.city;
+            geo.country = fb.country_name || geo.country;
+            geo.region = fb.region || geo.region;
+            if (fb.latitude != null) geo.lat = fb.latitude;
+            if (fb.longitude != null) geo.lon = fb.longitude;
+            geo.isp = fb.org || geo.isp;
+          }
+        }
+      } catch {
+        // Fallback also failed — continue with defaults
+      }
     }
 
     // Store in Supabase
@@ -123,12 +153,13 @@ export async function POST(request: Request) {
       region: geo.region || null,
       latitude: geo.lat,
       longitude: geo.lon,
+      isp: geo.isp || null,
       device_type: parsed.deviceType,
       browser: `${parsed.browser}${parsed.browserVersion ? ` ${parsed.browserVersion}` : ""}`,
       os: `${parsed.os}${parsed.osVersion ? ` ${parsed.osVersion}` : ""}`,
       page_url: body.pageUrl || "/",
       referrer: body.referrer || "",
-      user_agent: userAgent.slice(0, 500), // Cap UA string length
+      user_agent: userAgent.slice(0, 500),
     });
 
     if (error) {
