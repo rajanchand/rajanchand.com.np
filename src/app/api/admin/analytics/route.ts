@@ -85,7 +85,7 @@ export async function GET(request: Request) {
     let totalDurationSeconds = 0;
     let sessionCountWithDuration = 0;
 
-    Object.entries(ipGroups).forEach(([_, group]) => {
+    Object.values(ipGroups).forEach((group) => {
       // Sort visits for this IP ascending by visited_at
       group.sort((a, b) => new Date(a.visited_at).getTime() - new Date(b.visited_at).getTime());
       

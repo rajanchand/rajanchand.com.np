@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     // Ensure bucket exists (best-effort, might fail if using Anon Key but bucket is missing)
     try {
       await supabase.storage.createBucket(bucketName, { public: true });
-    } catch (e) {
+    } catch {
       // Ignore - bucket likely exists or lack permissions
     }
 

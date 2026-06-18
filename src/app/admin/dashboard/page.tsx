@@ -8,7 +8,6 @@ import {
   LogOut,
   Plus,
   Trash2,
-  Edit,
   User,
   Briefcase,
   Layers,
@@ -18,13 +17,11 @@ import {
   Activity,
   ChevronRight,
   ChevronLeft,
-  Sparkles,
   Link2,
   Upload,
   TrendingUp,
   Eye,
   Globe,
-  Shield,
   Terminal,
   RefreshCw,
   BarChart2,
@@ -35,13 +32,10 @@ import {
   Wifi,
   Menu,
   Search,
-  Bell,
   Download,
+  Printer,
   Moon,
-  Sun,
-  ExternalLink,
   Clock,
-  Check,
   X
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
@@ -257,8 +251,6 @@ const AreaChart = ({ data }: { data: { label: string; visits: number; unique: nu
 // Interactive Donut Chart for Devices & Browsers
 const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]; colors: string[] }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  let cumulativePercent = 0;
-
   const radius = 35;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
@@ -271,8 +263,10 @@ const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]
           {data.map((item, idx) => {
             const percent = total > 0 ? item.value / total : 0;
             const strokeLength = percent * circumference;
-            const strokeOffset = circumference - cumulativePercent * circumference;
-            cumulativePercent += percent;
+            const prevPercent = data
+              .slice(0, idx)
+              .reduce((sum, d) => sum + (total > 0 ? d.value / total : 0), 0);
+            const strokeOffset = circumference - prevPercent * circumference;
 
             return (
               <circle
@@ -840,6 +834,13 @@ export default function AdminDashboard() {
                 title="Export CSV"
               >
                 <Download className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleExportPDF}
+                className="p-2 border border-white/5 hover:bg-white/5 rounded-lg text-white/50 hover:text-white transition-colors cursor-pointer"
+                title="Export PDF (Print)"
+              >
+                <Printer className="w-4 h-4" />
               </button>
             </div>
           </div>
