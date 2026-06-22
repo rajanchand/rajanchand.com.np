@@ -416,6 +416,11 @@ export default function AdminDashboard() {
           return;
         }
         const jsonData = await res.json();
+        if (jsonData) {
+          const dissList = jsonData.dissertations || jsonData.dissertions || [];
+          jsonData.dissertations = dissList;
+          jsonData.dissertions = dissList;
+        }
         setData(jsonData);
         setLoading(false);
       } catch (err) {
@@ -479,10 +484,17 @@ export default function AdminDashboard() {
     setSaveStatus({ success: false, message: "" });
 
     try {
+      const payload = { ...data };
+      if (payload) {
+        const list = payload.dissertations || payload.dissertions || [];
+        payload.dissertations = list;
+        payload.dissertions = list;
+      }
+
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const resData = await res.json();

@@ -4,113 +4,171 @@ import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ExternalLink, 
+  BookOpen, 
+  GraduationCap, 
+  Calendar, 
+  User, 
+  Globe, 
+  Github 
+} from "lucide-react";
 import Link from "next/link";
 
 interface DissertionItem {
-  title: string;
-  description: string;
-  type: string;
-  published: string;
-  url: string;
+  title?: string;
+  description?: string;
+  type?: string;
+  published?: string;
+  url?: string;
   websiteUrl?: string;
   githubUrl?: string;
+  author?: string;
+  institution?: string;
+  year?: string;
+  abstract?: string;
+  pdfUrl?: string;
 }
 
 export default async function DissertionsListing() {
   const data = await loadPortfolioData();
-  const dataList = (data?.dissertions || dissertions) as DissertionItem[];
+  const rawList = (data?.dissertions || data?.dissertations || dissertions) as DissertionItem[];
+  
+  // Deduplicate and normalize data lists safely
+  const dataList = (rawList || []).map((item) => {
+    return {
+      title: item.title || "Untitled Research Paper",
+      author: item.author || "Rajan Prakash Chand",
+      institution: item.institution || item.type || "Academic Research",
+      year: item.year || item.published || "2026",
+      abstract: item.abstract || item.description || "No abstract description provided.",
+      pdfUrl: item.pdfUrl || item.url || "",
+      websiteUrl: item.websiteUrl || "",
+      githubUrl: item.githubUrl || ""
+    };
+  });
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 relative overflow-hidden transition-colors duration-300">
       <BackgroundOrbs />
       <Navbar />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-28">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-28">
         <ScrollReveal>
-          <div className="mb-6">
+          <div className="mb-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline mb-8"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors group mb-6"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
               Back to Home
             </Link>
           </div>
           <SectionHeader
             label="Research & Publications"
-            title="Academic and Professional Papers"
-            description="A list of my academic project reports, research papers, and industrial publications bridging the gap between networking theory and practice."
+            title="Academic & Professional Papers"
+            description="Explore my academic thesis, research papers, and technical dissertations bridging network infrastructure engineering with security protocols."
             center={false}
           />
         </ScrollReveal>
 
         {/* Papers list */}
-        <div className="space-y-8 mt-12">
-          {dataList.map((doc, i) => (
-            <ScrollReveal key={i} delay={i * 0.12}>
-              <div className="glass rounded-3xl p-6 md:p-8 relative overflow-hidden hover:border-[var(--primary)]/25 hover:shadow-[0_8px_40px_var(--glow-primary)] transition-all duration-500 group">
-                <div className="absolute -top-1/2 -right-1/4 w-[250px] h-[250px] bg-[var(--primary)] rounded-full opacity-[0.03] blur-[80px] pointer-events-none" />
-
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                  <div className="space-y-4 flex-1">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="px-3 py-1 text-[10px] font-bold tracking-wider uppercase rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">
-                        {doc.type}
-                      </span>
-                      <span className="text-xs text-[var(--muted-foreground)] font-mono">
-                        Published: {doc.published}
-                      </span>
-                    </div>
-
-                    <h2 className="text-xl md:text-2xl font-bold font-[family-name:var(--font-outfit)] text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
-                      {doc.title}
-                    </h2>
-
-                    <p className="text-sm md:text-base text-[var(--muted-foreground)] leading-relaxed">
-                      {doc.description}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3.5 self-start shrink-0">
-                    {doc.url && doc.url !== "#" && (
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_20px_var(--glow-primary)] text-white rounded-xl text-xs font-semibold transition-all duration-300 cursor-pointer"
-                      >
-                        View Document
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {doc.websiteUrl && doc.websiteUrl !== "" && (
-                      <a
-                        href={doc.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 glass rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/10 transition-all duration-300 cursor-pointer"
-                      >
-                        Website
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {doc.githubUrl && doc.githubUrl !== "" && (
-                      <a
-                        href={doc.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 glass rounded-xl text-xs font-semibold hover:border-[#333]/30 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/5 transition-all duration-300 cursor-pointer"
-                      >
-                        GitHub
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
+        <div className="space-y-8 mt-10">
+          {dataList.length === 0 ? (
+            <ScrollReveal>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center">
+                <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold">No publications found</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Check back later or add new dissertations via the admin dashboard console.
+                </p>
               </div>
             </ScrollReveal>
-          ))}
+          ) : (
+            dataList.map((doc, i) => (
+              <ScrollReveal key={i} delay={i * 0.1}>
+                <div className="bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-300 rounded-3xl p-6 md:p-8 relative overflow-hidden backdrop-blur-md">
+                  <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-[80px] pointer-events-none" />
+
+                  <div className="space-y-5">
+                    {/* Header: Title and top metadata */}
+                    <div className="space-y-3">
+                      <h2 className="text-xl md:text-2xl font-bold font-[family-name:var(--font-outfit)] tracking-tight text-slate-900 dark:text-white leading-snug">
+                        {doc.title}
+                      </h2>
+
+                      {/* Meta Tags Row */}
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800/50 pb-4">
+                        <div className="flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <span><span className="font-semibold text-slate-700 dark:text-slate-300">Author:</span> {doc.author}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <GraduationCap className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <span><span className="font-semibold text-slate-700 dark:text-slate-300">Institution:</span> {doc.institution}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <span><span className="font-semibold text-slate-700 dark:text-slate-300">Year:</span> {doc.year}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Abstract block */}
+                    <div className="bg-slate-50 dark:bg-slate-950/40 border-l-4 border-blue-500 dark:border-blue-400 p-5 rounded-r-2xl">
+                      <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                        Abstract / Executive Summary
+                      </h3>
+                      <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                        {doc.abstract}
+                      </p>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      {doc.pdfUrl && doc.pdfUrl !== "#" && doc.pdfUrl !== "" && (
+                        <a
+                          href={doc.pdfUrl}
+                          target="_blank; rel=noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
+                        >
+                          View Document
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      
+                      {doc.websiteUrl && doc.websiteUrl !== "" && (
+                        <a
+                          href={doc.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
+                        >
+                          <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                          Website
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+
+                      {doc.githubUrl && doc.githubUrl !== "" && (
+                        <a
+                          href={doc.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
+                        >
+                          <Github className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                          GitHub
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))
+          )}
         </div>
       </div>
 
