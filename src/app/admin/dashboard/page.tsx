@@ -1111,7 +1111,16 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newExp = { role: "New Role", company: "Company Name", location: "Location", duration: "2026 - Present", description: ["Description details..."] };
+                        const newExp = { 
+                          type: "work", 
+                          title: "New Role", 
+                          company: "Company Name", 
+                          companyUrl: "", 
+                          period: "2026 - Present", 
+                          description: "Role overview goes here.", 
+                          bullets: ["Key responsibility or accomplishment"],
+                          tags: []
+                        };
                         setData((prev: any) => ({ ...prev, experience: [newExp, ...prev.experience] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
@@ -1121,123 +1130,188 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
-                    {data.experience.map((item: any, idx: number) => (
-                      <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
-                        <button
-                          onClick={() => {
-                            const updated = data.experience.filter((_: any, i: number) => i !== idx);
-                            setData((prev: any) => ({ ...prev, experience: updated }));
-                          }}
-                          className="absolute top-4 right-4 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                    {data.experience.map((item: any, idx: number) => {
+                      // Normalize fields to avoid crashes and support fallbacks
+                      const titleVal = item.title || item.role || "";
+                      const periodVal = item.period || item.duration || "";
+                      const typeVal = item.type || "work";
+                      const companyVal = item.company || "";
+                      const companyUrlVal = item.companyUrl || "";
+                      const descVal = typeof item.description === "string" ? item.description : (Array.isArray(item.description) ? item.description.join(" ") : "");
+                      
+                      // Normalize bullets to avoid crashing on strings
+                      const bulletsVal = Array.isArray(item.bullets) 
+                        ? item.bullets 
+                        : (Array.isArray(item.description) ? item.description : []);
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Role Name</label>
-                            <input
-                              type="text"
-                              value={item.role || ""}
-                              onChange={(e) => {
-                                const updated = [...data.experience];
-                                updated[idx].role = e.target.value;
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Company</label>
-                            <input
-                              type="text"
-                              value={item.company || ""}
-                              onChange={(e) => {
-                                const updated = [...data.experience];
-                                updated[idx].company = e.target.value;
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Location</label>
-                            <input
-                              type="text"
-                              value={item.location || ""}
-                              onChange={(e) => {
-                                const updated = [...data.experience];
-                                updated[idx].location = e.target.value;
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Duration</label>
-                            <input
-                              type="text"
-                              value={item.duration || ""}
-                              onChange={(e) => {
-                                const updated = [...data.experience];
-                                updated[idx].duration = e.target.value;
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                        </div>
+                      const tagsVal = Array.isArray(item.tags) 
+                        ? item.tags.join(", ") 
+                        : (typeof item.tags === "string" ? item.tags : "");
 
-                        {/* Bullet points */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Job Description details</label>
-                            <button
-                              onClick={() => {
-                                const updated = [...data.experience];
-                                updated[idx].description = [...(updated[idx].description || []), "New detail description..."];
-                                setData((prev: any) => ({ ...prev, experience: updated }));
-                              }}
-                              className="text-[10px] text-[var(--primary)] hover:underline flex items-center gap-1 font-semibold"
-                            >
-                              <Plus className="w-3 h-3" /> Add Detail
-                            </button>
+                      return (
+                        <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
+                          <button
+                            onClick={() => {
+                              const updated = data.experience.filter((_: any, i: number) => i !== idx);
+                              setData((prev: any) => ({ ...prev, experience: updated }));
+                            }}
+                            className="absolute top-4 right-4 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Type</label>
+                              <select
+                                value={typeVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].type = e.target.value;
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              >
+                                <option value="work">Professional Work Experience</option>
+                                <option value="education">Academic & Education</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Role / Degree Title</label>
+                              <input
+                                type="text"
+                                value={titleVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].title = e.target.value;
+                                  updated[idx].role = e.target.value; // Keep both sync
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Company / Institution</label>
+                              <input
+                                type="text"
+                                value={companyVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].company = e.target.value;
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Company / Institution Website URL</label>
+                              <input
+                                type="text"
+                                value={companyUrlVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].companyUrl = e.target.value;
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Duration / Period (e.g. 2019 — 2022)</label>
+                              <input
+                                type="text"
+                                value={periodVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].period = e.target.value;
+                                  updated[idx].duration = e.target.value; // Keep both sync
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Skills / Tags (Comma-separated)</label>
+                              <input
+                                type="text"
+                                value={tagsVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="md:col-span-2 space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Role Overview / Summary (Single paragraph)</label>
+                              <textarea
+                                rows={2}
+                                value={descVal}
+                                onChange={(e) => {
+                                  const updated = [...data.experience];
+                                  updated[idx].description = e.target.value;
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
                           </div>
+
+                          {/* Bullet points */}
                           <div className="space-y-2">
-                            {(item.description || []).map((bullet: string, bIdx: number) => (
-                              <div key={bIdx} className="flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  value={bullet}
-                                  onChange={(e) => {
-                                    const updated = [...data.experience];
-                                    updated[idx].description[bIdx] = e.target.value;
-                                    setData((prev: any) => ({ ...prev, experience: updated }));
-                                  }}
-                                  className="flex-1 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                                />
-                                <button
-                                  onClick={() => {
-                                    const updated = [...data.experience];
-                                    updated[idx].description = updated[idx].description.filter((_: any, i: number) => i !== bIdx);
-                                    setData((prev: any) => ({ ...prev, experience: updated }));
-                                  }}
-                                  className="p-2 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ))}
+                            <div className="flex items-center justify-between">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Key Accomplishments / Bullet Points</label>
+                              <button
+                                onClick={() => {
+                                  const updated = [...data.experience];
+                                  updated[idx].bullets = [...bulletsVal, "New key detail accomplishment..."];
+                                  setData((prev: any) => ({ ...prev, experience: updated }));
+                                }}
+                                className="text-[10px] text-[var(--primary)] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Highlight
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              {bulletsVal.map((bullet: string, bIdx: number) => (
+                                <div key={bIdx} className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={bullet}
+                                    onChange={(e) => {
+                                      const updated = [...data.experience];
+                                      const newBullets = [...bulletsVal];
+                                      newBullets[bIdx] = e.target.value;
+                                      updated[idx].bullets = newBullets;
+                                      setData((prev: any) => ({ ...prev, experience: updated }));
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const updated = [...data.experience];
+                                      const newBullets = bulletsVal.filter((_: any, i: number) => i !== bIdx);
+                                      updated[idx].bullets = newBullets;
+                                      setData((prev: any) => ({ ...prev, experience: updated }));
+                                    }}
+                                    className="p-2 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {/* === PROJECTS GRID === */}
-              {activeTab === "projects" && data && (
+                {activeTab === "projects" && data && (
                 <div className="space-y-6">
                   <div className="border-b border-[var(--glass-border)] pb-4 flex items-center justify-between">
                     <div>
@@ -1246,7 +1320,19 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newProj = { title: "New Project", description: "Project description...", tags: ["React"], github: "", demo: "", image: "" };
+                        const newProj = { 
+                          title: "New Project", 
+                          role: "Lead Engineer", 
+                          company: "Company Name", 
+                          description: "Designed and configured redundant network interfaces...", 
+                          icon: "FolderGit2", 
+                          tags: ["Networking", "Cisco"], 
+                          githubUrl: "", 
+                          github: "", 
+                          websiteUrl: "", 
+                          demo: "", 
+                          impact: ["Achieved 99.9% uptime", "Improved packet delivery"] 
+                        };
                         setData((prev: any) => ({ ...prev, projects: [newProj, ...prev.projects] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
@@ -1256,87 +1342,198 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
-                    {data.projects.map((proj: any, idx: number) => (
-                      <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
-                        <button
-                          onClick={() => {
-                            const updated = data.projects.filter((_: any, i: number) => i !== idx);
-                            setData((prev: any) => ({ ...prev, projects: updated }));
-                          }}
-                          className="absolute top-4 right-4 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                    {data.projects.map((proj: any, idx: number) => {
+                      const githubVal = proj.githubUrl || proj.github || "";
+                      const websiteVal = proj.websiteUrl || proj.demo || "";
+                      const companyVal = proj.company || "";
+                      const roleVal = proj.role || "";
+                      const iconVal = proj.icon || "FolderGit2";
+                      
+                      const tagsVal = Array.isArray(proj.tags) 
+                        ? proj.tags.join(", ") 
+                        : (typeof proj.tags === "string" ? proj.tags : "");
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Project Title</label>
-                            <input
-                              type="text"
-                              value={proj.title || ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].title = e.target.value;
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
+                      const impactVal = Array.isArray(proj.impact) ? proj.impact : [];
+
+                      return (
+                        <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
+                          <button
+                            onClick={() => {
+                              const updated = data.projects.filter((_: any, i: number) => i !== idx);
+                              setData((prev: any) => ({ ...prev, projects: updated }));
+                            }}
+                            className="absolute top-4 right-4 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Project Title</label>
+                              <input
+                                type="text"
+                                value={proj.title || ""}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].title = e.target.value;
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Company / Client / Context</label>
+                              <input
+                                type="text"
+                                value={companyVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].company = e.target.value;
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Your Role in the Project</label>
+                              <input
+                                type="text"
+                                value={roleVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].role = e.target.value;
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Visual Icon</label>
+                              <select
+                                value={iconVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].icon = e.target.value;
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              >
+                                <option value="FolderGit2">Generic Folder / Git</option>
+                                <option value="Router">Router & Switch</option>
+                                <option value="Network">Network Topology</option>
+                                <option value="Wifi">Broadband / Wi-Fi</option>
+                                <option value="Tv">Broadband TV / Multicast</option>
+                                <option value="ShieldCheck">Security / Lock</option>
+                                <option value="Bell">Bell / Alarm Alert</option>
+                                <option value="Search">Search / Lens</option>
+                                <option value="Monitor">Monitor Screen</option>
+                                <option value="Activity">Pulse Line / Telemetry</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">GitHub Link (Code)</label>
+                              <input
+                                type="text"
+                                value={githubVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].githubUrl = e.target.value;
+                                  updated[idx].github = e.target.value; // Sync
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Live Site / Website Link (Demo)</label>
+                              <input
+                                type="text"
+                                value={websiteVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].websiteUrl = e.target.value;
+                                  updated[idx].demo = e.target.value; // Sync
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="md:col-span-2 space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Tags / Technologies (Comma-separated)</label>
+                              <input
+                                type="text"
+                                value={tagsVal}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
+                            <div className="md:col-span-2 space-y-1">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Project Overview Description</label>
+                              <textarea
+                                rows={2}
+                                value={proj.description || ""}
+                                onChange={(e) => {
+                                  const updated = [...data.projects];
+                                  updated[idx].description = e.target.value;
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Tags (comma-separated)</label>
-                            <input
-                              type="text"
-                              value={proj.tags ? proj.tags.join(", ") : ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].tags = e.target.value.split(",").map((s) => s.trim());
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="md:col-span-2 space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Description</label>
-                            <textarea
-                              rows={3}
-                              value={proj.description || ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].description = e.target.value;
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">GitHub Link</label>
-                            <input
-                              type="text"
-                              value={proj.github || ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].github = e.target.value;
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Demo Link</label>
-                            <input
-                              type="text"
-                              value={proj.demo || ""}
-                              onChange={(e) => {
-                                const updated = [...data.projects];
-                                updated[idx].demo = e.target.value;
-                                setData((prev: any) => ({ ...prev, projects: updated }));
-                              }}
-                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            />
+
+                          {/* Impact Metrics Highlights list */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Project Metrics & Impact Highlights</label>
+                              <button
+                                onClick={() => {
+                                  const updated = [...data.projects];
+                                  updated[idx].impact = [...impactVal, "New impact result highlight..."];
+                                  setData((prev: any) => ({ ...prev, projects: updated }));
+                                }}
+                                className="text-[10px] text-[var(--primary)] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Impact Metric
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              {impactVal.map((metric: string, mIdx: number) => (
+                                <div key={mIdx} className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={metric}
+                                    onChange={(e) => {
+                                      const updated = [...data.projects];
+                                      const newImpact = [...impactVal];
+                                      newImpact[mIdx] = e.target.value;
+                                      updated[idx].impact = newImpact;
+                                      setData((prev: any) => ({ ...prev, projects: updated }));
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const updated = [...data.projects];
+                                      const newImpact = impactVal.filter((_: any, i: number) => i !== mIdx);
+                                      updated[idx].impact = newImpact;
+                                      setData((prev: any) => ({ ...prev, projects: updated }));
+                                    }}
+                                    className="p-2 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
