@@ -1,8 +1,25 @@
+import type { Metadata } from "next";
 import { blogPosts, loadPortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { BlogClient } from "./blog-client";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description:
+    "Insights, tutorials, and in-depth articles on network engineering, cybersecurity, ISP infrastructure, and IT research by Rajan Prakash Chand.",
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "Blog — Rajan Prakash Chand",
+    description:
+      "Read articles on networking, Zero Trust security, ISP operations, and IT research.",
+    url: "/blog",
+    type: "website",
+  },
+};
 
 interface BlogPostItem {
   slug: string;

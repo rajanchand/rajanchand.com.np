@@ -9,12 +9,14 @@ import { Certifications } from "@/components/sections/certifications";
 import { Articles } from "@/components/sections/articles";
 import { loadPortfolioData } from "@/lib/data";
 import { PortfolioSync } from "@/components/portfolio-sync";
+import { HomeJsonLd } from "@/components/json-ld";
 
 export default async function Home() {
   const data = await loadPortfolioData();
 
   return (
     <>
+      <HomeJsonLd />
       <PortfolioSync data={data} />
       <BackgroundOrbs />
       <Navbar />

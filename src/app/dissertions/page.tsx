@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { dissertions, loadPortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -15,6 +16,22 @@ import {
   Github 
 } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Research & Publications",
+  description:
+    "Academic thesis, research papers, and technical dissertations by Rajan Prakash Chand — bridging network engineering with Zero Trust security and IT research.",
+  alternates: {
+    canonical: "/dissertions",
+  },
+  openGraph: {
+    title: "Research & Publications — Rajan Prakash Chand",
+    description:
+      "Explore academic research papers on Zero Trust security, network engineering, and ISP infrastructure.",
+    url: "/dissertions",
+    type: "website",
+  },
+};
 
 interface DissertionItem {
   title?: string;

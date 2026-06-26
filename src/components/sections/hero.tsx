@@ -57,8 +57,9 @@ export function Hero() {
               <Image
                 src={siteConfig.profileImage || "/images/profile.jpg"}
                 className="rounded-full border-8 border-slate-100 dark:border-zinc-800 shadow-inner bg-gradient-to-r from-slate-100 to-white dark:from-gray-900 dark:to-zinc-900 object-cover"
-                alt="Rajan Prakash Chand"
+                alt="Rajan Prakash Chand — Network Engineer & MSc IT Researcher"
                 fill
+                sizes="(max-width: 640px) 192px, 224px"
                 priority
               />
             </div>
@@ -67,6 +68,7 @@ export function Hero() {
           {/* Right Column — Intro Text */}
           <div className="w-full lg:w-2/3 text-left">
             <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
+              <span className="sr-only">Hi, I&apos;m {siteConfig.name}!</span>
               <TypingAnimation text={`${siteConfig.name}!`} />
             </h1>
 

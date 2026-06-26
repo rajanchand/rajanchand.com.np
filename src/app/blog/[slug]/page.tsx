@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { blogPosts, siteConfig, loadPortfolioData } from "@/lib/data";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -6,6 +7,7 @@ import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortfolioSync } from "@/components/portfolio-sync";
+import { BlogPostJsonLd } from "@/components/json-ld";
 
 interface BlogPostItem {
   slug: string;
@@ -19,6 +21,36 @@ interface BlogPostItem {
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = (blogPosts as BlogPostItem[]).find((p) => p.slug === slug);
+
+  if (!post) {
+    return { title: "Post Not Found" };
+  }
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `/blog/${post.slug}`,
+      type: "article",
+      publishedTime: post.date,
+      authors: [siteConfig.name],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
 }
 
 function formatDate(dateStr: string) {
@@ -126,6 +158,12 @@ export default async function BlogPost({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
+      <BlogPostJsonLd
+        title={post.title}
+        description={post.excerpt}
+        datePublished={post.date}
+        slug={post.slug}
+      />
       <PortfolioSync data={data} />
       <BackgroundOrbs />
       <Navbar />
@@ -153,7 +191,7 @@ export default async function BlogPost({ params }: PageProps) {
             </span>
             <span className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
-              {formatDate(post.date)}
+              <time dateTime={post.date}>{formatDate(post.date)}</time>
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />

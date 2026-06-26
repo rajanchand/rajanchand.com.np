@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Hide framework fingerprint
   poweredByHeader: false,
 
+  // Optimize images with modern formats
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+
   // Security headers for all responses
   async headers() {
     return [
