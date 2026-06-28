@@ -1097,6 +1097,47 @@ export default function AdminDashboard() {
                         className="w-full px-5 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase block">Resume / CV URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://docs.google.com/document/d/..."
+                        value={data.siteConfig.resumeUrl || ""}
+                        onChange={(e) => handleConfigChange("resumeUrl", e.target.value)}
+                        className="w-full px-5 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                      />
+                      <p className="text-[10px] text-[var(--muted-foreground)]">Google Drive link to your resume. Used in navbar &quot;Resume&quot; link and hero &quot;Download CV&quot; button.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase block">Calendly URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://calendly.com/..."
+                        value={data.siteConfig.calendlyUrl || ""}
+                        onChange={(e) => handleConfigChange("calendlyUrl", e.target.value)}
+                        className="w-full px-5 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase block">Location</label>
+                      <input
+                        type="text"
+                        placeholder="Scotland, UK"
+                        value={data.siteConfig.location || ""}
+                        onChange={(e) => handleConfigChange("location", e.target.value)}
+                        className="w-full px-5 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase block">Location Origin</label>
+                      <input
+                        type="text"
+                        placeholder="Nepal"
+                        value={data.siteConfig.locationOrigin || ""}
+                        onChange={(e) => handleConfigChange("locationOrigin", e.target.value)}
+                        className="w-full px-5 py-3 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

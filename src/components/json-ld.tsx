@@ -4,9 +4,9 @@ import staticData from "@/lib/data.json";
  * JSON-LD structured data for the homepage.
  * Renders Person + WebSite schemas for Google rich results / knowledge panel.
  */
-export function HomeJsonLd() {
-  const config = staticData.siteConfig;
-  const socials = staticData.socialLinks || [];
+export function HomeJsonLd({ siteConfig: siteConfigProp, socialLinks: socialLinksProp }: { siteConfig?: any; socialLinks?: any[] } = {}) {
+  const config = siteConfigProp || staticData.siteConfig;
+  const socials = socialLinksProp || staticData.socialLinks || [];
 
   const personSchema = {
     "@context": "https://schema.org",
@@ -88,13 +88,15 @@ export function BlogPostJsonLd({
   description,
   datePublished,
   slug,
+  siteConfig: siteConfigProp,
 }: {
   title: string;
   description: string;
   datePublished: string;
   slug: string;
+  siteConfig?: any;
 }) {
-  const config = staticData.siteConfig;
+  const config = siteConfigProp || staticData.siteConfig;
 
   const articleSchema = {
     "@context": "https://schema.org",

@@ -1,6 +1,6 @@
 "use client";
 
-import { blogPosts } from "@/lib/data";
+import { blogPosts as defaultBlogPosts } from "@/lib/data";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { ArrowRight, Clock } from "lucide-react";
@@ -23,7 +23,8 @@ function formatDate(dateStr: string) {
   return `${formattedMonth} ${parseInt(day, 10)}, ${year}`;
 }
 
-export function Articles() {
+export function Articles({ blogPosts: customBlogPosts }: { blogPosts?: any[] } = {}) {
+  const blogPosts = customBlogPosts || defaultBlogPosts;
   return (
     <section id="articles" className="relative z-10 pt-6 pb-10 md:pt-8 md:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

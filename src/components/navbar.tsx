@@ -3,11 +3,16 @@
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown, Github, Rss } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
-import { siteConfig, socialLinks } from "@/lib/data";
+import { siteConfig as defaultSiteConfig, socialLinks } from "@/lib/data";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function Navbar() {
+interface NavbarProps {
+  siteConfig?: any;
+}
+
+export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
+  const siteConfig = customSiteConfig || defaultSiteConfig;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
@@ -97,6 +102,32 @@ export function Navbar() {
             <li>
               <Link
                 className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
+                href={isBlog ? "/#skills" : "#skills"}
+                onClick={() => {
+                  if (!isBlog) {
+                    document.querySelector("#skills")?.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                Skills
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
+                href={isBlog ? "/#experience" : "#experience"}
+                onClick={() => {
+                  if (!isBlog) {
+                    document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                Experience
+              </Link>
+            </li>
+            <li>
+              <Link
+                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
                 href={isBlog ? "/#projects" : "#projects"}
                 onClick={() => {
                   if (!isBlog) {
@@ -144,6 +175,14 @@ export function Navbar() {
                       className="block px-4 py-2 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition duration-150 cursor-pointer"
                     >
                       Dissertations
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={isBlog ? "/#certifications" : "#certifications"}
+                      className="block px-4 py-2 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition duration-150 cursor-pointer"
+                    >
+                      Certifications
                     </Link>
                   </li>
                 </ul>
@@ -194,6 +233,34 @@ export function Navbar() {
             </li>
             <li>
               <Link
+                href={isBlog ? "/#skills" : "#skills"}
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (!isBlog) {
+                    document.querySelector("#skills")?.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Skills
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={isBlog ? "/#experience" : "#experience"}
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (!isBlog) {
+                    document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Experience
+              </Link>
+            </li>
+            <li>
+              <Link
                 href={isBlog ? "/#projects" : "#projects"}
                 onClick={() => {
                   setMobileOpen(false);
@@ -234,6 +301,18 @@ export function Navbar() {
                 className="block px-8 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 Dissertations
+              </Link>
+              <Link
+                href={isBlog ? "/#certifications" : "#certifications"}
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (!isBlog) {
+                    document.querySelector("#certifications")?.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="block px-8 py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Certifications
               </Link>
             </li>
           </ul>

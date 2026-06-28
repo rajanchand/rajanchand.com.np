@@ -1,6 +1,6 @@
 "use client";
 
-import { experience } from "@/lib/data";
+import { experience as defaultExperience } from "@/lib/data";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { ArrowUp } from "lucide-react";
 
@@ -52,7 +52,8 @@ const sortDescending = (a: ExperienceItem, b: ExperienceItem) => {
   return bYears.end - aYears.end;
 };
 
-export function Experience() {
+export function Experience({ experience: customExperience }: { experience?: any[] } = {}) {
+  const experience = customExperience || defaultExperience;
   // Separate work and education items dynamically with type casting and sort them in descending order (newest first)
   const typedExperience = experience as ExperienceItem[];
   const workExperience = typedExperience

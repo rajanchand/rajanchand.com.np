@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { siteConfig, socialLinks } from "@/lib/data";
+import { siteConfig as defaultSiteConfig, socialLinks as defaultSocialLinks } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { Mail } from "lucide-react";
 import Link from "next/link";
@@ -33,7 +33,14 @@ const links = [
   },
 ];
 
-export function Footer() {
+interface FooterProps {
+  siteConfig?: any;
+  socialLinks?: any[];
+}
+
+export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocialLinks }: FooterProps = {}) {
+  const siteConfig = customSiteConfig || defaultSiteConfig;
+  const socialLinks = customSocialLinks || defaultSocialLinks;
   const [currentYear, setCurrentYear] = useState(2026);
 
   useEffect(() => {

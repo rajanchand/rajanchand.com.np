@@ -16,19 +16,19 @@ export default async function Home() {
 
   return (
     <>
-      <HomeJsonLd />
+      <HomeJsonLd siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
       <PortfolioSync data={data} />
       <BackgroundOrbs />
-      <Navbar />
+      <Navbar siteConfig={data?.siteConfig} />
       <main>
-        <Hero />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Certifications />
-        <Articles />
+        <Hero siteConfig={data?.siteConfig} />
+        <Skills skills={data?.skills} />
+        <Experience experience={data?.experience} />
+        <Projects projects={data?.projects} />
+        <Certifications certifications={data?.certifications} />
+        <Articles blogPosts={data?.blogPosts} />
       </main>
-      <Footer />
+      <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
     </>
   );
 }

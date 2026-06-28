@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { siteConfig } from "@/lib/data";
+import { siteConfig as defaultSiteConfig } from "@/lib/data";
 import { Mail, FileText } from "lucide-react";
 import Image from "next/image";
 
@@ -46,7 +46,8 @@ function TypingAnimation({ text }: { text: string }) {
   );
 }
 
-export function Hero() {
+export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}) {
+  const siteConfig = customSiteConfig || defaultSiteConfig;
   return (
     <section id="home" className="relative pt-24 pb-8 md:pt-32 md:pb-12 z-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">

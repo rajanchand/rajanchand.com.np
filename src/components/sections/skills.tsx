@@ -1,6 +1,6 @@
 "use client";
 
-import { skills } from "@/lib/data";
+import { skills as defaultSkills } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
@@ -109,7 +109,8 @@ const defaultCategoryConfig = {
   }
 };
 
-export function Skills() {
+export function Skills({ skills: customSkills }: { skills?: any[] } = {}) {
+  const skills = customSkills || defaultSkills;
   // Group skills dynamically
   const groupedSkills: Record<string, SkillItem[]> = {};
   skills.forEach((skill) => {

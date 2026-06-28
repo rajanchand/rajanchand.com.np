@@ -1,6 +1,6 @@
 "use client";
 
-import { certifications } from "@/lib/data";
+import { certifications as defaultCertifications } from "@/lib/data";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { Award, Eye, X } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -11,7 +11,8 @@ interface CertificationItem {
   photo?: string;
 }
 
-export function Certifications() {
+export function Certifications({ certifications: customCertifications }: { certifications?: any[] } = {}) {
+  const certifications = customCertifications || defaultCertifications;
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const typedCertifications = certifications as CertificationItem[];
 

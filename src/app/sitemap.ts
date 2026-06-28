@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
+import { loadPortfolioData } from "@/lib/data";
 import staticData from "@/lib/data.json";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://rajanchand.com.np";
+  const data = await loadPortfolioData();
+  const posts = data?.blogPosts || staticData.blogPosts || [];
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -27,8 +30,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // Dynamic blog post pages
-  const blogPages: MetadataRoute.Sitemap = (staticData.blogPosts || []).map(
-    (post) => ({
+  const blogPages: MetadataRoute.Sitemap = posts.map(
+    (post: any) => ({
       url: `${baseUrl}/blog/${post.slug}`,
       lastModified: post.date ? new Date(post.date) : new Date(),
       changeFrequency: "monthly" as const,

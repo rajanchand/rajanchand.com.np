@@ -69,7 +69,7 @@ export default async function DissertionsListing() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 relative overflow-hidden transition-colors duration-300">
       <BackgroundOrbs />
-      <Navbar />
+      <Navbar siteConfig={data?.siteConfig} />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-28">
         <ScrollReveal>
@@ -189,7 +189,7 @@ export default async function DissertionsListing() {
         </div>
       </div>
 
-      <Footer />
+      <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
     </main>
   );
 }

@@ -38,9 +38,9 @@ export default async function BlogListing() {
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
       <BackgroundOrbs />
-      <Navbar />
+      <Navbar siteConfig={data?.siteConfig} />
       <BlogClient initialPosts={posts} />
-      <Footer />
+      <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
     </main>
   );
 }

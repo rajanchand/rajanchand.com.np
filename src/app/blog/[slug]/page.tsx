@@ -25,11 +25,15 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = (blogPosts as BlogPostItem[]).find((p) => p.slug === slug);
+  const data = await loadPortfolioData();
+  const posts = (data?.blogPosts || blogPosts) as BlogPostItem[];
+  const post = posts.find((p) => p.slug === slug);
 
   if (!post) {
     return { title: "Post Not Found" };
   }
+
+  const resolvedSiteConfig = data?.siteConfig || siteConfig;
 
   return {
     title: post.title,
@@ -43,12 +47,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `/blog/${post.slug}`,
       type: "article",
       publishedTime: post.date,
-      authors: [siteConfig.name],
+      authors: [resolvedSiteConfig.name],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
+      images: [resolvedSiteConfig.profileImage || "/images/rajan-jpg-1780267497062.jpg"],
     },
   };
 }
@@ -149,8 +154,9 @@ function renderMarkdown(content: string) {
 export default async function BlogPost({ params }: PageProps) {
   const { slug } = await params;
   const data = await loadPortfolioData();
+  const posts = (data?.blogPosts || blogPosts) as BlogPostItem[];
   
-  const post = (blogPosts as BlogPostItem[]).find((p) => p.slug === slug);
+  const post = posts.find((p) => p.slug === slug);
   
   if (!post) {
     notFound();
@@ -163,10 +169,11 @@ export default async function BlogPost({ params }: PageProps) {
         description={post.excerpt}
         datePublished={post.date}
         slug={post.slug}
+        siteConfig={data?.siteConfig}
       />
       <PortfolioSync data={data} />
       <BackgroundOrbs />
-      <Navbar />
+      <Navbar siteConfig={data?.siteConfig} />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-28">
         {/* Back Link */}
@@ -231,7 +238,7 @@ export default async function BlogPost({ params }: PageProps) {
         </article>
       </div>
 
-      <Footer />
+      <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
     </main>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { projects } from "@/lib/data";
+import { projects as defaultProjects } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
 
-export function Projects() {
+export function Projects({ projects: customProjects }: { projects?: any[] } = {}) {
+  const projects = customProjects || defaultProjects;
   return (
     <section className="relative scroll-mt-16 pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern" id="projects">
       {/* Background shape */}
@@ -94,7 +95,7 @@ export function Projects() {
                     <div>
                       {/* Tech Stack Badges */}
                       <div className="flex flex-wrap gap-2 mt-5">
-                        {proj.tags?.map((tag) => (
+                        {proj.tags?.map((tag: string) => (
                           <span
                             key={tag}
                             className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded-lg bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
