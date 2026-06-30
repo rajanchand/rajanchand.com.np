@@ -236,7 +236,7 @@ const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 p-2">
+    <div className="flex flex-col xl:flex-row items-center gap-6 p-2">
       <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
         <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={radius} fill="none" stroke="var(--border)" strokeWidth={strokeWidth} className="opacity-40" />
@@ -272,19 +272,19 @@ const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]
           <span className="text-base font-extrabold text-[var(--foreground)]">{total}</span>
         </div>
       </div>
-      <div className="space-y-1 flex-1 w-full">
+      <div className="space-y-1 flex-1 w-full min-w-0">
         {data.map((item, idx) => {
           const percent = total > 0 ? Math.round((item.value / total) * 100) : 0;
           return (
-            <div key={idx} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
+            <div key={idx} className="flex items-center justify-between text-xs gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors[idx % colors.length] }} />
-                <span className="text-[var(--muted-foreground)] font-semibold truncate max-w-[110px]" title={item.label}>
+                <span className="text-[var(--muted-foreground)] font-semibold truncate block min-w-0" title={item.label}>
                   {item.label}
                 </span>
               </div>
-              <span className="font-bold text-[var(--foreground)] pl-2">
-                {item.value} <span className="text-[9px] text-[var(--muted-foreground)] font-normal">({percent}%)</span>
+              <span className="font-bold text-[var(--foreground)] shrink-0 pl-2">
+                {item.value} <span className="text-[9px] text-[var(--muted-foreground)] font-normal font-sans">({percent}%)</span>
               </span>
             </div>
           );
@@ -807,15 +807,15 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Referrers */}
-                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 flex flex-col justify-between">
+                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 flex flex-col justify-between min-w-0">
                           <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Traffic Referrers</h3>
                           <div className="space-y-3 flex-1 overflow-y-auto max-h-[140px] pr-1">
                             {analyticsData.topReferrers.slice(0, 4).map((ref: any, idx: number) => {
                               const percent = Math.round((ref.count / (analyticsData.totalVisits || 1)) * 100);
                               return (
-                                <div key={idx} className="flex items-center justify-between text-xs border-b border-[var(--glass-border)] pb-2">
-                                  <span className="text-[var(--muted-foreground)] font-semibold truncate max-w-[150px]">{ref.referrer}</span>
-                                  <span className="font-mono text-[var(--primary)] font-bold">{ref.count} ({percent}%)</span>
+                                <div key={idx} className="flex items-center justify-between text-xs border-b border-[var(--glass-border)] pb-2 gap-2 min-w-0">
+                                  <span className="text-[var(--muted-foreground)] font-semibold truncate block min-w-0 flex-1" title={ref.referrer}>{ref.referrer}</span>
+                                  <span className="font-mono text-[var(--primary)] font-bold shrink-0">{ref.count} ({percent}%)</span>
                                 </div>
                               );
                             })}
@@ -824,16 +824,16 @@ export default function AdminDashboard() {
                       </div>
 
                       {/* Top Visited paths list */}
-                      <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
+                      <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 min-w-0">
                         <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Top Visited Paths</h3>
                         <div className="space-y-3">
                           {analyticsData.topPages.slice(0, 5).map((page: any, idx: number) => {
                             const percent = Math.round((page.count / (analyticsData.totalVisits || 1)) * 100);
                             return (
                               <div key={idx} className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="font-mono text-[var(--primary)] truncate max-w-[200px]">{page.page}</span>
-                                  <span className="font-bold text-[var(--foreground)]">{page.count} views ({percent}%)</span>
+                                <div className="flex items-center justify-between text-xs gap-2 min-w-0">
+                                  <span className="font-mono text-[var(--primary)] truncate block min-w-0 flex-1" title={page.page}>{page.page}</span>
+                                  <span className="font-bold text-[var(--foreground)] shrink-0">{page.count} views ({percent}%)</span>
                                 </div>
                                 <div className="w-full h-1 bg-[var(--glass-border)] rounded-full overflow-hidden">
                                   <div className="h-full bg-[var(--primary)] rounded-full" style={{ width: `${percent}%` }} />
