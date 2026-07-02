@@ -109,6 +109,7 @@ const defaultCategoryConfig = {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Skills({ skills: customSkills }: { skills?: any[] } = {}) {
   const skills = customSkills || defaultSkills;
   // Group skills dynamically

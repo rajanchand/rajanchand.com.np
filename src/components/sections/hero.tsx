@@ -46,6 +46,7 @@ function TypingAnimation({ text }: { text: string }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}) {
   const siteConfig = customSiteConfig || defaultSiteConfig;
   return (

@@ -23,6 +23,7 @@ function formatDate(dateStr: string) {
   return `${formattedMonth} ${parseInt(day, 10)}, ${year}`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Articles({ blogPosts: customBlogPosts }: { blogPosts?: any[] } = {}) {
   const blogPosts = customBlogPosts || defaultBlogPosts;
   return (

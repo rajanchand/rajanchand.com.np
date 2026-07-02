@@ -11,6 +11,7 @@ interface CertificationItem {
   photo?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Certifications({ certifications: customCertifications }: { certifications?: any[] } = {}) {
   const certifications = customCertifications || defaultCertifications;
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);

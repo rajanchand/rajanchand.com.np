@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface NavbarProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   siteConfig?: any;
 }
 

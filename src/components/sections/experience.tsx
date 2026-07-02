@@ -52,6 +52,7 @@ const sortDescending = (a: ExperienceItem, b: ExperienceItem) => {
   return bYears.end - aYears.end;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Experience({ experience: customExperience }: { experience?: any[] } = {}) {
   const experience = customExperience || defaultExperience;
   // Separate work and education items dynamically with type casting and sort them in descending order (newest first)

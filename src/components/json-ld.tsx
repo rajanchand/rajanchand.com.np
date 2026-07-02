@@ -4,6 +4,7 @@ import staticData from "@/lib/data.json";
  * JSON-LD structured data for the homepage.
  * Renders Person + WebSite schemas for Google rich results / knowledge panel.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function HomeJsonLd({ siteConfig: siteConfigProp, socialLinks: socialLinksProp }: { siteConfig?: any; socialLinks?: any[] } = {}) {
   const config = siteConfigProp || staticData.siteConfig;
   const socials = socialLinksProp || staticData.socialLinks || [];
@@ -94,6 +95,7 @@ export function BlogPostJsonLd({
   description: string;
   datePublished: string;
   slug: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   siteConfig?: any;
 }) {
   const config = siteConfigProp || staticData.siteConfig;

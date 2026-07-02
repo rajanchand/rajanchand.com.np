@@ -34,7 +34,9 @@ const links = [
 ];
 
 interface FooterProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   siteConfig?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   socialLinks?: any[];
 }
 

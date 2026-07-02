@@ -5,6 +5,7 @@ import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Projects({ projects: customProjects }: { projects?: any[] } = {}) {
   const projects = customProjects || defaultProjects;
   return (
