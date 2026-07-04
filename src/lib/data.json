@@ -193,9 +193,9 @@
         "Wi-Fi",
         "Deployment",
         "Nokia",
-        "Dualband"
+        "Dual-Band"
       ],
-      "title": "Ignite ,Dual Band RouterbDeployment & Optimization",
+      "title": "Ignite Dual-Band Router Deployment & Optimization",
       "impact": [
         "Successfully deployed across 10,000+ customer premises",
         "Reduced Wi-Fi related customer complaints by 40%",
@@ -272,32 +272,16 @@
   ],
   "blogPosts": [
     {
+      "date": "2026-06-01",
       "slug": "zero-trust-network-access-isp-enterprise",
       "title": "Adopting Zero Trust Network Access (ZTNA) in ISP and Enterprise Infrastructure",
+      "content": "# Adopting Zero Trust Network Access (ZTNA) in ISP and Enterprise Infrastructure\n\nIn modern networking, the traditional perimeter-based security model—often described as 'castle-and-moat'—is no longer sufficient. Enterprise networks have expanded beyond physical office walls, driven by cloud-first architectures, distributed remote workforces, and dynamic endpoint environments. As a network supervisor leading large-scale operations, I have witnessed first-hand how legacy VPNs introduce severe security blindspots. The solution is migrating to **Zero Trust Network Access (ZTNA)**.\n\n## The Fallacy of Perimeter-Based VPNs\n\nLegacy Virtual Private Networks (VPNs) grant users broad network-level access once authenticated. This implicit trust model has major vulnerabilities:\n- **Lateral Movement**: Once an attacker compromises a single VPN endpoint, they gain visibility and routing paths to the entire internal subnet.\n- **Static Authentication**: Standard credentials or basic tokens are checked only at the initial tunnel establishment, ignoring continuous risk changes.\n- **Performance Bottlenecks**: Backhauling all traffic through a centralized VPN gateway degrades bandwidth and increases MTTR for network anomalies.\n\n## The Core Pillars of Zero Trust Architecture\n\nZero Trust operates on a simple, absolute rule: **Never Trust, Always Verify**. In an ISP or enterprise environment, this is achieved through five core pillars:\n\n1. **Identity Provider (IdP) Integration**: Binding user authentication with Multi-Factor Authentication (MFA) and Identity and Access Management (IAM) systems.\n2. **Device Posture Assessment**: Checking the health, OS patches, compliance, and active antivirus of the requesting client *before* and *during* the session.\n3. **Micro-segmentation**: Isolating network zones so that a compromise in Zone A (e.g., HR data) cannot impact Zone B (e.g., development subnets).\n4. **Adaptive Trust Engine**: Continuously scoring connection requests based on geolocation, anomalous traffic patterns, and user activity.\n5. **Secure Edge Gateways**: Leveraging distributed policy decision points to enforce rules closer to the user, reducing routing overhead.\n\n## Implementing Risk-Adaptive Authentication: A Prototype\n\nAs part of my MSc research in Information Technology at the University of the West of Scotland (UWS), I developed a prototype implementing **risk-based authentication** and **device fingerprinting**. The prototype captures device metadata (operating system, browser headers, screen resolution, active network hops) to compute a dynamic *risk score*. If the risk score exceeds defined thresholds—for instance, if an access request originates from an unusual country or an unpatched browser version—the system automatically triggers additional MFA challenges or completely restricts network access.\n\n## Conclusion\n\nTransitioning to Zero Trust is not merely about installing new hardware; it is a fundamental shift in network security culture. By treating every packet and every device as untrusted, ISPs and enterprise network managers can drastically reduce their threat surface area while delivering a faster, more reliable experience to their end-users.",
       "excerpt": "An in-depth analysis of migrating from perimeter-based VPN models to risk-adaptive Zero Trust framework models in modern carrier-grade networks.",
-      "date": "2026-06-01",
       "category": "Network Security",
-      "readTime": "8 min read",
-      "content": "# Adopting Zero Trust Network Access (ZTNA) in ISP and Enterprise Infrastructure\n\nIn modern networking, the traditional perimeter-based security model—often described as 'castle-and-moat'—is no longer sufficient. Enterprise networks have expanded beyond physical office walls, driven by cloud-first architectures, distributed remote workforces, and dynamic endpoint environments. As a network supervisor leading large-scale operations, I have witnessed first-hand how legacy VPNs introduce severe security blindspots. The solution is migrating to **Zero Trust Network Access (ZTNA)**.\n\n## The Fallacy of Perimeter-Based VPNs\n\nLegacy Virtual Private Networks (VPNs) grant users broad network-level access once authenticated. This implicit trust model has major vulnerabilities:\n- **Lateral Movement**: Once an attacker compromises a single VPN endpoint, they gain visibility and routing paths to the entire internal subnet.\n- **Static Authentication**: Standard credentials or basic tokens are checked only at the initial tunnel establishment, ignoring continuous risk changes.\n- **Performance Bottlenecks**: Backhauling all traffic through a centralized VPN gateway degrades bandwidth and increases MTTR for network anomalies.\n\n## The Core Pillars of Zero Trust Architecture\n\nZero Trust operates on a simple, absolute rule: **Never Trust, Always Verify**. In an ISP or enterprise environment, this is achieved through five core pillars:\n\n1. **Identity Provider (IdP) Integration**: Binding user authentication with Multi-Factor Authentication (MFA) and Identity and Access Management (IAM) systems.\n2. **Device Posture Assessment**: Checking the health, OS patches, compliance, and active antivirus of the requesting client *before* and *during* the session.\n3. **Micro-segmentation**: Isolating network zones so that a compromise in Zone A (e.g., HR data) cannot impact Zone B (e.g., development subnets).\n4. **Adaptive Trust Engine**: Continuously scoring connection requests based on geolocation, anomalous traffic patterns, and user activity.\n5. **Secure Edge Gateways**: Leveraging distributed policy decision points to enforce rules closer to the user, reducing routing overhead.\n\n## Implementing Risk-Adaptive Authentication: A Prototype\n\nAs part of my MSc research in Information Technology at the University of the West of Scotland (UWS), I developed a prototype implementing **risk-based authentication** and **device fingerprinting**. The prototype captures device metadata (operating system, browser headers, screen resolution, active network hops) to compute a dynamic *risk score*. If the risk score exceeds defined thresholds—for instance, if an access request originates from an unusual country or an unpatched browser version—the system automatically triggers additional MFA challenges or completely restricts network access.\n\n## Conclusion\n\nTransitioning to Zero Trust is not merely about installing new hardware; it is a fundamental shift in network security culture. By treating every packet and every device as untrusted, ISPs and enterprise network managers can drastically reduce their threat surface area while delivering a faster, more reliable experience to their end-users."
+      "readTime": "8 min read"
     }
   ],
   "experience": [
-    {
-      "tags": [
-        "Mathis",
-        "Biology",
-        "Chemistry"
-      ],
-      "type": "education",
-      "title": "Science-Higher secondary School",
-      "period": "2013-2015",
-      "bullets": [
-        "Key responsibility or accomplishment"
-      ],
-      "company": "Gorkha Secondary School",
-      "companyUrl": "https://gorkhagroup.org.np/gorkha-secondary-school/",
-      "description": "Role overview goes here."
-    },
     {
       "tags": [
         "Research",
@@ -309,8 +293,9 @@
       ],
       "type": "education",
       "title": "MSc Information Technology",
-      "period": "Current",
+      "period": "JAN 2025-May 2026",
       "company": "University of the West of Scotland",
+      "duration": "JAN 2025-May 2026",
       "companyUrl": "https://www.uws.ac.uk/",
       "description": "Advanced studies in information technology with focus on modern computing systems, digital innovation, and network security research."
     },
@@ -320,9 +305,9 @@
         "Team Leadership",
         "Escalation Design",
         "IPTV",
-        "Vendor coordinate",
-        "Issue esclated",
-        "Network desing",
+        "Vendor Coordination",
+        "Issue Escalated",
+        "Network Design",
         "Planning",
         "Customer support",
         "Team management"
@@ -350,7 +335,7 @@
         "Raisecom",
         "Nokia",
         "OLT configurations",
-        "Network desing",
+        "Network Design",
         "Planning",
         "Router",
         "Customer support"
@@ -391,8 +376,10 @@
     "name": "Rajan Prakash Chand",
     "email": "rajanchand48@gmail.com",
     "title": "Network Engineer & MSc IT Researcher",
+    "github": "https://github.com/rajanchand",
+    "linkedin": "https://www.linkedin.com/in/rajanprakashchand/",
     "location": "Scotland, UK",
-    "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/edit?usp=sharing",
+    "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/export?format=pdf",
     "shortName": "RC",
     "calendlyUrl": "https://calendly.com/rajanchand48/1",
     "description": "5+ years managing large-scale ISP infrastructure — networks trusted by 500,000+ users at WorldLink and Dish Media. Currently pursuing MSc IT at UWS, Scotland.",
@@ -401,9 +388,17 @@
   },
   "dissertions": [
     {
+      "year": "2026",
+      "title": "Thesis Title",
+      "author": "Rajan Prakash Chand",
+      "pdfUrl": "",
+      "abstract": "Abstract...",
+      "institution": "UWS, Scotland"
+    },
+    {
       "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
       "type": "Academic Research Paper",
-      "title": "Dissertartions",
+      "title": "Zero Trust Security in Remote Work Environments",
       "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
       "published": "May 2026",
       "websiteUrl": "https://zero-trust-security.org/login",
@@ -447,26 +442,49 @@
       "linkedIn": "https://www.linkedin.com/in/dr-james-smith-uws"
     }
   ],
+  "dissertations": [
+    {
+      "year": "2026",
+      "title": "Thesis Title",
+      "author": "Rajan Prakash Chand",
+      "pdfUrl": "",
+      "abstract": "Abstract...",
+      "institution": "UWS, Scotland"
+    },
+    {
+      "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
+      "type": "Academic Research Paper",
+      "title": "Dissertartions",
+      "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
+      "published": "May 2026",
+      "websiteUrl": "https://zero-trust-security.org/login",
+      "description": "Zero Trust Security in remote work environments ensures secure access by continuously validating user identity, device posture, and contextual risk, thereby reducing the attack surface compared to traditional perimeter-based models."
+    }
+  ],
   "certifications": [
     {
-      "title": "Cisco Certified Network Associate (CCNA)",
+      "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
+      "title": "DevOps",
+      "issuer": "TechAxis"
+    },
+    {
+      "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
+      "title": "Cybersecurity Awareness",
+      "issuer": "APNIC"
+    },
+    {
+      "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
+      "title": "NSE 1 Network Security Associate ",
+      "issuer": "Fortinite"
+    },
+    {
+      "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
+      "title": "Network Devices and Inital Configurations",
       "issuer": "Cisco"
     },
     {
-      "title": "MikroTik Certified Network Associate (MTCNA)",
-      "issuer": "MikroTik"
-    },
-    {
-      "title": "MikroTik Certified Routing Engineer (MTCRE)",
-      "issuer": "MikroTik"
-    },
-    {
-      "title": "Zero Trust Security Architecture Professional",
-      "issuer": "Palo Alto Networks"
-    },
-    {
-      "title": "Juniper Networks Certified Associate (JNCIA-Junos)",
-      "issuer": "Juniper Networks"
+      "title": "",
+      "issuer": ""
     }
   ]
 }

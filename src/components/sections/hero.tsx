@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { siteConfig as defaultSiteConfig } from "@/lib/data";
 import { Mail, FileText } from "lucide-react";
 import Image from "next/image";
@@ -70,18 +70,12 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
           {/* Right Column — Intro Text */}
           <div className="w-full lg:w-2/3 text-left">
             <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
-              <span className="sr-only">Hi, I&apos;m {siteConfig.name}!</span>
               <TypingAnimation text={`${siteConfig.name}!`} />
             </h1>
 
             <div className="space-y-6">
               <p className="text-base text-gray-600 dark:text-slate-400 text-justify leading-relaxed">
-                Highly motivated Network and IT Support Engineer with over 4 years of hands-on experience supporting ISP and enterprise networks, specializing in LAN/WAN, routing, switching, firewalls, VPNs, and wireless infrastructure. Promoted from L1 Technical Support to Technical Supervisor at WorldLink Communications, leading outdoor network operations, vendor escalations, and incident response. Proven ability to reduce Mean Time to Detect (MTTD) and Mean Time to Resolve (MTTR), produce clear technical documentation, and effectively communicate with technical and non-technical stakeholders. Currently pursuing an MSc in Information Technology, with hands-on research in Zero Trust Security adoption, including a prototype implementing risk-based authentication and device fingerprinting.
-                <br />
-                <br />
-                <span className="text-sm font-medium text-gray-500 dark:text-slate-500">
-                  Feel free to read and share. 🙂 <em>Enjoy 📖 !</em>
-                </span>
+                Network Engineer with 5+ years building and operating large-scale ISP infrastructure at WorldLink Communications and Dish Media — supporting 500,000+ users across redundant LAN/WAN, routing, switching, and wireless systems. Currently completing MSc IT at the University of the West of Scotland, with research focused on Zero Trust Security architecture and risk-based authentication in enterprise environments.
               </p>
 
               {/* Action Buttons to match subashcs layout */}
@@ -96,9 +90,7 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
                 </a>
                 <a
                   className="inline-flex items-center justify-center rounded-md shadow-md border-gray-400 dark:border-slate-500 border bg-transparent font-medium text-center text-sm text-gray-700 dark:text-slate-300 py-3 px-6 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:border-gray-600 dark:hover:border-slate-800 transition duration-200 cursor-pointer w-full sm:w-auto hover:scale-105"
-                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`mailto:${siteConfig.email}`}
                 >
                   <Mail className="w-4 h-4 mr-2" /> Message
                 </a>

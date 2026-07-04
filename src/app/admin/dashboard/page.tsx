@@ -1760,7 +1760,7 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newCert = { name: "Cert Name", issuer: "Cisco", date: "2026", credentialId: "", url: "" };
+                        const newCert = { title: "Cert Name", name: "Cert Name", issuer: "Cisco", date: "2026", credentialId: "", url: "" };
                         setData((prev: any) => ({ ...prev, certifications: [newCert, ...prev.certifications] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
@@ -1787,9 +1787,10 @@ export default function AdminDashboard() {
                             <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Certification Title</label>
                             <input
                               type="text"
-                              value={cert.name || ""}
+                              value={cert.title || cert.name || ""}
                               onChange={(e) => {
                                 const updated = [...data.certifications];
+                                updated[idx].title = e.target.value;
                                 updated[idx].name = e.target.value;
                                 setData((prev: any) => ({ ...prev, certifications: updated }));
                               }}

@@ -12,7 +12,7 @@ export default function Loading() {
             <Sparkles className="w-8 h-8 text-white animate-spin" style={{ animationDuration: '6s' }} />
           </div>
         </div>
-        <p className="text-xs font-bold tracking-[0.25em] uppercase text-[var(--muted-foreground)] font-mono">Loading telemetry...</p>
+        <p className="text-xs font-bold tracking-[0.25em] uppercase text-[var(--muted-foreground)] font-mono">Loading...</p>
       </div>
     </div>
   );

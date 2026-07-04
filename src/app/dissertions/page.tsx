@@ -12,8 +12,8 @@ import {
   GraduationCap, 
   Calendar, 
   User, 
-  Globe, 
-  Github 
+  Globe,
+  GitBranch
 } from "lucide-react";
 import Link from "next/link";
 
@@ -147,7 +147,8 @@ export default async function DissertionsListing() {
                       {doc.pdfUrl && doc.pdfUrl !== "#" && doc.pdfUrl !== "" && (
                         <a
                           href={doc.pdfUrl}
-                          target="_blank; rel=noopener noreferrer"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
                         >
                           View Document
@@ -175,7 +176,7 @@ export default async function DissertionsListing() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
                         >
-                          <Github className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                          <GitBranch className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           GitHub
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
