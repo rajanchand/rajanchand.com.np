@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect } from "react";
 import { updatePortfolioData } from "@/lib/data";
 
 interface PortfolioSyncProps {
@@ -8,11 +9,9 @@ interface PortfolioSyncProps {
 }
 
 export function PortfolioSync({ data }: PortfolioSyncProps) {
-  // We run this in the constructor/render phase so it updates client references
-  // immediately during hydration before other components render!
-  if (data && typeof window !== "undefined") {
-    updatePortfolioData(data);
-  }
+  useLayoutEffect(() => {
+    if (data) updatePortfolioData(data);
+  }, [data]);
 
   return null;
 }

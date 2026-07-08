@@ -23,10 +23,18 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!docsOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDocsOpen(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [docsOpen]);
 
   const isBlog = pathname?.startsWith("/blog") || pathname?.startsWith("/dissertions") || pathname?.startsWith("/admin");
 
@@ -34,7 +42,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     <header
       className={`fixed top-0 left-0 right-0 z-40 flex-none mx-auto w-full transition-all duration-300 ${
         scrolled
-          ? "bg-white/95 dark:bg-zinc-900/95 border-b border-gray-150 dark:border-zinc-800/80 shadow-md md:backdrop-blur-sm"
+          ? "bg-white/95 dark:bg-zinc-900/95 border-b border-gray-200 dark:border-zinc-800/80 shadow-md md:backdrop-blur-sm"
           : "bg-white md:bg-white/90 dark:bg-zinc-900 dark:md:bg-zinc-900/90 md:backdrop-blur-sm"
       }`}
       id="header"
@@ -91,8 +99,9 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               <Link
                 className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
                 href={isBlog ? "/#home" : "#home"}
-                onClick={() => {
+                onClick={(e) => {
                   if (!isBlog) {
+                    e.preventDefault();
                     document.querySelector("#home")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
@@ -104,8 +113,9 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               <Link
                 className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
                 href={isBlog ? "/#skills" : "#skills"}
-                onClick={() => {
+                onClick={(e) => {
                   if (!isBlog) {
+                    e.preventDefault();
                     document.querySelector("#skills")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
@@ -117,8 +127,9 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               <Link
                 className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
                 href={isBlog ? "/#experience" : "#experience"}
-                onClick={() => {
+                onClick={(e) => {
                   if (!isBlog) {
+                    e.preventDefault();
                     document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
@@ -130,8 +141,9 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               <Link
                 className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
                 href={isBlog ? "/#projects" : "#projects"}
-                onClick={() => {
+                onClick={(e) => {
                   if (!isBlog) {
+                    e.preventDefault();
                     document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
@@ -154,12 +166,17 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               onMouseEnter={() => setDocsOpen(true)}
               onMouseLeave={() => setDocsOpen(false)}
             >
-              <button className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out gap-1 cursor-pointer">
+              <button
+                onClick={() => setDocsOpen((prev) => !prev)}
+                aria-expanded={docsOpen}
+                aria-haspopup="true"
+                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out gap-1 cursor-pointer"
+              >
                 Documents
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${docsOpen ? "rotate-180 text-blue-600" : ""}`} />
               </button>
               {docsOpen && (
-                <ul className="absolute top-full left-0 bg-white dark:bg-zinc-900 border border-gray-150 dark:border-zinc-800 rounded-lg py-1.5 shadow-xl min-w-[180px] z-50">
+                <ul role="menu" className="absolute top-full left-0 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg py-1.5 shadow-xl min-w-[180px] z-50">
                   <li>
                     <a
                       href={siteConfig.resumeUrl}

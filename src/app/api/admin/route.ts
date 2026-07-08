@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 async function isAuthenticated() {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin_session");
-  return session?.value === "rajan-portfolio-secure-token-2026";
+  return session?.value === (process.env.ADMIN_SESSION_SECRET || "rajan-portfolio-secure-token-2026");
 }
 
 const dataFilePath = path.join(process.cwd(), "src/lib/data.json");

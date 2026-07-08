@@ -4,6 +4,21 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+// In-memory rate limiter: max 10 tracking calls per IP per minute
+const trackAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = trackAttempts.get(ip);
+  if (!record || now > record.resetAt) {
+    trackAttempts.set(ip, { count: 1, resetAt: now + 60_000 });
+    return false;
+  }
+  if (record.count >= 10) return true;
+  record.count += 1;
+  return false;
+}
+
 // Simple User-Agent parser
 function parseUserAgent(ua: string) {
   const result = {
@@ -78,6 +93,11 @@ export async function POST(request: Request) {
   try {
     const headersList = await headers();
     const ip = getClientIP(headersList);
+
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ ok: true }, { status: 200 });
+    }
+
     const userAgent = headersList.get("user-agent") || "";
 
     let body: { pageUrl?: string; referrer?: string } = {};
@@ -103,7 +123,7 @@ export async function POST(request: Request) {
       // ip-api.com: request status + all useful fields for precise location
       // district gives sub-city accuracy; zip helps refine; isp/org for network name
       const geoRes = await fetch(
-        `http://ip-api.com/json/${ip}?fields=status,city,country,regionName,district,zip,lat,lon,isp,org,as`,
+        `https://ip-api.com/json/${ip}?fields=status,city,country,regionName,district,zip,lat,lon,isp,org,as`,
         { signal: AbortSignal.timeout(3000) }
       );
       if (geoRes.ok) {

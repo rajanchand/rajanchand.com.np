@@ -92,7 +92,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
           {/* Column 1 — Work Experience */}
           <div className="space-y-8">
             <ScrollReveal>
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-150 dark:border-slate-800/80 pb-3">
+              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-200 dark:border-slate-800/80 pb-3">
                 <span className="w-1.5 h-6 bg-blue-500 rounded-full" />
                 Professional Work Experience
               </h3>
@@ -114,28 +114,34 @@ export function Experience({ experience: customExperience }: { experience?: any[
                       </span>
                       
                       {/* Job Title */}
-                      <h4 className="text-lg font-extrabold text-slate-850 dark:text-slate-100 font-[var(--font-display)] leading-snug">
+                      <h4 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 font-[var(--font-display)] leading-snug">
                         {item.title}
                       </h4>
                       
                       {/* Company Name */}
-                      <a
-                        href={item.companyUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                      >
-                        {item.company}
-                      </a>
-                      
+                      {item.companyUrl ? (
+                        <a
+                          href={item.companyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                        >
+                          {item.company}
+                        </a>
+                      ) : (
+                        <span className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                          {item.company}
+                        </span>
+                      )}
+
                       {/* Description */}
-                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-450 leading-relaxed max-w-2xl mb-4 text-justify">
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mb-4 text-justify">
                         {item.description}
                       </p>
 
                       {/* Bullet highlights */}
                       {item.bullets && item.bullets.length > 0 && (
-                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-450">
+                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-400">
                           {item.bullets.map((bullet, j) => (
                             <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 shrink-0 mt-2" />
@@ -190,28 +196,34 @@ export function Experience({ experience: customExperience }: { experience?: any[
                       </span>
                       
                       {/* Course/Degree Title */}
-                      <h4 className="text-lg font-extrabold text-slate-850 dark:text-slate-100 font-[var(--font-display)] leading-snug">
+                      <h4 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 font-[var(--font-display)] leading-snug">
                         {item.title}
                       </h4>
                       
                       {/* Institution Name */}
-                      <a
-                        href={item.companyUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
-                      >
-                        {item.company}
-                      </a>
+                      {item.companyUrl ? (
+                        <a
+                          href={item.companyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                        >
+                          {item.company}
+                        </a>
+                      ) : (
+                        <span className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                          {item.company}
+                        </span>
+                      )}
                       
                       {/* Description */}
-                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-450 leading-relaxed max-w-2xl mb-4 text-justify">
+                      <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mb-4 text-justify">
                         {item.description}
                       </p>
 
                       {/* Bullet highlights */}
                       {item.bullets && item.bullets.length > 0 && (
-                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-450">
+                        <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-400">
                           {item.bullets.map((bullet, j) => (
                             <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
                               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/80 shrink-0 mt-2" />

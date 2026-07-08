@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { siteConfig as defaultSiteConfig, socialLinks as defaultSocialLinks } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { Mail } from "lucide-react";
@@ -43,14 +42,6 @@ interface FooterProps {
 export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocialLinks }: FooterProps = {}) {
   const siteConfig = customSiteConfig || defaultSiteConfig;
   const socialLinks = customSocialLinks || defaultSocialLinks;
-  const [currentYear, setCurrentYear] = useState(2026);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentYear(new Date().getFullYear());
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-zinc-950 z-10 relative">
@@ -122,7 +113,7 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
           </ul>
 
           <div className="text-xs text-gray-500 mr-4 dark:text-slate-400">
-            &copy; Rajan Prakash Chand | {currentYear}
+            &copy; Rajan Prakash Chand | <span suppressHydrationWarning>{new Date().getFullYear()}</span>
           </div>
         </div>
       </div>

@@ -95,7 +95,7 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
                   <Mail className="w-4 h-4 mr-2" /> Message
                 </a>
                 <a
-                  className="inline-flex items-center justify-center rounded-md shadow-md border border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-zinc-150 dark:hover:bg-zinc-800 font-semibold text-center text-sm text-slate-700 dark:text-slate-200 py-3 px-6 hover:-translate-y-0.5 transition duration-200 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md shadow-md border border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold text-center text-sm text-slate-700 dark:text-slate-200 py-3 px-6 hover:-translate-y-0.5 transition duration-200 cursor-pointer w-full sm:w-auto"
                   href="#projects"
                   onClick={(e) => {
                     e.preventDefault();

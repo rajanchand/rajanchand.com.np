@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 async function isAuthenticated() {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin_session");
-  return session?.value === "rajan-portfolio-secure-token-2026";
+  return session?.value === (process.env.ADMIN_SESSION_SECRET || "rajan-portfolio-secure-token-2026");
 }
 
 export async function GET(request: Request) {

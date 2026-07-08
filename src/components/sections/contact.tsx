@@ -54,7 +54,7 @@ export function Contact() {
                     </div>
                     <div>
                       <span className="text-xs text-[var(--muted-foreground)] block">Email</span>
-                      <a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contactEmail)}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
+                      <a href={`mailto:${contactEmail}`} className="text-sm font-medium hover:text-[var(--accent)] transition-colors">
                         {contactEmail}
                       </a>
                     </div>

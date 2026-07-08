@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import { blogPosts, siteConfig, loadPortfolioData } from "@/lib/data";
+
+export async function generateStaticParams() {
+  const data = await loadPortfolioData();
+  const posts = (data?.blogPosts || blogPosts) as { slug: string }[];
+  return posts.map((post) => ({ slug: post.slug }));
+}
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
@@ -228,7 +234,7 @@ export default async function BlogPost({ params }: PageProps) {
           {/* Share / Footer */}
           <div className="mt-12 pt-8 border-t border-[var(--glass-border)] flex flex-wrap items-center justify-between gap-4">
             <div className="text-xs text-[var(--muted-foreground)]">
-              Published by <span className="font-semibold text-[var(--foreground)]">{siteConfig.name}</span>
+              Published by <span className="font-semibold text-[var(--foreground)]">{data?.siteConfig?.name || siteConfig.name}</span>
             </div>
             <button className="inline-flex items-center gap-2 px-4 py-2 glass rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 transition-all cursor-pointer">
               <Share2 className="w-3.5 h-3.5" />

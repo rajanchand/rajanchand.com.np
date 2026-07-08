@@ -17,21 +17,25 @@ export function Certifications({ certifications: customCertifications }: { certi
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const typedCertifications = certifications as CertificationItem[];
 
-  // Dismiss lightbox with Escape key
+  // Lock body scroll and handle Escape key when lightbox is open
   useEffect(() => {
     if (!selectedPhoto) return;
+    document.body.style.overflow = "hidden";
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelectedPhoto(null);
     };
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKey);
+    };
   }, [selectedPhoto]);
 
   return (
     <section className={`relative pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern ${selectedPhoto ? 'z-[60]' : 'z-10'}`} id="certifications">
       {/* Background shape */}
       <div className="absolute inset-0 bg-blue-50/10 dark:bg-zinc-950/10 pointer-events-none mb-32" aria-hidden="true" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <ScrollReveal>
@@ -60,10 +64,11 @@ export function Certifications({ certifications: customCertifications }: { certi
             const hasPhoto = !!cert.photo;
             return (
               <ScrollReveal key={i} delay={i * 0.05}>
-                <div
+                <button
+                  type="button"
                   onClick={() => hasPhoto && setSelectedPhoto(cert.photo ?? null)}
-                  className={`group relative flex items-center gap-4 p-5 rounded-[20px] bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-blue-200/80 dark:hover:border-blue-900/50 hover:shadow-[0_15px_35px_rgba(59,130,246,0.04)] dark:hover:shadow-[0_15px_35px_rgba(59,130,246,0.1)] transition-all duration-400 ease-out select-none ${
-                    hasPhoto ? "cursor-pointer" : ""
+                  className={`group relative flex items-center gap-4 p-5 rounded-[20px] bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-blue-200/80 dark:hover:border-blue-900/50 hover:shadow-[0_15px_35px_rgba(59,130,246,0.04)] dark:hover:shadow-[0_15px_35px_rgba(59,130,246,0.1)] transition-all duration-300 ease-out select-none w-full text-left ${
+                    hasPhoto ? "cursor-pointer" : "cursor-default"
                   }`}
                 >
                   {/* Subtle Verify Badge on Hover */}
@@ -88,7 +93,7 @@ export function Certifications({ certifications: customCertifications }: { certi
                       {cert.issuer}
                     </p>
                   </div>
-                </div>
+                </button>
               </ScrollReveal>
             );
           })}
@@ -98,7 +103,7 @@ export function Certifications({ certifications: customCertifications }: { certi
       {/* Modern Lightbox Modal for certificate view */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <div
@@ -106,6 +111,8 @@ export function Certifications({ certifications: customCertifications }: { certi
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
+              aria-label="Close certificate"
               onClick={() => setSelectedPhoto(null)}
               className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 text-white rounded-full transition-colors cursor-pointer"
             >

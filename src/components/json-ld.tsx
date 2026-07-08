@@ -67,13 +67,13 @@ export function HomeJsonLd({ siteConfig: siteConfigProp, socialLinks: socialLink
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(personSchema),
+          __html: JSON.stringify(personSchema).replace(/<\/script>/gi, "<\\/script>"),
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema),
+          __html: JSON.stringify(websiteSchema).replace(/<\/script>/gi, "<\\/script>"),
         }}
       />
     </>
@@ -128,7 +128,7 @@ export function BlogPostJsonLd({
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(articleSchema),
+        __html: JSON.stringify(articleSchema).replace(/<\/script>/gi, "<\\/script>"),
       }}
     />
   );

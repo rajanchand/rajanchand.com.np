@@ -28,18 +28,22 @@ export function Testimonials() {
                 <div className="flex items-center gap-3 mt-auto">
                   {/* Avatar placeholder */}
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-bold shrink-0">
-                    {t.author.split(" ").map((n) => n[0]).join("")}
+                    {(t.author || "?").split(" ").map((n: string) => n[0] || "").join("")}
                   </div>
                   <div className="min-w-0">
-                    <a
-                      href={t.linkedIn}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-semibold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1"
-                    >
-                      {t.author}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                    {t.linkedIn ? (
+                      <a
+                        href={t.linkedIn}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1"
+                      >
+                        {t.author}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-sm font-semibold">{t.author}</span>
+                    )}
                     <p className="text-xs text-[var(--muted-foreground)] truncate">
                       {t.role}
                     </p>

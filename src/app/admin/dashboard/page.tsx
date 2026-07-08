@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Save,
@@ -76,6 +76,15 @@ const AreaChart = ({ data }: { data: { label: string; visits: number; unique: nu
     return (
       <div className="h-60 flex items-center justify-center text-xs text-[var(--muted-foreground)]">
         No telemetry records in range.
+      </div>
+    );
+  }
+
+  if (data.length === 1) {
+    return (
+      <div className="h-60 flex flex-col items-center justify-center text-xs text-[var(--muted-foreground)] gap-2">
+        <p className="font-bold text-[var(--foreground)]">{data[0].label}</p>
+        <p>{data[0].visits} visit{data[0].visits !== 1 ? "s" : ""} · {data[0].unique} unique</p>
       </div>
     );
   }
@@ -416,22 +425,26 @@ export default function AdminDashboard() {
           return;
         }
         const jsonData = await res.json();
-        if (jsonData) {
-          const dissList = jsonData.dissertations || jsonData.dissertions || [];
-          jsonData.dissertations = dissList;
-          jsonData.dissertions = dissList;
+        if (!jsonData || !jsonData.siteConfig) {
+          console.error("Admin API returned invalid data:", jsonData?.error || "missing siteConfig");
+          setLoading(false);
+          return;
         }
+        const dissList = jsonData.dissertations || jsonData.dissertions || [];
+        jsonData.dissertations = dissList;
+        jsonData.dissertions = dissList;
         setData(jsonData);
         setLoading(false);
       } catch (err) {
         console.error("Error loading admin data:", err);
+        setLoading(false);
       }
     }
     loadData();
   }, [router]);
 
   const handleLogout = async () => {
-    document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin");
   };
 
@@ -454,7 +467,7 @@ export default function AdminDashboard() {
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e: any) => e.map((val: string) => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+      [headers.join(","), ...rows.map((e: any) => e.map((val: any) => `"${String(val ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -878,9 +891,8 @@ export default function AdminDashboard() {
                                 const isExpanded = !!expandedRows[idx];
 
                                 return (
-                                  <>
+                                  <React.Fragment key={idx}>
                                     <tr
-                                      key={idx}
                                       onClick={() => toggleRow(idx)}
                                       className="hover:bg-[var(--primary)]/5 transition-colors cursor-pointer group"
                                     >
@@ -959,7 +971,7 @@ export default function AdminDashboard() {
                                         </td>
                                       </tr>
                                     )}
-                                  </>
+                                  </React.Fragment>
                                 );
                               })}
                             </tbody>
@@ -1589,54 +1601,70 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newCat = { category: "Skills Domain", items: ["Skill Item"] };
-                        setData((prev: any) => ({ ...prev, skills: [...prev.skills, newCat] }));
+                        const newSkill = { icon: "Cpu", name: "New Skill", category: "General" };
+                        setData((prev: any) => ({ ...prev, skills: [...prev.skills, newSkill] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Domain Group
+                      <Plus className="w-3.5 h-3.5" /> Add Skill
                     </button>
                   </div>
 
-                  <div className="space-y-6">
-                    {data.skills.map((cat: any, idx: number) => (
-                      <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {data.skills.map((skill: any, idx: number) => (
+                      <div key={idx} className="p-4 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-3 relative">
                         <button
                           onClick={() => {
                             const updated = data.skills.filter((_: any, i: number) => i !== idx);
                             setData((prev: any) => ({ ...prev, skills: updated }));
                           }}
-                          className="absolute top-4 right-4 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                          className="absolute top-3 right-3 p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
 
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Skills Category Title</label>
-                          <input
-                            type="text"
-                            value={cat.category || ""}
-                            onChange={(e) => {
-                              const updated = [...data.skills];
-                              updated[idx].category = e.target.value;
-                              setData((prev: any) => ({ ...prev, skills: updated }));
-                            }}
-                            className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs font-bold text-[var(--foreground)] focus:outline-none"
-                          />
+                        <div className="grid grid-cols-2 gap-3 pr-8">
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Icon (lucide name)</label>
+                            <input
+                              type="text"
+                              value={skill.icon || ""}
+                              onChange={(e) => {
+                                const updated = [...data.skills];
+                                updated[idx] = { ...updated[idx], icon: e.target.value };
+                                setData((prev: any) => ({ ...prev, skills: updated }));
+                              }}
+                              className="w-full px-3 py-1.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-xs text-[var(--foreground)] focus:outline-none"
+                              placeholder="Cpu"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Category</label>
+                            <input
+                              type="text"
+                              value={skill.category || ""}
+                              onChange={(e) => {
+                                const updated = [...data.skills];
+                                updated[idx] = { ...updated[idx], category: e.target.value };
+                                setData((prev: any) => ({ ...prev, skills: updated }));
+                              }}
+                              className="w-full px-3 py-1.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-xs text-[var(--foreground)] focus:outline-none"
+                              placeholder="Networking"
+                            />
+                          </div>
                         </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Skills Array (comma-separated)</label>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Skill Name</label>
                           <input
                             type="text"
-                            value={cat.items ? cat.items.join(", ") : ""}
+                            value={skill.name || ""}
                             onChange={(e) => {
                               const updated = [...data.skills];
-                              updated[idx].items = e.target.value.split(",").map((s) => s.trim());
+                              updated[idx] = { ...updated[idx], name: e.target.value };
                               setData((prev: any) => ({ ...prev, skills: updated }));
                             }}
-                            className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
-                            placeholder="Core routing, BGP..."
+                            className="w-full px-3 py-1.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-xs font-bold text-[var(--foreground)] focus:outline-none"
+                            placeholder="Cisco Routing"
                           />
                         </div>
                       </div>
@@ -1655,7 +1683,7 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newBlog = { title: "Draft Blog", slug: "draft-slug", date: new Date().toLocaleDateString("en-US"), excerpt: "Excerpt...", content: "Content...", tags: ["General"] };
+                        const newBlog = { title: "Draft Blog", slug: "draft-slug", date: new Date().toISOString().split("T")[0], category: "Network Engineering", readTime: "5 min read", excerpt: "Excerpt...", content: "Content...", tags: ["General"] };
                         setData((prev: any) => ({ ...prev, blogPosts: [newBlog, ...prev.blogPosts] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
@@ -1705,9 +1733,9 @@ export default function AdminDashboard() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Date</label>
+                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Date (YYYY-MM-DD)</label>
                             <input
-                              type="text"
+                              type="date"
                               value={blog.date || ""}
                               onChange={(e) => {
                                 const updated = [...data.blogPosts];
@@ -1715,6 +1743,34 @@ export default function AdminDashboard() {
                                 setData((prev: any) => ({ ...prev, blogPosts: updated }));
                               }}
                               className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Category</label>
+                            <input
+                              type="text"
+                              value={blog.category || ""}
+                              onChange={(e) => {
+                                const updated = [...data.blogPosts];
+                                updated[idx].category = e.target.value;
+                                setData((prev: any) => ({ ...prev, blogPosts: updated }));
+                              }}
+                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              placeholder="Network Engineering"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)]">Read Time</label>
+                            <input
+                              type="text"
+                              value={blog.readTime || ""}
+                              onChange={(e) => {
+                                const updated = [...data.blogPosts];
+                                updated[idx].readTime = e.target.value;
+                                setData((prev: any) => ({ ...prev, blogPosts: updated }));
+                              }}
+                              className="w-full px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none"
+                              placeholder="5 min read"
                             />
                           </div>
                           <div className="md:col-span-3 space-y-1">
