@@ -1,20 +1,27 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { supabase } from "@/lib/supabase";
+import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { serverError } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
-// Helper to check authentication
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  return session?.value === (process.env.ADMIN_SESSION_SECRET || "rajan-portfolio-secure-token-2026");
-}
+const analyticsRateLimiter = createRateLimiter({ max: 60, windowMs: 60 * 1000 });
 
 export async function GET(request: Request) {
   try {
-    if (!(await isAuthenticated())) {
+    if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const clientIp = getClientIp(await headers());
+    const rateCheck = analyticsRateLimiter(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -54,8 +61,7 @@ export async function GET(request: Request) {
     const { data: visitors, error } = await query;
 
     if (error) {
-      console.error("Analytics query error:", error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return serverError("Analytics query error:", error);
     }
 
     const visitorList = visitors || [];
@@ -224,7 +230,6 @@ export async function GET(request: Request) {
       recentVisitors: visitorList.slice(0, 50), // Last 50 visitors
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return serverError("Analytics GET error:", error);
   }
 }

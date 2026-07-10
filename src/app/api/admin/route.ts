@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import fs from "fs";
 import path from "path";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
-
-// Helper to check authentication
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  return session?.value === (process.env.ADMIN_SESSION_SECRET || "rajan-portfolio-secure-token-2026");
-}
+import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { sanitizeObject } from "@/lib/sanitize";
+import { serverError } from "@/lib/api-response";
 
 const dataFilePath = path.join(process.cwd(), "src/lib/data.json");
+const adminRateLimiter = createRateLimiter({ max: 30, windowMs: 60 * 1000 });
+
+async function checkRateLimit() {
+  const clientIp = getClientIp(await headers());
+  return adminRateLimiter(clientIp);
+}
 
 export async function GET() {
   try {
-    if (!(await isAuthenticated())) {
+    if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateCheck = await checkRateLimit();
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
+      );
     }
 
     // Try fetching from Supabase with safe try-catch wrapper
@@ -57,14 +68,11 @@ export async function GET() {
     // Auto-seed Supabase if table exists but is empty (wrapped in try-catch)
     if (!dbError && !dbData) {
       try {
-        console.log("Auto-seeding Supabase in GET admin API...");
         const { error: seedError } = await supabase
           .from("portfolio")
           .insert({ id: 1, content: localData });
         if (seedError) {
           console.error("Auto-seeding failed:", seedError.message);
-        } else {
-          console.log("Auto-seeding succeeded!");
         }
       } catch (seedErr: unknown) {
         const error = seedErr as Error;
@@ -74,15 +82,22 @@ export async function GET() {
 
     return NextResponse.json(localData);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return serverError("Admin GET error:", error);
   }
 }
 
 export async function POST(request: Request) {
   try {
-    if (!(await isAuthenticated())) {
+    if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateCheck = await checkRateLimit();
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
+      );
     }
 
     const updatedData = await request.json();
@@ -90,32 +105,6 @@ export async function POST(request: Request) {
     // Validate the incoming JSON is sound
     if (!updatedData.siteConfig || !updatedData.experience || !updatedData.projects) {
       return NextResponse.json({ error: "Invalid data structure" }, { status: 400 });
-    }
-
-    // Input sanitization to prevent XSS (recursive stripper)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function sanitizeObject(obj: any): any {
-      if (!obj) return obj;
-      if (typeof obj === "string") {
-        return obj
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-          .replace(/javascript:/gi, "")
-          .replace(/on\w+\s*=/gi, "");
-      }
-      if (Array.isArray(obj)) {
-        return obj.map(item => sanitizeObject(item));
-      }
-      if (typeof obj === "object") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sanitized: any = {};
-        for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            sanitized[key] = sanitizeObject(obj[key]);
-          }
-        }
-        return sanitized;
-      }
-      return obj;
     }
 
     const sanitizedData = sanitizeObject(updatedData);
@@ -174,13 +163,12 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ 
-      success: !dbError, 
-      message 
+    return NextResponse.json({
+      success: !dbError,
+      message
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return serverError("Admin POST error:", error);
   }
 }
 

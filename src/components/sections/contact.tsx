@@ -1,29 +1,65 @@
 "use client";
 
-import { siteConfig, socialLinks } from "@/lib/data";
+import { useState } from "react";
+import { siteConfig as defaultSiteConfig, socialLinks as defaultSocialLinks } from "@/lib/data";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { Send, Mail, MapPin, Globe, Calendar } from "lucide-react";
+import { Send, Mail, MapPin, Globe, Calendar, CheckCircle, ShieldAlert } from "lucide-react";
 import { getIcon } from "@/lib/icons";
 
-export function Contact() {
+interface ContactProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  siteConfig?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  socialLinks?: any[];
+}
+
+export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocialLinks }: ContactProps = {}) {
+  const siteConfig = customSiteConfig || defaultSiteConfig;
+  const socialLinks = customSocialLinks || defaultSocialLinks;
   const contactEmail = siteConfig.email || "rajanchand48@gmail.com";
 
-  // Build Gmail compose URL with pre-filled fields
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const name = (formData.get("name") as string) || "";
-    const email = (formData.get("email") as string) || "";
-    const subject = (formData.get("subject") as string) || "";
-    const message = (formData.get("message") as string) || "";
 
-    const body = `Hi Rajan,\n\n${message}\n\n---\nFrom: ${name}\nEmail: ${email}`;
+    const payload = {
+      name: (formData.get("name") as string) || "",
+      email: (formData.get("email") as string) || "",
+      subject: (formData.get("subject") as string) || "",
+      message: (formData.get("message") as string) || "",
+      // Honeypot — hidden from real visitors, bots tend to fill every field
+      company: (formData.get("company") as string) || "",
+    };
 
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contactEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
 
-    window.open(gmailUrl, "_blank", "noopener,noreferrer");
+      if (data.success) {
+        setSuccess(true);
+        form.reset();
+        setTimeout(() => setSuccess(false), 6000);
+      } else {
+        setError(data.error || "Couldn't send your message. Please try again.");
+      }
+    } catch {
+      setError("Couldn't send your message. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -115,7 +151,16 @@ export function Contact() {
               </div>
 
               {/* Right — Form */}
-              <form onSubmit={handleSendMessage} className="flex flex-col gap-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {/* Honeypot — invisible to real visitors, bots fill every field */}
+                <input
+                  type="text"
+                  name="company"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] w-px h-px opacity-0"
+                />
                 <div>
                   <input
                     type="text"
@@ -123,7 +168,8 @@ export function Contact() {
                     id="contact-name"
                     placeholder="Your Name"
                     required
-                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                    disabled={loading}
+                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
@@ -133,7 +179,8 @@ export function Contact() {
                     id="contact-email"
                     placeholder="Your Email"
                     required
-                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                    disabled={loading}
+                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
@@ -142,7 +189,8 @@ export function Contact() {
                     name="subject"
                     id="contact-subject"
                     placeholder="Subject"
-                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors"
+                    disabled={loading}
+                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
@@ -151,19 +199,37 @@ export function Contact() {
                     id="contact-message"
                     placeholder="Your Message"
                     required
+                    disabled={loading}
                     rows={5}
-                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors resize-y min-h-[120px]"
+                    minLength={10}
+                    className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors resize-y min-h-[120px] disabled:opacity-60"
                   />
                 </div>
+
+                {error && (
+                  <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3 text-sm text-rose-500">
+                    <ShieldAlert className="w-5 h-5 shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500">
+                    <CheckCircle className="w-5 h-5 shrink-0" />
+                    <span>Message sent! I&apos;ll get back to you soon.</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 cursor-pointer bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_35px_var(--glow-primary)] hover:-translate-y-0.5"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 cursor-pointer bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_35px_var(--glow-primary)] hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                 >
                   <Send className="w-4 h-4" />
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
                 <p className="text-[10px] text-[var(--muted-foreground)] text-center -mt-2">
-                  Opens Gmail with your message pre-filled
+                  Or email me directly at {contactEmail}
                 </p>
               </form>
             </div>

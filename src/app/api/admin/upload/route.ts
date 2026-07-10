@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import path from "path";
 import { supabase } from "@/lib/supabase";
+import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { serverError } from "@/lib/api-response";
 
-// Helper to check authentication
-async function isAuthenticated() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
-  return session?.value === (process.env.ADMIN_SESSION_SECRET || "rajan-portfolio-secure-token-2026");
-}
+const uploadRateLimiter = createRateLimiter({ max: 10, windowMs: 60 * 1000 });
 
 // Allowed file extensions and MIME magic bytes for validation
 const ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
@@ -39,10 +37,31 @@ function validateMagicBytes(buffer: Buffer, ext: string): boolean {
   );
 }
 
+// Strips script content from SVGs before they land in a public Storage bucket.
+// Magic-byte/extension checks alone don't stop an SVG carrying an embedded payload.
+function sanitizeSvg(buffer: Buffer): Buffer {
+  const text = buffer.toString("utf8");
+  const cleaned = text
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/<foreignObject\b[^<]*(?:(?!<\/foreignObject>)<[^<]*)*<\/foreignObject>/gi, "");
+  return Buffer.from(cleaned, "utf8");
+}
+
 export async function POST(request: Request) {
   try {
-    if (!(await isAuthenticated())) {
+    if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const clientIp = getClientIp(await headers());
+    const rateCheck = uploadRateLimiter(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many uploads. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
+      );
     }
 
     const formData = await request.formData();
@@ -80,6 +99,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // SVGs can carry <script>/event-handler payloads that magic-byte checks don't
+    // catch — strip them before the file lands in a public Storage bucket.
+    const uploadBuffer = ext === ".svg" ? sanitizeSvg(buffer) : buffer;
+
     // Generate a secure, sanitized filename
     const baseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 50);
     const safeName = `${baseName}-${Date.now()}${ext}`;
@@ -95,7 +118,7 @@ export async function POST(request: Request) {
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from(bucketName)
-      .upload(safeName, buffer, {
+      .upload(safeName, uploadBuffer, {
         contentType: file.type || "image/jpeg",
         upsert: false,
       });
@@ -114,7 +137,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return serverError("Upload error:", error);
   }
 }

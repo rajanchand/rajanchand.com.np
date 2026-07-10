@@ -30,8 +30,7 @@ export const skills = [...(data.skills || [])];
 export const certifications = [...(data.certifications || [])];
 export const testimonials = [...(data.testimonials || [])];
 export const blogPosts = [...(data.blogPosts || [])];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dissertions = [...(data.dissertions || (data as any).dissertations || [])];
+export const dissertions = [...(data.dissertations || [])];
 export const socialLinks = [...(data.socialLinks || [])];
 export const navLinks = [...(data.navLinks || [])];
 
@@ -65,8 +64,7 @@ export function updatePortfolioData(newData: any) {
   if (newData.certifications) syncArray(certifications, newData.certifications);
   if (newData.testimonials) syncArray(testimonials, newData.testimonials);
   if (newData.blogPosts) syncArray(blogPosts, newData.blogPosts);
-  if (newData.dissertions) syncArray(dissertions, newData.dissertions);
-  else if (newData.dissertations) syncArray(dissertions, newData.dissertations);
+  if (newData.dissertations) syncArray(dissertions, newData.dissertations);
   if (newData.socialLinks) syncArray(socialLinks, newData.socialLinks);
   if (newData.navLinks) syncArray(navLinks, newData.navLinks);
 }

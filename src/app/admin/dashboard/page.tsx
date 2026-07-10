@@ -29,7 +29,8 @@ import {
   Search,
   Download,
   Printer,
-  X
+  X,
+  Mail
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
@@ -389,10 +390,63 @@ export default function AdminDashboard() {
   const [analyticsRange, setAnalyticsRange] = useState("7d");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const [messages, setMessages] = useState<any[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const router = useRouter();
 
   // Polling condition
   const isAnalyticsActive = activeTab === "analytics";
+  const isMessagesActive = activeTab === "messages";
+
+  const loadMessages = async () => {
+    setMessagesLoading(true);
+    try {
+      const res = await fetch("/api/admin/messages");
+      if (res.ok) {
+        const json = await res.json();
+        setMessages(json.messages || []);
+      } else {
+        console.error("Failed to load messages");
+      }
+    } catch (err) {
+      console.error("Messages fetch error:", err);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isMessagesActive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mirrors the existing analytics tab's fetch-on-activate pattern
+      loadMessages();
+    }
+  }, [isMessagesActive]);
+
+  const handleToggleMessageStatus = async (id: number, currentStatus: string) => {
+    const newStatus = currentStatus === "read" ? "unread" : "read";
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: newStatus } : m)));
+    try {
+      await fetch("/api/admin/messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+    } catch (err) {
+      console.error("Failed to update message status:", err);
+      loadMessages();
+    }
+  };
+
+  const handleDeleteMessage = async (id: number) => {
+    if (!window.confirm("Delete this message? This cannot be undone.")) return;
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+    try {
+      await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE" });
+    } catch (err) {
+      console.error("Failed to delete message:", err);
+      loadMessages();
+    }
+  };
 
   useEffect(() => {
     if (isAnalyticsActive) {
@@ -430,9 +484,6 @@ export default function AdminDashboard() {
           setLoading(false);
           return;
         }
-        const dissList = jsonData.dissertations || jsonData.dissertions || [];
-        jsonData.dissertations = dissList;
-        jsonData.dissertions = dissList;
         setData(jsonData);
         setLoading(false);
       } catch (err) {
@@ -498,11 +549,6 @@ export default function AdminDashboard() {
 
     try {
       const payload = { ...data };
-      if (payload) {
-        const list = payload.dissertations || payload.dissertions || [];
-        payload.dissertations = list;
-        payload.dissertions = list;
-      }
 
       const res = await fetch("/api/admin", {
         method: "POST",
@@ -632,6 +678,7 @@ export default function AdminDashboard() {
                 { id: "blogs", label: "Blog Articles", icon: BookOpen },
                 { id: "certifications", label: "Certifications", icon: Award },
                 { id: "dissertions", label: "Dissertations", icon: Briefcase },
+                { id: "messages", label: "Messages", icon: Mail },
                 { id: "analytics", label: "Visitor Analytics", icon: BarChart2 }
               ].map((tab) => {
                 const TabIcon = tab.icon;
@@ -1183,6 +1230,11 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
+                    {data.experience.length === 0 && (
+                      <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No experience entries yet — click &quot;Add Job&quot; above to create one.
+                      </div>
+                    )}
                     {data.experience.map((item: any, idx: number) => {
                       // Normalize fields to avoid crashes and support fallbacks
                       const titleVal = item.title || item.role || "";
@@ -1205,6 +1257,7 @@ export default function AdminDashboard() {
                         <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                           <button
                             onClick={() => {
+                              if (!window.confirm("Delete this experience entry? This cannot be undone.")) return;
                               const updated = data.experience.filter((_: any, i: number) => i !== idx);
                               setData((prev: any) => ({ ...prev, experience: updated }));
                             }}
@@ -1343,6 +1396,7 @@ export default function AdminDashboard() {
                                   />
                                   <button
                                     onClick={() => {
+                                      if (!window.confirm("Remove this highlight?")) return;
                                       const updated = [...data.experience];
                                       const newBullets = bulletsVal.filter((_: any, i: number) => i !== bIdx);
                                       updated[idx].bullets = newBullets;
@@ -1395,6 +1449,11 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
+                    {data.projects.length === 0 && (
+                      <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No projects yet — click &quot;Add Project&quot; above to create one.
+                      </div>
+                    )}
                     {data.projects.map((proj: any, idx: number) => {
                       const githubVal = proj.githubUrl || proj.github || "";
                       const websiteVal = proj.websiteUrl || proj.demo || "";
@@ -1412,6 +1471,7 @@ export default function AdminDashboard() {
                         <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                           <button
                             onClick={() => {
+                              if (!window.confirm("Delete this project? This cannot be undone.")) return;
                               const updated = data.projects.filter((_: any, i: number) => i !== idx);
                               setData((prev: any) => ({ ...prev, projects: updated }));
                             }}
@@ -1571,6 +1631,7 @@ export default function AdminDashboard() {
                                   />
                                   <button
                                     onClick={() => {
+                                      if (!window.confirm("Remove this impact highlight?")) return;
                                       const updated = [...data.projects];
                                       const newImpact = impactVal.filter((_: any, i: number) => i !== mIdx);
                                       updated[idx].impact = newImpact;
@@ -1611,10 +1672,16 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {data.skills.length === 0 && (
+                      <div className="md:col-span-2 p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No skills yet — click &quot;Add Skill&quot; above to create one.
+                      </div>
+                    )}
                     {data.skills.map((skill: any, idx: number) => (
                       <div key={idx} className="p-4 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-3 relative">
                         <button
                           onClick={() => {
+                            if (!window.confirm("Delete this skill? This cannot be undone.")) return;
                             const updated = data.skills.filter((_: any, i: number) => i !== idx);
                             setData((prev: any) => ({ ...prev, skills: updated }));
                           }}
@@ -1693,10 +1760,16 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
+                    {data.blogPosts.length === 0 && (
+                      <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No blog posts yet — click &quot;New Post&quot; above to create one.
+                      </div>
+                    )}
                     {data.blogPosts.map((blog: any, idx: number) => (
                       <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                         <button
                           onClick={() => {
+                            if (!window.confirm("Delete this blog post? This cannot be undone.")) return;
                             const updated = data.blogPosts.filter((_: any, i: number) => i !== idx);
                             setData((prev: any) => ({ ...prev, blogPosts: updated }));
                           }}
@@ -1826,10 +1899,16 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
+                    {data.certifications.length === 0 && (
+                      <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No certifications yet — click &quot;Add Credential&quot; above to create one.
+                      </div>
+                    )}
                     {data.certifications.map((cert: any, idx: number) => (
                       <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                         <button
                           onClick={() => {
+                            if (!window.confirm("Delete this certification? This cannot be undone.")) return;
                             const updated = data.certifications.filter((_: any, i: number) => i !== idx);
                             setData((prev: any) => ({ ...prev, certifications: updated }));
                           }}
@@ -1932,10 +2011,16 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
+                    {data.dissertations.length === 0 && (
+                      <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                        No dissertations yet — click &quot;Add Dissertation&quot; above to create one.
+                      </div>
+                    )}
                     {data.dissertations.map((diss: any, idx: number) => (
                       <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                         <button
                           onClick={() => {
+                            if (!window.confirm("Delete this dissertation entry? This cannot be undone.")) return;
                             const updated = data.dissertations.filter((_: any, i: number) => i !== idx);
                             setData((prev: any) => ({ ...prev, dissertations: updated }));
                           }}
@@ -2029,6 +2114,97 @@ export default function AdminDashboard() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {activeTab === "messages" && (
+                <div className="space-y-6">
+                  <div className="border-b border-[var(--glass-border)] pb-4 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold font-display">Messages</h2>
+                      <p className="text-xs text-[var(--muted-foreground)]">Contact form submissions from visitors</p>
+                    </div>
+                    <button
+                      onClick={loadMessages}
+                      className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                    </button>
+                  </div>
+
+                  {messagesLoading && messages.length === 0 ? (
+                    <div className="py-20 text-center space-y-3">
+                      <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-xs text-[var(--muted-foreground)]">Loading messages...</p>
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
+                      No messages yet. When visitors submit the contact form, they&apos;ll appear here.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((msg) => (
+                        <div
+                          key={msg.id}
+                          className={`p-5 border rounded-2xl space-y-3 relative transition-colors ${
+                            msg.status === "unread"
+                              ? "border-[var(--primary)]/30 bg-[var(--primary)]/[0.03]"
+                              : "border-[var(--glass-border)] bg-[var(--glass-bg)]/20"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div className="space-y-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-semibold text-[var(--foreground)]">{msg.name}</span>
+                                <span
+                                  className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                                    msg.status === "unread"
+                                      ? "bg-[var(--primary)]/15 text-[var(--primary)]"
+                                      : "bg-[var(--muted)] text-[var(--muted-foreground)]"
+                                  }`}
+                                >
+                                  {msg.status}
+                                </span>
+                              </div>
+                              <a href={`mailto:${msg.email}`} className="text-xs text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors block truncate">
+                                {msg.email}
+                              </a>
+                              <p className="text-xs font-semibold text-[var(--foreground)]">{msg.subject}</p>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[10px] text-[var(--muted-foreground)] mr-1">
+                                {msg.created_at ? new Date(msg.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+                              </span>
+                              <a
+                                href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject}`)}`}
+                                className="p-1.5 border border-[var(--glass-border)] hover:border-[var(--primary)]/30 text-[var(--muted-foreground)] hover:text-[var(--primary)] rounded-lg transition-colors cursor-pointer"
+                                aria-label="Reply by email"
+                              >
+                                <Mail className="w-3.5 h-3.5" />
+                              </a>
+                              <button
+                                onClick={() => handleToggleMessageStatus(msg.id, msg.status)}
+                                className="p-1.5 border border-[var(--glass-border)] hover:border-[var(--primary)]/30 text-[var(--muted-foreground)] hover:text-[var(--primary)] rounded-lg transition-colors cursor-pointer"
+                                aria-label={msg.status === "read" ? "Mark as unread" : "Mark as read"}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteMessage(msg.id)}
+                                className="p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                                aria-label="Delete message"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-[var(--muted-foreground)] leading-relaxed whitespace-pre-wrap border-t border-[var(--glass-border)] pt-3">
+                            {msg.message}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

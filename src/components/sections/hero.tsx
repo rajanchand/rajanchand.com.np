@@ -41,7 +41,7 @@ function TypingAnimation({ text }: { text: string }) {
   return (
     <span className="relative inline-block min-h-[44px]">
       <span>Hi, I&apos;m {typedText}</span>
-      <span className="inline-block w-1 h-7 ml-1 bg-blue-500 dark:bg-blue-400 animate-pulse align-middle" />
+      <span className="inline-block w-1 h-7 ml-1 bg-[var(--primary)] animate-pulse align-middle" />
     </span>
   );
 }
@@ -81,7 +81,7 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
               {/* Action Buttons to match subashcs layout */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4 sm:justify-start">
                 <a
-                  className="inline-flex items-center justify-center rounded-md shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-[0_0_25px_var(--glow-primary)] text-white font-semibold text-center text-sm py-3 px-6 hover:scale-105 transition-all duration-200 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md shadow-md bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_25px_var(--glow-primary)] text-white font-semibold text-center text-sm py-3 px-6 hover:scale-105 transition-all duration-200 cursor-pointer w-full sm:w-auto"
                   href={siteConfig.resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"

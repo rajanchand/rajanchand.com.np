@@ -50,7 +50,7 @@ interface DissertionItem {
 
 export default async function DissertionsListing() {
   const data = await loadPortfolioData();
-  const rawList = (data?.dissertions || data?.dissertations || dissertions) as DissertionItem[];
+  const rawList = (data?.dissertations || dissertions) as DissertionItem[];
   
   // Deduplicate and normalize data lists safely
   const dataList = (rawList || []).map((item) => {
@@ -67,7 +67,7 @@ export default async function DissertionsListing() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-blue-500/30 relative overflow-hidden transition-colors duration-300">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-[var(--primary)]/30 relative overflow-hidden transition-colors duration-300">
       <BackgroundOrbs />
       <Navbar siteConfig={data?.siteConfig} />
 
@@ -76,7 +76,7 @@ export default async function DissertionsListing() {
           <div className="mb-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors group mb-6"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)] hover:text-[var(--accent)] transition-colors group mb-6"
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
               Back to Home
@@ -105,8 +105,8 @@ export default async function DissertionsListing() {
           ) : (
             dataList.map((doc, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
-                <div className="bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-300 rounded-3xl p-6 md:p-8 relative overflow-hidden backdrop-blur-md">
-                  <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-[80px] pointer-events-none" />
+                <div className="bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:border-[var(--primary)]/30 transition-all duration-300 rounded-3xl p-6 md:p-8 relative overflow-hidden backdrop-blur-md">
+                  <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--primary)]/5 rounded-full blur-[80px] pointer-events-none" />
 
                   <div className="space-y-5">
                     {/* Header: Title and top metadata */}
@@ -118,22 +118,22 @@ export default async function DissertionsListing() {
                       {/* Meta Tags Row */}
                       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800/50 pb-4">
                         <div className="flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <User className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
                           <span><span className="font-semibold text-slate-700 dark:text-slate-300">Author:</span> {doc.author}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <GraduationCap className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <GraduationCap className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
                           <span><span className="font-semibold text-slate-700 dark:text-slate-300">Institution:</span> {doc.institution}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                          <Calendar className="w-3.5 h-3.5 text-[var(--primary)] shrink-0" />
                           <span><span className="font-semibold text-slate-700 dark:text-slate-300">Year:</span> {doc.year}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Abstract block */}
-                    <div className="bg-slate-50 dark:bg-slate-950/40 border-l-4 border-blue-500 dark:border-blue-400 p-5 rounded-r-2xl">
+                    <div className="bg-slate-50 dark:bg-slate-950/40 border-l-4 border-[var(--primary)] p-5 rounded-r-2xl">
                       <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
                         Abstract / Executive Summary
                       </h3>
@@ -149,7 +149,7 @@ export default async function DissertionsListing() {
                           href={doc.pdfUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
                         >
                           View Document
                           <ExternalLink className="w-3.5 h-3.5" />

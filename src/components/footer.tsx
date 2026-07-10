@@ -13,6 +13,7 @@ const links = [
       { title: "Skills", href: "#skills" },
       { title: "Work Experience", href: "#experience" },
       { title: "Certifications", href: "#certifications" },
+      { title: "Contact", href: "#contact" },
     ],
   },
   {
@@ -55,12 +56,9 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
               </Link>
             </div>
             <div className="text-sm text-gray-600 dark:text-slate-400">
-              <a
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition duration-150 ease-in-out"
-                href="#"
-              >
+              <span className="text-gray-600 dark:text-gray-400">
                 {siteConfig.title}
-              </a>
+              </span>
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400 my-4">
               {siteConfig.location} | {siteConfig.locationOrigin}
@@ -99,7 +97,7 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
               return (
                 <li key={social.name}>
                   <a
-                    className="text-blue-500 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center"
+                    className="text-[var(--primary)] hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 inline-flex items-center"
                     aria-label={social.name}
                     href={social.url === "#" ? `https://mail.google.com/mail/?view=cm&fs=1&to=${siteConfig.email}` : social.url}
                     target="_blank"

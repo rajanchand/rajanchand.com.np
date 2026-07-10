@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { supabase } from "@/lib/supabase";
+import { getClientIp, isValidIp } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-// In-memory rate limiter: max 10 tracking calls per IP per minute
-const trackAttempts = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const record = trackAttempts.get(ip);
-  if (!record || now > record.resetAt) {
-    trackAttempts.set(ip, { count: 1, resetAt: now + 60_000 });
-    return false;
-  }
-  if (record.count >= 10) return true;
-  record.count += 1;
-  return false;
-}
+// Max 10 tracking calls per IP per minute
+const trackRateLimiter = createRateLimiter({ max: 10, windowMs: 60 * 1000 });
 
 // Simple User-Agent parser
 function parseUserAgent(ua: string) {
@@ -81,20 +71,12 @@ function parseUserAgent(ua: string) {
   return result;
 }
 
-function getClientIP(headersList: Headers): string {
-  const forwarded = headersList.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  return headersList.get("x-real-ip") || "unknown";
-}
-
 export async function POST(request: Request) {
   try {
     const headersList = await headers();
-    const ip = getClientIP(headersList);
+    const ip = getClientIp(headersList);
 
-    if (isRateLimited(ip)) {
+    if (!trackRateLimiter(ip).allowed) {
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
@@ -119,49 +101,53 @@ export async function POST(request: Request) {
       isp: "",
     };
 
-    try {
-      // ip-api.com: request status + all useful fields for precise location
-      // district gives sub-city accuracy; zip helps refine; isp/org for network name
-      const geoRes = await fetch(
-        `https://ip-api.com/json/${ip}?fields=status,city,country,regionName,district,zip,lat,lon,isp,org,as`,
-        { signal: AbortSignal.timeout(3000) }
-      );
-      if (geoRes.ok) {
-        const g = await geoRes.json();
-        if (g.status === "success") {
-          // Use district (sub-city area) if available for more precise location
-          geo.city = g.district || g.city || "Unknown";
-          geo.country = g.country || "Unknown";
-          geo.region = g.regionName || "";
-          if (g.lat != null) geo.lat = g.lat;
-          if (g.lon != null) geo.lon = g.lon;
-          // Network name: prefer org, fallback to isp, then AS
-          geo.isp = g.org || g.isp || g.as || "";
-        }
-      }
-    } catch {
-      // Primary geo failed — try fallback
-    }
-
-    // Fallback: if primary returned "Unknown" city, try ipapi.co (more accurate for some IPs)
-    if (geo.city === "Unknown" && ip !== "unknown") {
+    // Only hit third-party geo APIs with something that actually looks like an IP —
+    // ip is client-supplied (via x-forwarded-for) and gets interpolated into these URLs.
+    if (isValidIp(ip)) {
       try {
-        const fallbackRes = await fetch(`https://ipapi.co/${ip}/json/`, {
-          signal: AbortSignal.timeout(3000),
-        });
-        if (fallbackRes.ok) {
-          const fb = await fallbackRes.json();
-          if (!fb.error) {
-            geo.city = fb.city || geo.city;
-            geo.country = fb.country_name || geo.country;
-            geo.region = fb.region || geo.region;
-            if (fb.latitude != null) geo.lat = fb.latitude;
-            if (fb.longitude != null) geo.lon = fb.longitude;
-            geo.isp = fb.org || geo.isp;
+        // ip-api.com: request status + all useful fields for precise location
+        // district gives sub-city accuracy; zip helps refine; isp/org for network name
+        const geoRes = await fetch(
+          `https://ip-api.com/json/${ip}?fields=status,city,country,regionName,district,zip,lat,lon,isp,org,as`,
+          { signal: AbortSignal.timeout(3000) }
+        );
+        if (geoRes.ok) {
+          const g = await geoRes.json();
+          if (g.status === "success") {
+            // Use district (sub-city area) if available for more precise location
+            geo.city = g.district || g.city || "Unknown";
+            geo.country = g.country || "Unknown";
+            geo.region = g.regionName || "";
+            if (g.lat != null) geo.lat = g.lat;
+            if (g.lon != null) geo.lon = g.lon;
+            // Network name: prefer org, fallback to isp, then AS
+            geo.isp = g.org || g.isp || g.as || "";
           }
         }
       } catch {
-        // Fallback also failed — continue with defaults
+        // Primary geo failed — try fallback
+      }
+
+      // Fallback: if primary returned "Unknown" city, try ipapi.co (more accurate for some IPs)
+      if (geo.city === "Unknown") {
+        try {
+          const fallbackRes = await fetch(`https://ipapi.co/${ip}/json/`, {
+            signal: AbortSignal.timeout(3000),
+          });
+          if (fallbackRes.ok) {
+            const fb = await fallbackRes.json();
+            if (!fb.error) {
+              geo.city = fb.city || geo.city;
+              geo.country = fb.country_name || geo.country;
+              geo.region = fb.region || geo.region;
+              if (fb.latitude != null) geo.lat = fb.latitude;
+              if (fb.longitude != null) geo.lon = fb.longitude;
+              geo.isp = fb.org || geo.isp;
+            }
+          }
+        } catch {
+          // Fallback also failed — continue with defaults
+        }
       }
     }
 

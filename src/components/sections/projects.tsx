@@ -11,23 +11,23 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
   return (
     <section className="relative scroll-mt-16 pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern" id="projects">
       {/* Background shape */}
-      <div className="absolute inset-0 bg-blue-50/20 dark:bg-zinc-950/20 pointer-events-none mb-32" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[var(--primary)]/5 dark:bg-zinc-950/20 pointer-events-none mb-32" aria-hidden="true" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 z-10">
         <div className="py-4 pt-8 sm:py-6 lg:py-8 lg:pt-12">
           {/* Header */}
           <ScrollReveal>
             <div className="mb-16 text-center select-none">
-              <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-blue-500 dark:text-blue-400 mb-4 font-mono">
-                <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+              <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-[var(--primary)] mb-4 font-mono">
+                <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
                 PORTFOLIO
-                <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+                <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
               </span>
               <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-5 font-[var(--font-display)] leading-tight">
                 Featured Projects &{" "}
                 <span className="relative inline-block pb-1">
                   Implementations
-                  <span className="absolute bottom-0 left-0 w-full h-[3.5px] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
+                  <span className="absolute bottom-0 left-0 w-full h-[3.5px] bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full" />
                 </span>
               </h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm md:text-[15px] max-w-2xl mx-auto leading-relaxed">
@@ -49,7 +49,7 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
                       {/* Organization / Company Badge */}
                       {proj.company && (
                         <div className="flex justify-between items-start gap-4 mb-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 text-[10px] md:text-xs font-bold rounded-lg border border-blue-100/50 dark:border-blue-900/30 font-mono uppercase tracking-wide">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--primary)]/10 text-[var(--primary)] text-[10px] md:text-xs font-bold rounded-lg border border-[var(--primary)]/20 font-mono uppercase tracking-wide">
                             <Building2 className="w-3 h-3" />
                             {proj.company}
                           </span>
@@ -58,7 +58,7 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
 
                       {/* Header Title & Icon */}
                       <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
                           <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col pt-1">
@@ -125,7 +125,7 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
                               href={proj.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                               <span>Live Site</span>

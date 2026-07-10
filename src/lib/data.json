@@ -386,25 +386,6 @@
     "profileImage": "/images/rajan-jpg-1780267497062.jpg",
     "locationOrigin": "Nepal"
   },
-  "dissertions": [
-    {
-      "year": "2026",
-      "title": "Thesis Title",
-      "author": "Rajan Prakash Chand",
-      "pdfUrl": "",
-      "abstract": "Abstract...",
-      "institution": "UWS, Scotland"
-    },
-    {
-      "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
-      "type": "Academic Research Paper",
-      "title": "Zero Trust Security in Remote Work Environments",
-      "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
-      "published": "May 2026",
-      "websiteUrl": "https://zero-trust-security.org/login",
-      "description": "Zero Trust Security in remote work environments ensures secure access by continuously validating user identity, device posture, and contextual risk, thereby reducing the attack surface compared to traditional perimeter-based models."
-    }
-  ],
   "socialLinks": [
     {
       "url": "https://www.linkedin.com/in/rajanchand",
@@ -454,7 +435,7 @@
     {
       "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
       "type": "Academic Research Paper",
-      "title": "Dissertartions",
+      "title": "Zero Trust Security in Remote Work Environments",
       "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
       "published": "May 2026",
       "websiteUrl": "https://zero-trust-security.org/login",

@@ -1,12 +1,27 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { supabase } from "@/lib/supabase";
 import fs from "fs";
 import path from "path";
+import { getClientIp } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { serverError } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
+const portfolioRateLimiter = createRateLimiter({ max: 30, windowMs: 60 * 1000 });
+
 export async function GET() {
   try {
+    const clientIp = getClientIp(await headers());
+    const rateCheck = portfolioRateLimiter(clientIp);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
+      );
+    }
+
     // Try to fetch from Supabase
     const { data: dbData, error } = await supabase
       .from("portfolio")
@@ -30,14 +45,11 @@ export async function GET() {
 
       // Auto-seed Supabase if the table exists but is empty
       if (!error && !dbData) {
-        console.log("Seeding Supabase with local data...");
         const { error: seedError } = await supabase
           .from("portfolio")
           .insert({ id: 1, content: localData });
         if (seedError) {
           console.error("Failed to seed Supabase:", seedError.message);
-        } else {
-          console.log("Supabase successfully seeded!");
         }
       }
 
@@ -46,7 +58,6 @@ export async function GET() {
 
     return NextResponse.json({ error: "Data source not found" }, { status: 404 });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return serverError("Portfolio GET error:", error);
   }
 }

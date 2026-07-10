@@ -70,16 +70,16 @@ export function Experience({ experience: customExperience }: { experience?: any[
         {/* Section Header */}
         <ScrollReveal>
           <div className="text-center mb-16 select-none">
-            <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-blue-500 dark:text-blue-400 mb-4 font-mono">
-              <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+            <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-[var(--primary)] mb-4 font-mono">
+              <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
               HISTORY
-              <span className="w-8 h-[1.5px] bg-blue-500/30 dark:bg-blue-400/30 rounded-full" />
+              <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
             </span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-5 font-[var(--font-display)] leading-tight">
               Work &{" "}
               <span className="relative inline-block pb-1">
                 Education
-                <span className="absolute bottom-0 left-0 w-full h-[3.5px] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" />
+                <span className="absolute bottom-0 left-0 w-full h-[3.5px] bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full" />
               </span>
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm md:text-[15px] max-w-2xl mx-auto leading-relaxed">
@@ -93,7 +93,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
           <div className="space-y-8">
             <ScrollReveal>
               <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-200 dark:border-slate-800/80 pb-3">
-                <span className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                <span className="w-1.5 h-6 bg-[var(--primary)] rounded-full" />
                 Professional Work Experience
               </h3>
             </ScrollReveal>
@@ -103,13 +103,13 @@ export function Experience({ experience: customExperience }: { experience?: any[
                 <ScrollReveal key={i} delay={i * 0.1}>
                   <div className="relative pl-8">
                     {/* Circle Indicator Centered on Line */}
-                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-blue-500 dark:border-blue-400 border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
-                      <ArrowUp className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-[var(--primary)] border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
+                      <ArrowUp className="w-4 h-4 text-[var(--primary)]" />
                     </div>
 
                     <div>
                       {/* Period Label */}
-                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/30 rounded-lg font-mono uppercase">
+                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-[var(--primary)] bg-[var(--primary)]/10 border border-[var(--primary)]/20 rounded-lg font-mono uppercase">
                         {item.period}
                       </span>
                       
@@ -124,7 +124,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
                           href={item.companyUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-[var(--primary)] transition-colors"
                         >
                           {item.company}
                         </a>
@@ -144,7 +144,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
                         <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-400">
                           {item.bullets.map((bullet, j) => (
                             <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/80 shrink-0 mt-2" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]/80 shrink-0 mt-2" />
                               <span>{bullet}</span>
                             </li>
                           ))}
@@ -175,7 +175,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
           <div className="space-y-8">
             <ScrollReveal>
               <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 mb-8 font-[var(--font-display)] border-b border-gray-100 dark:border-slate-800/80 pb-3">
-                <span className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                <span className="w-1.5 h-6 bg-[var(--accent)] rounded-full" />
                 Academic & Education Details
               </h3>
             </ScrollReveal>
@@ -185,13 +185,13 @@ export function Experience({ experience: customExperience }: { experience?: any[
                 <ScrollReveal key={i} delay={i * 0.1}>
                   <div className="relative pl-8">
                     {/* Circle Indicator Centered on Line */}
-                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-indigo-500 dark:border-indigo-400 border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
-                      <ArrowUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    <div className="absolute left-0 -translate-x-1/2 top-1.5 flex items-center justify-center w-9 h-9 rounded-full border-[var(--accent)] border-2 bg-white dark:bg-slate-950 shadow-sm shrink-0 hover:scale-105 transition-transform duration-300">
+                      <ArrowUp className="w-4 h-4 text-[var(--accent)]" />
                     </div>
 
                     <div>
                       {/* Period Label */}
-                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 rounded-lg font-mono uppercase">
+                      <span className="inline-block px-3 py-1 mb-2.5 text-[10px] font-bold tracking-wider text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20 rounded-lg font-mono uppercase">
                         {item.period}
                       </span>
                       
@@ -206,7 +206,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
                           href={item.companyUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                          className="inline-block mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-[var(--accent)] transition-colors"
                         >
                           {item.company}
                         </a>
@@ -226,7 +226,7 @@ export function Experience({ experience: customExperience }: { experience?: any[
                         <ul className="space-y-2 mb-4 pl-4 text-slate-500 dark:text-slate-400">
                           {item.bullets.map((bullet, j) => (
                             <li key={j} className="text-xs md:text-sm flex gap-2 leading-relaxed text-justify items-start">
-                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/80 shrink-0 mt-2" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]/80 shrink-0 mt-2" />
                               <span>{bullet}</span>
                             </li>
                           ))}

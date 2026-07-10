@@ -1,43 +1,24 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { getClientIp, verifyAdminPassword, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { serverError } from "@/lib/api-response";
 
-// In-memory rate limiter for brute-force protection
-// Key: IP address, Value: { attempts, resetAt }
-const loginAttempts = new Map<string, { attempts: number; resetAt: number }>();
-
-const MAX_ATTEMPTS = process.env.NODE_ENV === "development" ? 100 : 5;
-const WINDOW_MS = process.env.NODE_ENV === "development" ? 1000 : 15 * 60 * 1000; // 1 second in development, 15 minutes in production
-
-function getClientIP(headersList: Headers): string {
-  const forwarded = headersList.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-  return headersList.get("x-real-ip") || "unknown";
-}
-
-function checkRateLimit(ip: string): { allowed: boolean; retryAfterSec: number } {
-  const now = Date.now();
-  const record = loginAttempts.get(ip);
-
-  if (!record || now > record.resetAt) {
-    // Window expired or first attempt — reset
-    loginAttempts.set(ip, { attempts: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, retryAfterSec: 0 };
-  }
-
-  if (record.attempts >= MAX_ATTEMPTS) {
-    const retryAfterSec = Math.ceil((record.resetAt - now) / 1000);
-    return { allowed: false, retryAfterSec };
-  }
-
-  record.attempts += 1;
-  return { allowed: true, retryAfterSec: 0 };
-}
+const loginRateLimiter = createRateLimiter({
+  max: process.env.NODE_ENV === "development" ? 100 : 5,
+  windowMs: process.env.NODE_ENV === "development" ? 1000 : 15 * 60 * 1000, // 1s dev, 15min prod
+});
 
 export async function POST(request: Request) {
   try {
-    // Validate Content-Type
+    if (!process.env.ADMIN_SESSION_SECRET || !process.env.ADMIN_PASSWORD_HASH) {
+      console.error("Admin login attempted but ADMIN_SESSION_SECRET/ADMIN_PASSWORD_HASH are not configured");
+      return NextResponse.json(
+        { success: false, error: "Server misconfigured. Contact the site owner." },
+        { status: 500 }
+      );
+    }
+
     const contentType = request.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       return NextResponse.json(
@@ -46,10 +27,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limiting
     const headersList = await headers();
-    const clientIP = getClientIP(headersList);
-    const rateCheck = checkRateLimit(clientIP);
+    const clientIP = getClientIp(headersList);
+    const rateCheck = loginRateLimiter(clientIP);
 
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -73,42 +53,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Cryptographically secure password verification via SHA-256 Web Crypto API
-    const encoder = new TextEncoder();
-    const encodedData = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", encodedData);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    const isValid = await verifyAdminPassword(password);
 
-    // Determine target hash (supporting either ADMIN_PASSWORD_HASH, dynamic hashing of plain ADMIN_PASSWORD, or falling back to either "rajan123" or "rajan123!")
-    let targetHash = process.env.ADMIN_PASSWORD_HASH;
-    if (!targetHash) {
-      const plainPassword = process.env.ADMIN_PASSWORD;
-      if (plainPassword) {
-        const plainEncoded = encoder.encode(plainPassword);
-        const plainBuffer = await crypto.subtle.digest("SHA-256", plainEncoded);
-        targetHash = Array.from(new Uint8Array(plainBuffer))
-          .map(b => b.toString(16).padStart(2, "0"))
-          .join("");
-      } else {
-        const hashRajan123 = "13fe158da362195393a7cb1679b45999f7438c46965e20c728422f2632551180";
-        const hashRajan123Excl = "9176b591b61a832ad4761c8e8a14e8e167736a63a77c2d9be09dc5c487fd9585";
-        if (hashHex === hashRajan123 || hashHex === hashRajan123Excl) {
-          targetHash = hashHex; // Direct match
-        } else {
-          targetHash = hashRajan123; // Will fail naturally
-        }
-      }
-    }
+    if (isValid) {
+      loginRateLimiter.reset(clientIP);
 
-    if (hashHex === targetHash) {
-      // Clear rate limit on successful login
-      loginAttempts.delete(clientIP);
-
-      // Return success WITHOUT the token in the body — it's in the httpOnly cookie only
       const response = NextResponse.json({ success: true });
 
-      response.cookies.set("admin_session", "rajan-portfolio-secure-token-2026", {
+      response.cookies.set(SESSION_COOKIE_NAME, process.env.ADMIN_SESSION_SECRET, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -124,11 +76,6 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred";
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
+    return serverError("Admin login error:", error, "An unexpected error occurred");
   }
 }
