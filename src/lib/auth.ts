@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 const SESSION_COOKIE_NAME = "admin_session";
 
@@ -33,12 +35,48 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 export { SESSION_COOKIE_NAME };
 
 /**
- * Verifies a plaintext password against ADMIN_PASSWORD_HASH, which must be
- * formatted as "<hex salt>:<hex scrypt-derived key>". Fails closed if unset
- * or malformed — there is no hardcoded fallback password.
+ * Retrieves the current password hash from Supabase (row id=2), local file, or environment fallback.
+ */
+export async function getAdminPasswordHash(): Promise<string | null> {
+  // 1. Try Supabase row id = 2
+  try {
+    const { supabase } = await import("@/lib/supabase");
+    const { data, error } = await supabase
+      .from("portfolio")
+      .select("content")
+      .eq("id", 2)
+      .maybeSingle();
+    if (!error && data?.content?.passwordHash) {
+      return data.content.passwordHash;
+    }
+  } catch (err) {
+    console.warn("Supabase fetch failed in getAdminPasswordHash:", err);
+  }
+
+  // 2. Try local credentials.json
+  try {
+    const credPath = path.join(process.cwd(), "src/lib/credentials.json");
+    if (fs.existsSync(credPath)) {
+      const fileContent = fs.readFileSync(credPath, "utf8");
+      const credData = JSON.parse(fileContent);
+      if (credData.passwordHash) {
+        return credData.passwordHash;
+      }
+    }
+  } catch (err) {
+    console.warn("Local credentials read failed:", err);
+  }
+
+  // 3. Fallback to env
+  return process.env.ADMIN_PASSWORD_HASH || null;
+}
+
+/**
+ * Verifies a plaintext password against the configured admin password hash.
+ * Fails closed if unset or malformed.
  */
 export async function verifyAdminPassword(password: string): Promise<boolean> {
-  const targetHash = process.env.ADMIN_PASSWORD_HASH;
+  const targetHash = await getAdminPasswordHash();
   if (!targetHash) return false;
 
   const [saltHex, keyHex] = targetHash.split(":");

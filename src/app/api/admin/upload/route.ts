@@ -6,19 +6,34 @@ import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 
-const uploadRateLimiter = createRateLimiter({ max: 10, windowMs: 60 * 1000 });
+const uploadRateLimiter = createRateLimiter({ max: 20, windowMs: 60 * 1000 });
 
 // Allowed file extensions and MIME magic bytes for validation
-const ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".svg", ".pdf", ".doc", ".docx"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// Magic byte signatures for image file validation
+// Magic byte signatures for file validation
 const MAGIC_BYTES: Record<string, number[][]> = {
   ".png": [[0x89, 0x50, 0x4e, 0x47]],
   ".jpg": [[0xff, 0xd8, 0xff]],
   ".jpeg": [[0xff, 0xd8, 0xff]],
   ".webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF header
   ".svg": [], // SVG validated by text content check
+  ".pdf": [[0x25, 0x50, 0x44, 0x46]], // %PDF
+  ".docx": [[0x50, 0x4b, 0x03, 0x04]], // PK.. (ZIP archive)
+  ".doc": [[0xd0, 0xcf, 0x11, 0xe0]], // OLE compound file
+};
+
+// Map file extension to MIME type for Supabase Storage contentType
+const MIME_TYPES: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".pdf": "application/pdf",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".doc": "application/msword",
 };
 
 function validateMagicBytes(buffer: Buffer, ext: string): boolean {
@@ -38,7 +53,6 @@ function validateMagicBytes(buffer: Buffer, ext: string): boolean {
 }
 
 // Strips script content from SVGs before they land in a public Storage bucket.
-// Magic-byte/extension checks alone don't stop an SVG carrying an embedded payload.
 function sanitizeSvg(buffer: Buffer): Buffer {
   const text = buffer.toString("utf8");
   const cleaned = text
@@ -83,7 +97,7 @@ export async function POST(request: Request) {
     const ext = path.extname(file.name).toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       return NextResponse.json(
-        { error: "Allowed file formats: PNG, JPG, JPEG, WEBP, SVG" },
+        { error: "Allowed formats: PNG, JPG, JPEG, WEBP, SVG, PDF, DOC, DOCX" },
         { status: 400 }
       );
     }
@@ -100,7 +114,6 @@ export async function POST(request: Request) {
     }
 
     // SVGs can carry <script>/event-handler payloads that magic-byte checks don't
-    // catch — strip them before the file lands in a public Storage bucket.
     const uploadBuffer = ext === ".svg" ? sanitizeSvg(buffer) : buffer;
 
     // Generate a secure, sanitized filename
@@ -108,18 +121,21 @@ export async function POST(request: Request) {
     const safeName = `${baseName}-${Date.now()}${ext}`;
     const bucketName = "images";
 
-    // Ensure bucket exists (best-effort, might fail if using Anon Key but bucket is missing)
+    // Ensure bucket exists (best-effort)
     try {
       await supabase.storage.createBucket(bucketName, { public: true });
     } catch {
       // Ignore - bucket likely exists or lack permissions
     }
 
+    // Get correct MIME type
+    const contentType = MIME_TYPES[ext] || file.type || "application/octet-stream";
+
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(safeName, uploadBuffer, {
-        contentType: file.type || "image/jpeg",
+        contentType,
         upsert: false,
       });
 
@@ -135,7 +151,7 @@ export async function POST(request: Request) {
       .from(bucketName)
       .getPublicUrl(safeName);
 
-    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
+    return NextResponse.json({ success: true, url: publicUrlData.publicUrl, name: file.name, size: file.size, type: ext });
   } catch (error) {
     return serverError("Upload error:", error);
   }
