@@ -69,9 +69,9 @@ export async function GET() {
           messagesUnread = msgData.filter((m) => m.status === "unread").length;
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       supabaseStatus = "error";
-      dbErrorMsg = e.message || e;
+      dbErrorMsg = e instanceof Error ? e.message : String(e);
     }
 
     // 2. Check local files writeability

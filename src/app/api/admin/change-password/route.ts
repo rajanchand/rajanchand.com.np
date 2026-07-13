@@ -76,8 +76,8 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString()
         });
       dbError = error;
-    } catch (dbErr: any) {
-      console.error("Supabase upsert crashed for password hash:", dbErr.message || dbErr);
+    } catch (dbErr: unknown) {
+      console.error("Supabase upsert crashed for password hash:", dbErr instanceof Error ? dbErr.message : dbErr);
       dbError = dbErr;
     }
 

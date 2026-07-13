@@ -47,7 +47,6 @@ import {
   Clock,
   Fingerprint,
   Globe,
-  Zap,
   Lock,
   ShieldCheck,
   HardDrive,
@@ -61,8 +60,7 @@ import {
   Heading2,
   List,
   ListOrdered,
-  Code,
-  File
+  Code
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
@@ -443,7 +441,6 @@ export default function AdminDashboard() {
   const isAnalyticsActive = activeTab === "analytics";
   const isMessagesActive = activeTab === "messages";
   const isOverviewActive = activeTab === "overview";
-  const isSecurityActive = activeTab === "security";
 
   const loadMessages = async () => {
     setMessagesLoading(true);
@@ -513,10 +510,26 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (isOverviewActive || isSecurityActive) {
-      loadStatus();
+    if (activeTab === "overview" || activeTab === "security") {
+      const fetchStatus = async () => {
+        setStatusLoading(true);
+        try {
+          const res = await fetch("/api/admin/status");
+          if (res.ok) {
+            const json = await res.json();
+            setStatusData(json);
+          } else {
+            console.error("Failed to load health status");
+          }
+        } catch (err) {
+          console.error("Status fetch error:", err);
+        } finally {
+          setStatusLoading(false);
+        }
+      };
+      fetchStatus();
     }
-  }, [isOverviewActive, isSecurityActive]);
+  }, [activeTab]);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1737,6 +1750,7 @@ export default function AdminDashboard() {
                   <div className="flex flex-col sm:flex-row items-center gap-6 p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl">
                     <div className="relative w-20 h-20 rounded-full overflow-hidden border border-[var(--glass-border)] shrink-0 bg-zinc-100 flex items-center justify-center">
                       {data.siteConfig.profileImage ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={data.siteConfig.profileImage} alt="Profile Headshot" className="w-full h-full object-cover" />
                       ) : (
                         <User className="w-8 h-8 text-[var(--muted-foreground)]" />
@@ -2455,17 +2469,18 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data.skills.map((skill: any, idx: number) => {
                       // Attempt to resolve custom Lucide icon dynamic preview
-                      let PreviewIconComponent = Cpu;
-                      try {
-                        const iconName = skill.icon || "Cpu";
-                        // Find matching icon component
-                        const lucideIcons = require("lucide-react");
-                        if (lucideIcons && lucideIcons[iconName]) {
-                          PreviewIconComponent = lucideIcons[iconName];
-                        }
-                      } catch (e) {
-                        PreviewIconComponent = Cpu;
-                      }
+                      const iconName = skill.icon || "Cpu";
+                      const iconMap: Record<string, typeof Cpu> = {
+                        Cpu, Wifi, Search, Globe, Lock, Server, Database, Shield, HardDrive,
+                        Terminal, Activity, Layers, Mail, Download, Printer, Grid,
+                        Laptop, Smartphone, Tablet, MapPin, Eye, TrendingUp, BarChart2,
+                        RefreshCw, Upload, ExternalLink, Calendar, Hash, Link2, Clock,
+                        Fingerprint, ShieldCheck, FolderGit2, Github, Code, Award,
+                        BookOpen, Briefcase, User, Save, LogOut, Plus, Trash2, ChevronRight,
+                        Check, AlertTriangle, KeyRound, Image, FileText, Bold, Italic,
+                        Heading1, Heading2, List, ListOrdered, GripVertical, X,
+                      };
+                      const PreviewIconComponent = iconMap[iconName] || Cpu;
 
                       return (
                         <div key={idx} className="border border-[var(--glass-border)] bg-[var(--glass-bg)]/10 rounded-2xl p-4 space-y-3 relative hover:border-emerald-500/20 transition-all duration-300">
@@ -2504,7 +2519,7 @@ export default function AdminDashboard() {
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
                                   <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
-                                    <Image className="w-2.5 h-2.5" /> Lucide Icon
+                                    <Image aria-hidden alt="" className="w-2.5 h-2.5" /> Lucide Icon
                                   </label>
                                   <input
                                     type="text"
@@ -3070,11 +3085,12 @@ export default function AdminDashboard() {
                             {/* Photo Uploader */}
                             <div className="shrink-0 space-y-2">
                               <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
-                                <Image className="w-3 h-3" /> Certificate Photo
+                                <Image aria-hidden alt="" className="w-3 h-3" /> Certificate Photo
                               </label>
                               <div className="relative w-32 h-24 rounded-xl border-2 border-dashed border-[var(--glass-border)] hover:border-amber-500/30 bg-[var(--glass-bg)]/30 overflow-hidden group/photo transition-colors cursor-pointer">
                                 {cert.photo ? (
                                   <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={cert.photo} alt="Certificate" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center">
                                       <span className="text-white text-[9px] font-bold">Change</span>

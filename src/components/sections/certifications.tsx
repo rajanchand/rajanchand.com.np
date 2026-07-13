@@ -16,7 +16,7 @@ interface CertificationItem {
   description?: string;
 }
 
-export function Certifications({ certifications: customCertifications }: { certifications?: any[] } = {}) {
+export function Certifications({ certifications: customCertifications }: { certifications?: CertificationItem[] } = {}) {
   const certifications = customCertifications || defaultCertifications;
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const typedCertifications = certifications as CertificationItem[];
@@ -77,6 +77,7 @@ export function Certifications({ certifications: customCertifications }: { certi
                   {/* Photo Thumbnail Header (if present) */}
                   {hasPhoto ? (
                     <div className="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800/60 cursor-zoom-in" onClick={() => setSelectedPhoto(cert.photo ?? null)}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={cert.photo}
                         alt={`${certTitle} preview`}
@@ -170,6 +171,7 @@ export function Certifications({ certifications: customCertifications }: { certi
             >
               <X className="w-5 h-5" />
             </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedPhoto}
               alt="Certificate Credential"
