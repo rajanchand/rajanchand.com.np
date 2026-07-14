@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     if (dbError) {
-      console.error("Database update error for password:", dbError.message || dbError);
+      console.error("Database update error for password:", dbError instanceof Error ? dbError.message : dbError);
       return NextResponse.json({
         success: true,
         message: "Password updated locally, but failed to sync to Supabase database. Make sure Supabase connection is functional."
