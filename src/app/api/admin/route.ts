@@ -117,6 +117,20 @@ export async function POST(request: Request) {
       }
     }
 
+    // Preserve existing _adminPasswordHash when saving content edits
+    try {
+      const { data: existingData } = await supabase
+        .from("portfolio")
+        .select("content")
+        .eq("id", 1)
+        .maybeSingle();
+      if (existingData?.content?._adminPasswordHash) {
+        sanitizedData._adminPasswordHash = existingData.content._adminPasswordHash;
+      }
+    } catch (e: unknown) {
+      console.warn("Failed to fetch existing password hash during save:", e);
+    }
+
     // 1. Write to the local JSON file (so local environment stays in sync)
     try {
       fs.writeFileSync(dataFilePath, JSON.stringify(sanitizedData, null, 2), "utf8");

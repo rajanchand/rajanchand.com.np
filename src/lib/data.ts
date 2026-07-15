@@ -82,8 +82,10 @@ export async function loadPortfolioData() {
       .maybeSingle();
 
     if (!error && dbData && dbData.content) {
-      updatePortfolioData(dbData.content);
-      return dbData.content;
+      const content = { ...dbData.content };
+      delete content._adminPasswordHash;
+      updatePortfolioData(content);
+      return content;
     }
   } catch (err) {
     console.error("Error loading portfolio data from Supabase:", err);

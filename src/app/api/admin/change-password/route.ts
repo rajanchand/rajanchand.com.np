@@ -65,14 +65,25 @@ export async function POST(request: Request) {
       console.warn("Failed to write credentials.json locally (likely serverless environment):", fsErr);
     }
 
-    // 4. Write to Supabase under row id = 2
+    // 4. Write to Supabase under row id = 1 (_adminPasswordHash inside content)
     let dbError = null;
     try {
+      const { data: existingData } = await supabase
+        .from("portfolio")
+        .select("content")
+        .eq("id", 1)
+        .maybeSingle();
+
+      const updatedContent = {
+        ...(existingData?.content || {}),
+        _adminPasswordHash: newHash,
+      };
+
       const { error } = await supabase
         .from("portfolio")
         .upsert({
-          id: 2,
-          content: { passwordHash: newHash },
+          id: 1,
+          content: updatedContent,
           updated_at: new Date().toISOString()
         });
       dbError = error;

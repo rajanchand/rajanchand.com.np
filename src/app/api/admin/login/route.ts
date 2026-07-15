@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { getClientIp, verifyAdminPassword, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { getClientIp, verifyAdminPassword, getAdminPasswordHash, SESSION_COOKIE_NAME } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 
@@ -11,7 +11,8 @@ const loginRateLimiter = createRateLimiter({
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.ADMIN_SESSION_SECRET || !process.env.ADMIN_PASSWORD_HASH) {
+    const targetHash = await getAdminPasswordHash();
+    if (!process.env.ADMIN_SESSION_SECRET || !targetHash) {
       console.error("Admin login attempted but ADMIN_SESSION_SECRET/ADMIN_PASSWORD_HASH are not configured");
       return NextResponse.json(
         { success: false, error: "Server misconfigured. Contact the site owner." },

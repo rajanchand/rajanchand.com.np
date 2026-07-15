@@ -30,7 +30,9 @@ export async function GET() {
       .maybeSingle();
 
     if (!error && dbData && dbData.content) {
-      return NextResponse.json(dbData.content);
+      const content = { ...dbData.content };
+      delete content._adminPasswordHash;
+      return NextResponse.json(content);
     }
 
     if (error) {

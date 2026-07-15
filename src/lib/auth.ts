@@ -44,10 +44,10 @@ export async function getAdminPasswordHash(): Promise<string | null> {
     const { data, error } = await supabase
       .from("portfolio")
       .select("content")
-      .eq("id", 2)
+      .eq("id", 1)
       .maybeSingle();
-    if (!error && data?.content?.passwordHash) {
-      return data.content.passwordHash;
+    if (!error && data?.content?._adminPasswordHash) {
+      return data.content._adminPasswordHash;
     }
   } catch (err) {
     console.warn("Supabase fetch failed in getAdminPasswordHash:", err);
