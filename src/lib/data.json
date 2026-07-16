@@ -293,9 +293,9 @@
       ],
       "type": "education",
       "title": "MSc Information Technology",
-      "period": "JAN 2025-May 2026",
+      "period": "Jan 2025 — Present",
       "company": "University of the West of Scotland",
-      "duration": "JAN 2025-May 2026",
+      "duration": "Jan 2025 — Present",
       "companyUrl": "https://www.uws.ac.uk/",
       "description": "Advanced studies in information technology with focus on modern computing systems, digital innovation, and network security research."
     },
@@ -306,15 +306,13 @@
         "Escalation Design",
         "IPTV",
         "Vendor Coordination",
-        "Issue Escalated",
         "Network Design",
-        "Planning",
-        "Customer support",
-        "Team management"
+        "Customer Support",
+        "Team Management"
       ],
       "type": "work",
-      "title": "Supervisor-Customer Service",
-      "period": "2022— 2024",
+      "title": "Supervisor - Customer Service & Escalations",
+      "period": "2022 — 2024",
       "bullets": [
         "Managed vendor escalations and end-to-end technical case handling, acting as primary liaison between customers, internal engineering teams and external vendors.",
         "Logged, analyzed and acted on incidents promptly; contributed to incident reports, RCA documentation and post-incident reviews.",
@@ -334,17 +332,16 @@
         "Enterprise Networking",
         "Raisecom",
         "Nokia",
-        "OLT configurations",
+        "OLT Configurations",
         "Network Design",
-        "Planning",
-        "Router",
-        "Customer support"
+        "Routing Protocols",
+        "Customer Support"
       ],
       "type": "work",
-      "title": "Technical Supervisor-Outdoor Network Management",
+      "title": "Technical Supervisor - Outdoor Network Management",
       "period": "2019 — 2022",
       "bullets": [
-        " Supported and maintained core network infrastructure including switches, firewalls, VPNs and wireless networks across multiple regional sites, ensuring high availability and reliability.",
+        "Supported and maintained core network infrastructure including switches, firewalls, VPNs and wireless networks across multiple regional sites, ensuring high availability and reliability.",
         "Performed network configurations and implemented changes on routers, switches, firewalls and security appliances; carried out routine testing, monitoring and configuration backups.",
         "Collaborated with network architects to design and implement enterprise LAN/WAN solutions, and prepared network diagrams and operational documentation reflecting current state.",
         "Used DHCP, DNS and basic enterprise LAN/WAN concepts to diagnose and resolve connectivity issues at customer and office sites.",
@@ -445,27 +442,39 @@
   "certifications": [
     {
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
-      "title": "DevOps",
-      "issuer": "TechAxis"
+      "title": "DevOps & Cloud Systems Architecture",
+      "issuer": "TechAxis",
+      "date": "2024",
+      "credentialId": "TA-DEVOPS-2024",
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
+      "description": "Hands-on training covering CI/CD pipelines, Docker containerization, infrastructure monitoring, and automated deployment."
     },
     {
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
-      "title": "Cybersecurity Awareness",
-      "issuer": "APNIC"
+      "title": "Cybersecurity Awareness & Threat Mitigation",
+      "issuer": "APNIC",
+      "date": "2023",
+      "credentialId": "APNIC-CYBER-2023",
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
+      "description": "Carrier-grade Internet registry security training focusing on BGP security, RPKI, and network threat defense."
     },
     {
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
-      "title": "NSE 1 Network Security Associate ",
-      "issuer": "Fortinite"
+      "title": "NSE 1 Network Security Associate",
+      "issuer": "Fortinet",
+      "date": "2023",
+      "credentialId": "FT-NSE1-8849",
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
+      "description": "Comprehensive understanding of key network security threats, Fortinet Security Fabric, and firewall infrastructure."
     },
     {
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
-      "title": "Network Devices and Inital Configurations",
-      "issuer": "Cisco"
-    },
-    {
-      "title": "",
-      "issuer": ""
+      "title": "Network Devices and Initial Configurations",
+      "issuer": "Cisco",
+      "date": "2022",
+      "credentialId": "CSCO-NDIC-2022",
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
+      "description": "Cisco Networking Academy certification on switch/router IOS setup, VLAN configuration, and IPv4/IPv6 routing."
     }
   ]
 }
