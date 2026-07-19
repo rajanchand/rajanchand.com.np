@@ -41,6 +41,32 @@ function parsePeriodYears(period: string): { start: number; end: number } {
   return { start, end };
 }
 
+// Helper to parse and sanitize tags into clean individual badge items
+function parseTags(tags?: any): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) {
+    return tags.flatMap((t) => {
+      if (typeof t === "string") {
+        // Split concatenated strings by comma, or camelCase boundaries if concatenated
+        return t
+          .replace(/([a-z])([A-Z])/g, "$1, $2")
+          .split(/,|\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      return String(t);
+    });
+  }
+  if (typeof tags === "string") {
+    return tags
+      .replace(/([a-z])([A-Z])/g, "$1, $2")
+      .split(/,|\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 // Compare function for sorting items in descending chronological order (newest to oldest)
 const sortDescending = (a: ExperienceItem, b: ExperienceItem) => {
   const aYears = parsePeriodYears(a.period);
@@ -152,11 +178,11 @@ export function Experience({ experience: customExperience }: { experience?: any[
                       )}
 
                       {/* Badges/Tags */}
-                      {item.tags && item.tags.length > 0 && (
+                      {parseTags(item.tags).length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-2">
-                          {item.tags.map((tag) => (
+                          {parseTags(item.tags).map((tag, idx) => (
                             <span
-                              key={tag}
+                              key={`${tag}-${idx}`}
                               className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
                             >
                               {tag}
@@ -234,11 +260,11 @@ export function Experience({ experience: customExperience }: { experience?: any[
                       )}
 
                       {/* Badges/Tags */}
-                      {item.tags && item.tags.length > 0 && (
+                      {parseTags(item.tags).length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-2">
-                          {item.tags.map((tag) => (
+                          {parseTags(item.tags).map((tag, idx) => (
                             <span
-                              key={tag}
+                              key={`${tag}-${idx}`}
                               className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
                             >
                               {tag}

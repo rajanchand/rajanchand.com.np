@@ -5,6 +5,32 @@ import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
 
+// Helper to parse and sanitize tags into clean individual badge items
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseTags(tags?: any): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) {
+    return tags.flatMap((t) => {
+      if (typeof t === "string") {
+        return t
+          .replace(/([a-z])([A-Z])/g, "$1, $2")
+          .split(/,|\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      return String(t);
+    });
+  }
+  if (typeof tags === "string") {
+    return tags
+      .replace(/([a-z])([A-Z])/g, "$1, $2")
+      .split(/,|\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Projects({ projects: customProjects }: { projects?: any[] } = {}) {
   const projects = customProjects || defaultProjects;
@@ -40,6 +66,7 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch my-12">
             {projects.map((proj, i) => {
               const Icon = getIcon(proj.icon || "FolderGit2") || FolderGit2;
+              const formattedTags = parseTags(proj.tags);
               return (
                 <ScrollReveal key={proj.title} delay={i * 0.1}>
                   <div className="group relative flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-900/60 rounded-[24px] border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 hover:shadow-[0_15px_45px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_15px_45px_rgba(59,130,246,0.15)] transition-all duration-500 ease-out cursor-default">
@@ -96,9 +123,9 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
                     <div>
                       {/* Tech Stack Badges */}
                       <div className="flex flex-wrap gap-2 mt-5">
-                        {proj.tags?.map((tag: string) => (
+                        {formattedTags.map((tag: string, idx: number) => (
                           <span
-                            key={tag}
+                            key={`${tag}-${idx}`}
                             className="px-2.5 py-1 text-[10px] md:text-xs font-semibold rounded-lg bg-slate-50 dark:bg-slate-900/55 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800/80"
                           >
                             {tag}
