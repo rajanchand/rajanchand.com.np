@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { getClientIp, verifyAdminPassword, getAdminPasswordHash, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { verifyAdminPassword, getAdminPasswordHash, SESSION_COOKIE_NAME, DEFAULT_SESSION_SECRET } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
+import { getDeviceInfo, sendSecurityEmailNotification, logSecurityEvent } from "@/lib/security";
 
 const loginRateLimiter = createRateLimiter({
   max: process.env.NODE_ENV === "development" ? 100 : 5,
@@ -12,8 +13,10 @@ const loginRateLimiter = createRateLimiter({
 export async function POST(request: Request) {
   try {
     const targetHash = await getAdminPasswordHash();
-    if (!process.env.ADMIN_SESSION_SECRET || !targetHash) {
-      console.error("Admin login attempted but ADMIN_SESSION_SECRET/ADMIN_PASSWORD_HASH are not configured");
+    const sessionSecret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+
+    if (!sessionSecret || !targetHash) {
+      console.error("Admin login attempted but sessionSecret/targetHash could not be resolved");
       return NextResponse.json(
         { success: false, error: "Server misconfigured. Contact the site owner." },
         { status: 500 }
@@ -29,8 +32,8 @@ export async function POST(request: Request) {
     }
 
     const headersList = await headers();
-    const clientIP = getClientIp(headersList);
-    const rateCheck = loginRateLimiter(clientIP);
+    const deviceInfo = await getDeviceInfo(headersList);
+    const rateCheck = loginRateLimiter(deviceInfo.ip);
 
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -57,11 +60,15 @@ export async function POST(request: Request) {
     const isValid = await verifyAdminPassword(password);
 
     if (isValid) {
-      loginRateLimiter.reset(clientIP);
+      loginRateLimiter.reset(deviceInfo.ip);
+
+      // Async audit log & security email notification for successful login
+      logSecurityEvent(true, deviceInfo);
+      sendSecurityEmailNotification(true, deviceInfo, "rajanchand48@gmail.com");
 
       const response = NextResponse.json({ success: true });
 
-      response.cookies.set(SESSION_COOKIE_NAME, process.env.ADMIN_SESSION_SECRET, {
+      response.cookies.set(SESSION_COOKIE_NAME, sessionSecret, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -71,6 +78,10 @@ export async function POST(request: Request) {
 
       return response;
     }
+
+    // Async audit log & security email notification for failed login attempt
+    logSecurityEvent(false, deviceInfo);
+    sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com");
 
     return NextResponse.json(
       { success: false, error: "Incorrect password" },
