@@ -39,7 +39,7 @@ import {
   AlertTriangle,
   KeyRound,
   ExternalLink,
-  Image,
+  Image as ImageIcon,
   FileText,
   Calendar,
   Hash,
@@ -2477,7 +2477,7 @@ export default function AdminDashboard() {
                         RefreshCw, Upload, ExternalLink, Calendar, Hash, Link2, Clock,
                         Fingerprint, ShieldCheck, FolderGit2, Github, Code, Award,
                         BookOpen, Briefcase, User, Save, LogOut, Plus, Trash2, ChevronRight,
-                        Check, AlertTriangle, KeyRound, Image, FileText, Bold, Italic,
+                        Check, AlertTriangle, KeyRound, Image: ImageIcon, FileText, Bold, Italic,
                         Heading1, Heading2, List, ListOrdered, GripVertical, X,
                       };
                       const PreviewIconComponent = iconMap[iconName] || Cpu;
@@ -2519,7 +2519,7 @@ export default function AdminDashboard() {
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
                                   <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
-                                    <Image aria-hidden className="w-2.5 h-2.5" /> Lucide Icon
+                                    <ImageIcon aria-hidden className="w-2.5 h-2.5" /> Lucide Icon
                                   </label>
                                   <input
                                     type="text"
@@ -3085,7 +3085,7 @@ export default function AdminDashboard() {
                             {/* Photo Uploader */}
                             <div className="shrink-0 space-y-2">
                               <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
-                                <Image aria-hidden className="w-3 h-3" /> Certificate Photo
+                                <ImageIcon aria-hidden className="w-3 h-3" /> Certificate Photo
                               </label>
                               <div className="relative w-32 h-24 rounded-xl border-2 border-dashed border-[var(--glass-border)] hover:border-amber-500/30 bg-[var(--glass-bg)]/30 overflow-hidden group/photo transition-colors cursor-pointer">
                                 {cert.photo ? (

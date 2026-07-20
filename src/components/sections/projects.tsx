@@ -6,8 +6,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
 
 // Helper to parse and sanitize tags into clean individual badge items
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseTags(tags?: any): string[] {
+function parseTags(tags?: unknown): string[] {
   if (!tags) return [];
   if (Array.isArray(tags)) {
     return tags.flatMap((t) => {

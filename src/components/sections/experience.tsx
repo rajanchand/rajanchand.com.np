@@ -42,7 +42,7 @@ function parsePeriodYears(period: string): { start: number; end: number } {
 }
 
 // Helper to parse and sanitize tags into clean individual badge items
-function parseTags(tags?: any): string[] {
+function parseTags(tags?: unknown): string[] {
   if (!tags) return [];
   if (Array.isArray(tags)) {
     return tags.flatMap((t) => {
