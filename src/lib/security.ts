@@ -224,7 +224,7 @@ export async function sendOtpEmailNotification(
 
   if (resendApiKey) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${resendApiKey}`,
@@ -237,14 +237,19 @@ export async function sendOtpEmailNotification(
           html: htmlContent,
         }),
       });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("[RESEND EMAIL DISPATCH FAILED]", res.status, errorText);
+      } else {
+        console.log(`[RESEND EMAIL SENT] Successfully delivered OTP notification to ${adminEmail}`);
+      }
     } catch (err) {
-      console.warn("Resend OTP email dispatch error:", err);
+      console.error("[RESEND FETCH ERROR]", err);
     }
   } else {
-    console.log(`\n======================================================`);
+    console.warn(`[SECURITY WARNING] RESEND_API_KEY is not configured in environment variables. Email to ${adminEmail} skipped.`);
     console.log(`[OTP DISPATCH] To: ${adminEmail} | 6-Digit OTP: ${otpCode}`);
-    console.log(`[DETAILS] IP: ${deviceInfo.ip} | Browser: ${deviceInfo.browser} | Location: ${locationStr}`);
-    console.log(`======================================================\n`);
+    console.log(`[DETAILS] IP: ${deviceInfo.ip} | ISP: ${deviceInfo.isp} | OS: ${deviceInfo.os} | Location: ${locationStr}`);
   }
 }
 
@@ -339,7 +344,7 @@ export async function sendSecurityEmailNotification(
 
   if (resendApiKey) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${resendApiKey}`,
@@ -352,11 +357,19 @@ export async function sendSecurityEmailNotification(
           html: htmlContent,
         }),
       });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("[RESEND EMAIL DISPATCH FAILED]", res.status, errorText);
+      } else {
+        console.log(`[RESEND SECURITY ALERT SENT] Successfully delivered alert to ${adminEmail}`);
+      }
     } catch (err) {
-      console.warn("Resend email dispatch error:", err);
+      console.error("[RESEND FETCH ERROR]", err);
     }
   } else {
+    console.warn(`[SECURITY WARNING] RESEND_API_KEY is not configured in environment variables. Email to ${adminEmail} skipped.`);
     console.log(`[SECURITY NOTIFICATION] To: ${adminEmail} | Subject: ${subject}`);
+    console.log(`[ATTEMPT DETAILS] IP: ${deviceInfo.ip} | ISP: ${deviceInfo.isp} | OS: ${deviceInfo.os} | Location: ${locationStr}`);
   }
 }
 
