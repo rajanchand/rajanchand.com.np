@@ -13,6 +13,48 @@ export interface SecurityDeviceInfo {
   userAgent: string;
 }
 
+// In-memory OTP storage for pending 2FA authentication
+interface PendingOtp {
+  code: string;
+  expiresAt: number;
+}
+
+const pendingOtps = new Map<string, PendingOtp>();
+
+export function generateOtpCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+export function storePendingOtp(ip: string, code: string) {
+  // OTP valid for 10 minutes
+  pendingOtps.set(ip, {
+    code,
+    expiresAt: Date.now() + 10 * 60 * 1000,
+  });
+}
+
+export function verifyPendingOtp(ip: string, enteredCode: string): boolean {
+  const pending = pendingOtps.get(ip);
+  if (!pending) return false;
+
+  if (Date.now() > pending.expiresAt) {
+    pendingOtps.delete(ip);
+    return false;
+  }
+
+  const isValid = pending.code.trim() === enteredCode.trim();
+  if (isValid) {
+    pendingOtps.delete(ip);
+  }
+  return isValid;
+}
+
+export function getPendingOtpCode(ip: string): string | null {
+  const pending = pendingOtps.get(ip);
+  if (!pending || Date.now() > pending.expiresAt) return null;
+  return pending.code;
+}
+
 export function parseUserAgent(ua: string) {
   const result = {
     browser: "Unknown Browser",
@@ -98,6 +140,104 @@ export async function getDeviceInfo(headersList: Headers): Promise<SecurityDevic
   };
 }
 
+export async function sendOtpEmailNotification(
+  otpCode: string,
+  deviceInfo: SecurityDeviceInfo,
+  adminEmail: string = "rajanchand48@gmail.com"
+) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const timestampUTC = new Date().toUTCString();
+  const locationStr = [deviceInfo.city, deviceInfo.region, deviceInfo.country]
+    .filter((s) => s && s !== "Unknown")
+    .join(", ") || "Unknown Location";
+
+  const subject = `🔐 ${otpCode} is your Admin 2FA Login OTP Code`;
+
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 16px; background-color: #ffffff; color: #1f2937;">
+      <div style="margin-bottom: 24px; border-bottom: 2px solid #2563eb; padding-bottom: 12px; text-align: center;">
+        <h2 style="margin: 0; font-size: 22px; color: #1e40af;">Admin Portal Two-Factor Authentication</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Rajan Chand Portfolio System Security</p>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6; color: #374151;">Hi Rajan,</p>
+      <p style="font-size: 14px; line-height: 1.6; color: #374151;">
+        A sign-in request was initiated for your Admin Account (<strong>${adminEmail}</strong>). Please enter the following 6-digit OTP code to complete your login:
+      </p>
+
+      <div style="background-color: #f0f9ff; border: 2px dashed #0284c7; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0;">
+        <span style="font-size: 36px; font-weight: 800; letter-spacing: 0.35em; color: #0369a1; font-family: monospace; display: inline-block; padding-left: 0.35em;">${otpCode}</span>
+        <p style="margin: 8px 0 0 0; font-size: 12px; color: #0369a1; font-weight: 600;">Valid for 10 minutes &bull; Do not share this code with anyone</p>
+      </div>
+
+      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <h3 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563;">
+          Sign-In Request Details
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; color: #6b7280; width: 120px;">Device / OS:</td>
+            <td style="padding: 6px 0; font-weight: 600;">${deviceInfo.browser} &bull; ${deviceInfo.os} (${deviceInfo.deviceType})</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #6b7280;">Time (UTC):</td>
+            <td style="padding: 6px 0; font-family: monospace;">${timestampUTC}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #6b7280;">Location:</td>
+            <td style="padding: 6px 0; font-weight: 600;">${locationStr}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #6b7280;">IP Address:</td>
+            <td style="padding: 6px 0; font-family: monospace; font-weight: 600;">${deviceInfo.ip}</td>
+          </tr>
+          ${
+            deviceInfo.isp
+              ? `<tr>
+                  <td style="padding: 6px 0; color: #6b7280;">Network / ISP:</td>
+                  <td style="padding: 6px 0;">${deviceInfo.isp}</td>
+                </tr>`
+              : ""
+          }
+        </table>
+      </div>
+
+      <p style="font-size: 12px; color: #6b7280; line-height: 1.5;">
+        If you did not initiate this sign-in attempt, someone may have entered your password. Please review your account security immediately.
+      </p>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f3f4f6; font-size: 11px; color: #9ca3af; text-align: center;">
+        Rajan Chand Portfolio Security Telemetry Engine &bull; ${adminEmail}
+      </div>
+    </div>
+  `;
+
+  if (resendApiKey) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Security Audit <onboarding@resend.dev>",
+          to: [adminEmail],
+          subject,
+          html: htmlContent,
+        }),
+      });
+    } catch (err) {
+      console.warn("Resend OTP email dispatch error:", err);
+    }
+  } else {
+    console.log(`\n======================================================`);
+    console.log(`[OTP DISPATCH] To: ${adminEmail} | 6-Digit OTP: ${otpCode}`);
+    console.log(`[DETAILS] IP: ${deviceInfo.ip} | Browser: ${deviceInfo.browser} | Location: ${locationStr}`);
+    console.log(`======================================================\n`);
+  }
+}
+
 export async function sendSecurityEmailNotification(
   success: boolean,
   deviceInfo: SecurityDeviceInfo,
@@ -114,11 +254,11 @@ export async function sendSecurityEmailNotification(
     : `⚠️ ALERT: Failed Admin Login Attempt Detected for ${adminEmail}`;
 
   const statusBadge = success
-    ? `<span style="color:#10b981;font-weight:bold;">✅ SUCCESSFUL SIGN-IN</span>`
+    ? `<span style="color:#10b981;font-weight:bold;">✅ SUCCESSFUL 2FA SIGN-IN</span>`
     : `<span style="color:#ef4444;font-weight:bold;">❌ FAILED (Incorrect Password)</span>`;
 
   const htmlContent = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; rounded-radius: 12px; background-color: #ffffff; color: #1f2937;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 16px; background-color: #ffffff; color: #1f2937;">
       <div style="margin-bottom: 20px; border-bottom: 2px solid ${success ? '#3b82f6' : '#ef4444'}; padding-bottom: 12px;">
         <h2 style="margin: 0; font-size: 20px; color: ${success ? '#1e3a8a' : '#991b1b'};">
           ${success ? 'New Sign-On Detected' : '⚠️ Security Alert: Unauthorized Login Attempt'}
@@ -138,7 +278,7 @@ export async function sendSecurityEmailNotification(
       </p>
 
       <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 20px 0;">
-        <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563;">
+        <h3 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #4b5563;">
           Sign-In Activity Details
         </h3>
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">

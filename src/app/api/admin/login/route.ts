@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { verifyAdminPassword, getAdminPasswordHash, SESSION_COOKIE_NAME, DEFAULT_SESSION_SECRET } from "@/lib/auth";
+import { verifyAdminPassword, getAdminPasswordHash, DEFAULT_SESSION_SECRET } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
-import { getDeviceInfo, sendSecurityEmailNotification, logSecurityEvent } from "@/lib/security";
+import {
+  getDeviceInfo,
+  generateOtpCode,
+  storePendingOtp,
+  sendOtpEmailNotification,
+  sendSecurityEmailNotification,
+  logSecurityEvent,
+} from "@/lib/security";
 
 const loginRateLimiter = createRateLimiter({
   max: process.env.NODE_ENV === "development" ? 100 : 5,
@@ -62,29 +69,28 @@ export async function POST(request: Request) {
     if (isValid) {
       loginRateLimiter.reset(deviceInfo.ip);
 
-      // Async audit log & security email notification for successful login
-      logSecurityEvent(true, deviceInfo);
-      sendSecurityEmailNotification(true, deviceInfo, "rajanchand48@gmail.com");
+      // Generate 6-digit OTP code & store pending state
+      const otpCode = generateOtpCode();
+      storePendingOtp(deviceInfo.ip, otpCode);
 
-      const response = NextResponse.json({ success: true });
+      // Dispatch 2FA OTP Email
+      await sendOtpEmailNotification(otpCode, deviceInfo, "rajanchand48@gmail.com");
 
-      response.cookies.set(SESSION_COOKIE_NAME, sessionSecret, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 7, // 1 week
-        path: "/",
+      return NextResponse.json({
+        success: true,
+        requireOtp: true,
+        email: "rajanchand48@gmail.com",
+        // In dev mode, return OTP in payload so user can test without open email box if needed
+        ...(process.env.NODE_ENV === "development" ? { debugOtp: otpCode } : {}),
       });
-
-      return response;
     }
 
-    // Async audit log & security email notification for failed login attempt
-    logSecurityEvent(false, deviceInfo);
-    sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com");
+    // FAILED LOGIN: Log event & send instant security alert email
+    await logSecurityEvent(false, deviceInfo);
+    await sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com");
 
     return NextResponse.json(
-      { success: false, error: "Incorrect password" },
+      { success: false, error: "Incorrect password. Security alert sent to rajanchand48@gmail.com" },
       { status: 401 }
     );
   } catch (error) {
