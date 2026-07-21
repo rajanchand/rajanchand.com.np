@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, DEFAULT_SESSION_SECRET } from "@/lib/auth";
-import { getDeviceInfo, verifyPendingOtp, sendSecurityEmailNotification, logSecurityEvent } from "@/lib/security";
+import {
+  getDeviceInfo,
+  verifySignedOtpToken,
+  OTP_COOKIE_NAME,
+  sendSecurityEmailNotification,
+  logSecurityEvent,
+} from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +30,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const cookieStore = await cookies();
+    const tokenCookie = cookieStore.get(OTP_COOKIE_NAME);
+    const tokenValue = tokenCookie?.value;
+
     const headersList = await headers();
     const deviceInfo = await getDeviceInfo(headersList);
 
-    const isOtpValid = verifyPendingOtp(deviceInfo.ip, otp);
+    const isOtpValid = verifySignedOtpToken(tokenValue, otp);
     if (!isOtpValid) {
-      // Log failed OTP attempt
       logSecurityEvent(false, deviceInfo);
       return NextResponse.json(
         { success: false, error: "Invalid or expired OTP code. Please check your email and try again." },
@@ -37,12 +46,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Success! Log security event & send final login notification
+    // Success! Log security event & send final sign-in email
     logSecurityEvent(true, deviceInfo);
     sendSecurityEmailNotification(true, deviceInfo, "rajanchand48@gmail.com");
 
     const response = NextResponse.json({ success: true, redirect: "/admin/dashboard" });
 
+    // Set admin session cookie
     response.cookies.set(SESSION_COOKIE_NAME, sessionSecret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -50,6 +60,9 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: "/",
     });
+
+    // Clear pending OTP cookie
+    response.cookies.delete(OTP_COOKIE_NAME);
 
     return response;
   } catch (error) {

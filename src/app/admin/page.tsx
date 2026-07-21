@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw } from "lucide-react";
+import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw, Info } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
 export default function AdminLogin() {
@@ -14,6 +14,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [debugOtp, setDebugOtp] = useState<string | null>(null);
+  const [hasResendKey, setHasResendKey] = useState<boolean>(true);
   const router = useRouter();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -33,10 +34,9 @@ export default function AdminLogin() {
 
       if (data.success && data.requireOtp) {
         setStep("otp");
-        setInfoMsg(`A 6-digit OTP code has been sent to ${data.email || "your email"}.`);
-        if (data.debugOtp) {
-          setDebugOtp(data.debugOtp);
-        }
+        setInfoMsg(`A 6-digit OTP code has been issued for ${data.email || "your account"}.`);
+        if (data.debugOtp) setDebugOtp(data.debugOtp);
+        if (data.hasResendKey !== undefined) setHasResendKey(data.hasResendKey);
         setLoading(false);
       } else if (data.success) {
         setSuccess(true);
@@ -73,7 +73,7 @@ export default function AdminLogin() {
           router.push("/admin/dashboard");
         }, 1000);
       } else {
-        setError(data.error || "Invalid OTP code");
+        setError(data.error || "Invalid or expired OTP code");
         setLoading(false);
       }
     } catch {
@@ -95,7 +95,7 @@ export default function AdminLogin() {
 
       const data = await response.json();
       if (data.success && data.requireOtp) {
-        setInfoMsg(`A new 6-digit OTP code has been sent to ${data.email || "your email"}.`);
+        setInfoMsg(`A new 6-digit OTP code has been generated.`);
         if (data.debugOtp) setDebugOtp(data.debugOtp);
       } else {
         setError(data.error || "Failed to resend OTP");
@@ -192,10 +192,23 @@ export default function AdminLogin() {
                   <Mail className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span>{infoMsg}</span>
-                    {debugOtp && (
-                      <div className="mt-1 font-mono font-bold text-amber-500">
-                        [Dev Mode OTP: {debugOtp}]
-                      </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Display generated OTP for testing if RESEND_API_KEY is not yet added in Vercel */}
+              {debugOtp && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs text-amber-600 dark:text-amber-400">
+                  <Info className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+                  <div>
+                    <span className="font-bold block">Generated 2FA OTP Code:</span>
+                    <span className="text-xl font-mono font-extrabold tracking-[0.25em] text-amber-500 my-1 block">
+                      {debugOtp}
+                    </span>
+                    {!hasResendKey && (
+                      <span className="text-[11px] opacity-90 block mt-1">
+                        To receive emails in your inbox, set <code className="font-mono bg-amber-500/20 px-1 py-0.5 rounded">RESEND_API_KEY</code> on Vercel.
+                      </span>
                     )}
                   </div>
                 </div>
@@ -210,12 +223,12 @@ export default function AdminLogin() {
                   type="text"
                   maxLength={6}
                   pattern="\d{6}"
-                  placeholder="8 4 9 2 0 1"
+                  placeholder="123456"
                   required
                   autoFocus
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-center text-xl font-mono tracking-[0.3em] font-bold text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] placeholder:tracking-normal focus:outline-none focus:border-[var(--primary)] transition-colors"
+                  className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-center text-2xl font-mono tracking-[0.35em] font-bold text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/30 placeholder:tracking-normal focus:outline-none focus:border-[var(--primary)] transition-colors"
                 />
               </div>
 
@@ -229,7 +242,7 @@ export default function AdminLogin() {
               {success && (
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500">
                   <CheckCircle className="w-5 h-5 shrink-0" />
-                  <span>2FA Verified! Redirecting to Dashboard...</span>
+                  <span>2FA Verified! Access Granted...</span>
                 </div>
               )}
 
@@ -239,7 +252,7 @@ export default function AdminLogin() {
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_35px_var(--glow-primary)] text-white font-semibold rounded-xl text-sm transition-all duration-300 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5"
               >
                 {loading ? (
-                  <span>Verifying OTP...</span>
+                  <span>Verifying Code...</span>
                 ) : (
                   <>
                     <span>Verify Code & Sign In</span>

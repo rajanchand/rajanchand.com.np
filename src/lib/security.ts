@@ -13,46 +13,56 @@ export interface SecurityDeviceInfo {
   userAgent: string;
 }
 
-// In-memory OTP storage for pending 2FA authentication
-interface PendingOtp {
-  code: string;
-  expiresAt: number;
-}
+import crypto from "crypto";
+import { DEFAULT_SESSION_SECRET } from "@/lib/auth";
 
-const pendingOtps = new Map<string, PendingOtp>();
+export const OTP_COOKIE_NAME = "pending_otp_token";
 
 export function generateOtpCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export function storePendingOtp(ip: string, code: string) {
-  // OTP valid for 10 minutes
-  pendingOtps.set(ip, {
-    code,
-    expiresAt: Date.now() + 10 * 60 * 1000,
-  });
+export function createSignedOtpToken(otpCode: string): { token: string; expiresAt: number } {
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+  const secret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+  const hmac = crypto
+    .createHmac("sha256", secret)
+    .update(`${otpCode}:${expiresAt}`)
+    .digest("hex");
+
+  return {
+    token: `${otpCode}:${expiresAt}:${hmac}`,
+    expiresAt,
+  };
 }
 
-export function verifyPendingOtp(ip: string, enteredCode: string): boolean {
-  const pending = pendingOtps.get(ip);
-  if (!pending) return false;
+export function verifySignedOtpToken(token: string | undefined | null, enteredOtp: string): boolean {
+  if (!token || !enteredOtp) return false;
 
-  if (Date.now() > pending.expiresAt) {
-    pendingOtps.delete(ip);
+  const parts = token.split(":");
+  if (parts.length !== 3) return false;
+
+  const [expectedOtp, expiresAtStr, hmac] = parts;
+  const expiresAt = Number(expiresAtStr);
+
+  if (isNaN(expiresAt) || Date.now() > expiresAt) {
     return false;
   }
 
-  const isValid = pending.code.trim() === enteredCode.trim();
-  if (isValid) {
-    pendingOtps.delete(ip);
-  }
-  return isValid;
-}
+  const secret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+  const expectedHmac = crypto
+    .createHmac("sha256", secret)
+    .update(`${expectedOtp}:${expiresAtStr}`)
+    .digest("hex");
 
-export function getPendingOtpCode(ip: string): string | null {
-  const pending = pendingOtps.get(ip);
-  if (!pending || Date.now() > pending.expiresAt) return null;
-  return pending.code;
+  const hmacBuf = Buffer.from(hmac);
+  const expectedBuf = Buffer.from(expectedHmac);
+
+  if (hmacBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(hmacBuf, expectedBuf)) {
+    return false;
+  }
+
+  return expectedOtp.trim() === enteredOtp.trim();
 }
 
 export function parseUserAgent(ua: string) {

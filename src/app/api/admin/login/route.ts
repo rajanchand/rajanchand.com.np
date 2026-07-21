@@ -6,7 +6,8 @@ import { serverError } from "@/lib/api-response";
 import {
   getDeviceInfo,
   generateOtpCode,
-  storePendingOtp,
+  createSignedOtpToken,
+  OTP_COOKIE_NAME,
   sendOtpEmailNotification,
   sendSecurityEmailNotification,
   logSecurityEvent,
@@ -69,20 +70,31 @@ export async function POST(request: Request) {
     if (isValid) {
       loginRateLimiter.reset(deviceInfo.ip);
 
-      // Generate 6-digit OTP code & store pending state
+      // Generate 6-digit OTP code & create signed token
       const otpCode = generateOtpCode();
-      storePendingOtp(deviceInfo.ip, otpCode);
+      const { token } = createSignedOtpToken(otpCode);
 
       // Dispatch 2FA OTP Email
       await sendOtpEmailNotification(otpCode, deviceInfo, "rajanchand48@gmail.com");
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         requireOtp: true,
         email: "rajanchand48@gmail.com",
-        // In dev mode, return OTP in payload so user can test without open email box if needed
-        ...(process.env.NODE_ENV === "development" ? { debugOtp: otpCode } : {}),
+        debugOtp: otpCode,
+        hasResendKey: !!process.env.RESEND_API_KEY,
       });
+
+      // Store signed OTP token in HTTP-only cookie for serverless verification
+      response.cookies.set(OTP_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 10, // 10 minutes
+        path: "/",
+      });
+
+      return response;
     }
 
     // FAILED LOGIN: Log event & send instant security alert email
