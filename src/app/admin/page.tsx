@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw, Info } from "lucide-react";
+import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
 export default function AdminLogin() {
@@ -13,8 +13,6 @@ export default function AdminLogin() {
   const [infoMsg, setInfoMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [debugOtp, setDebugOtp] = useState<string | null>(null);
-  const [hasResendKey, setHasResendKey] = useState<boolean>(true);
   const router = useRouter();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -34,9 +32,7 @@ export default function AdminLogin() {
 
       if (data.success && data.requireOtp) {
         setStep("otp");
-        setInfoMsg(`A 6-digit OTP code has been issued for ${data.email || "your account"}.`);
-        if (data.debugOtp) setDebugOtp(data.debugOtp);
-        if (data.hasResendKey !== undefined) setHasResendKey(data.hasResendKey);
+        setInfoMsg(`A 6-digit OTP code has been sent to ${data.email || "your email"}.`);
         setLoading(false);
       } else if (data.success) {
         setSuccess(true);
@@ -95,8 +91,7 @@ export default function AdminLogin() {
 
       const data = await response.json();
       if (data.success && data.requireOtp) {
-        setInfoMsg(`A new 6-digit OTP code has been generated.`);
-        if (data.debugOtp) setDebugOtp(data.debugOtp);
+        setInfoMsg(`A new 6-digit OTP code has been sent to your email.`);
       } else {
         setError(data.error || "Failed to resend OTP");
       }
@@ -196,24 +191,6 @@ export default function AdminLogin() {
                 </div>
               )}
 
-              {/* Display generated OTP for testing if RESEND_API_KEY is not yet added in Vercel */}
-              {debugOtp && (
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-xs text-amber-600 dark:text-amber-400">
-                  <Info className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
-                  <div>
-                    <span className="font-bold block">Generated 2FA OTP Code:</span>
-                    <span className="text-xl font-mono font-extrabold tracking-[0.25em] text-amber-500 my-1 block">
-                      {debugOtp}
-                    </span>
-                    {!hasResendKey && (
-                      <span className="text-[11px] opacity-90 block mt-1">
-                        To receive emails in your inbox, set <code className="font-mono bg-amber-500/20 px-1 py-0.5 rounded">RESEND_API_KEY</code> on Vercel.
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
               <div className="space-y-2">
                 <label htmlFor="admin-otp" className="text-xs font-semibold text-[var(--muted-foreground)] tracking-wider uppercase block">
                   6-Digit Verification Code
@@ -223,7 +200,7 @@ export default function AdminLogin() {
                   type="text"
                   maxLength={6}
                   pattern="\d{6}"
-                  placeholder="123456"
+                  placeholder="••••••"
                   required
                   autoFocus
                   value={otp}

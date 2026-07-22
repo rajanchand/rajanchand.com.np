@@ -81,7 +81,6 @@ export async function POST(request: Request) {
         success: true,
         requireOtp: true,
         email: "rajanchand48@gmail.com",
-        debugOtp: otpCode,
         hasResendKey: !!process.env.RESEND_API_KEY,
       });
 
