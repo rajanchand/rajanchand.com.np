@@ -457,7 +457,27 @@ export async function sendContactAutoReplyEmail(
         }),
       });
       if (!res.ok) {
-        console.error("[AUTO-REPLY EMAIL FAILED]", res.status, await res.text());
+        const errText = await res.text();
+        console.error("[AUTO-REPLY EMAIL FAILED]", res.status, errText);
+
+        // If Resend returns sandbox restriction (can only send to verified owner email rajanchand48@gmail.com),
+        // send copy to admin email so test auto-replies are delivered.
+        if (errText.includes("onboarding@resend.dev") || res.status === 403 || res.status === 400) {
+          console.warn("[RESEND SANDBOX RESTRICTION] Recipient email is unverified in Resend sandbox. Dispatching copy to admin email rajanchand48@gmail.com...");
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: "Rajan Prakash Chand <onboarding@resend.dev>",
+              to: ["rajanchand48@gmail.com"],
+              subject: `[AUTO-REPLY COPY for ${email}] ${emailSubject}`,
+              html: htmlContent,
+            }),
+          });
+        }
       } else {
         console.log(`[AUTO-REPLY EMAIL SENT] Successfully sent auto-reply to ${email}`);
       }
@@ -465,7 +485,8 @@ export async function sendContactAutoReplyEmail(
       console.error("[AUTO-REPLY FETCH ERROR]", err);
     }
   } else {
-    console.log(`[AUTO-REPLY DISPATCHED] To: ${email} | Subject: ${emailSubject}`);
+    console.warn("[CONTACT AUTOMATION WARNING] RESEND_API_KEY is not configured in environment variables! Physical email delivery skipped.");
+    console.log(`[AUTO-REPLY LOGGED] To: ${email} | Subject: ${emailSubject}`);
   }
 }
 
