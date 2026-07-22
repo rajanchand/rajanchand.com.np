@@ -100,174 +100,7 @@ const Sparkline = ({ points, color = "#3b82f6" }: { points: number[]; color?: st
   );
 };
 
-const AreaChart = ({ data }: { data: { label: string; visits: number; unique: number }[] }) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="h-60 flex items-center justify-center text-xs text-[var(--muted-foreground)]">
-        No telemetry records in range.
-      </div>
-    );
-  }
-
-  if (data.length === 1) {
-    return (
-      <div className="h-60 flex flex-col items-center justify-center text-xs text-[var(--muted-foreground)] gap-2">
-        <p className="font-bold text-[var(--foreground)]">{data[0].label}</p>
-        <p>{data[0].visits} visit{data[0].visits !== 1 ? "s" : ""} · {data[0].unique} unique</p>
-      </div>
-    );
-  }
-
-  const height = 240;
-  const width = 800;
-  const padding = { top: 20, right: 30, bottom: 40, left: 50 };
-
-  const maxVal = Math.max(...data.map((d) => Math.max(d.visits, d.unique)), 5);
-  const stepY = Math.ceil(maxVal / 5) || 1;
-  const maxY = stepY * 5;
-
-  const getX = (index: number) => {
-    return padding.left + (index / (data.length - 1)) * (width - padding.left - padding.right);
-  };
-
-  const getY = (val: number) => {
-    return height - padding.bottom - (val / maxY) * (height - padding.top - padding.bottom);
-  };
-
-  const visitsPath = data.map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.visits)}`).join(" ");
-  const uniquePath = data.map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.unique)}`).join(" ");
-
-  const visitsArea = `${visitsPath} L ${getX(data.length - 1)} ${getY(0)} L ${getX(0)} ${getY(0)} Z`;
-  const uniqueArea = `${uniquePath} L ${getX(data.length - 1)} ${getY(0)} L ${getX(0)} ${getY(0)} Z`;
-
-  return (
-    <div className="w-full relative">
-      <div className="w-full overflow-x-auto custom-scrollbar pb-2">
-        <svg className="w-full min-w-[650px] h-60 overflow-visible" viewBox={`0 0 ${width} ${height}`}>
-          <defs>
-            <linearGradient id="visitsGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="uniqueGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#a855f7" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Grid lines */}
-          {[0, 1, 2, 3, 4, 5].map((idx) => {
-            const val = stepY * idx;
-            const y = getY(val);
-            return (
-              <g key={idx}>
-                <line
-                  x1={padding.left}
-                  y1={y}
-                  x2={width - padding.right}
-                  y2={y}
-                  stroke="var(--border)"
-                  strokeWidth="0.8"
-                  strokeDasharray="4 4"
-                  className="opacity-70"
-                />
-                <text x={padding.left - 12} y={y + 4} fill="var(--muted-foreground)" fontSize="10" textAnchor="end">
-                  {val}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* X Labels */}
-          {data.map((d, i) => {
-            const interval = Math.ceil(data.length / 8);
-            if (i % interval !== 0 && i !== data.length - 1) return null;
-            const x = getX(i);
-            return (
-              <text key={i} x={x} y={height - padding.bottom + 22} fill="var(--muted-foreground)" fontSize="10" textAnchor="middle">
-                {d.label}
-              </text>
-            );
-          })}
-
-          {/* Fill Areas */}
-          <path d={visitsArea} fill="url(#visitsGrad)" />
-          <path d={uniqueArea} fill="url(#uniqueGrad)" />
-
-          {/* Lines */}
-          <path d={visitsPath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
-          <path d={uniquePath} fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" />
-
-          {/* Nodes */}
-          {data.map((d, i) => {
-            const x = getX(i);
-            return (
-              <g
-                key={i}
-                onMouseEnter={() => setHoveredIndex(i)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                className="cursor-pointer"
-              >
-                <rect
-                  x={x - (width / data.length) / 2}
-                  y={padding.top}
-                  width={width / data.length}
-                  height={height - padding.top - padding.bottom}
-                  fill="transparent"
-                />
-                {hoveredIndex === i && (
-                  <line
-                    x1={x}
-                    y1={padding.top}
-                    x2={x}
-                    y2={height - padding.bottom}
-                    stroke="var(--primary)"
-                    strokeWidth="1"
-                    strokeDasharray="2 2"
-                  />
-                )}
-                <circle
-                  cx={x}
-                  cy={getY(d.visits)}
-                  r={hoveredIndex === i ? 4.5 : 2.5}
-                  fill="#3b82f6"
-                  stroke="var(--card)"
-                  strokeWidth="1.5"
-                />
-                <circle
-                  cx={x}
-                  cy={getY(d.unique)}
-                  r={hoveredIndex === i ? 4.5 : 2.5}
-                  fill="#a855f7"
-                  stroke="var(--card)"
-                  strokeWidth="1.5"
-                />
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {hoveredIndex !== null && data[hoveredIndex] && (
-        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-2.5 shadow-lg text-[10px] space-y-1 z-20">
-          <p className="font-bold text-[var(--foreground)] border-b border-[var(--border)] pb-1 mb-1 text-center">
-            {data[hoveredIndex].label}
-          </p>
-          <div className="flex gap-4">
-            <span className="flex items-center gap-1 text-[#3b82f6] font-semibold">
-              Views: {data[hoveredIndex].visits}
-            </span>
-            <span className="flex items-center gap-1 text-[#a855f7] font-semibold">
-              Unique: {data[hoveredIndex].unique}
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]; colors: string[] }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -334,76 +167,7 @@ const DonutChart = ({ data, colors }: { data: { label: string; value: number }[]
   );
 };
 
-const GeographyMap = ({ recentVisitors }: { recentVisitors: any[] }) => {
-  const worldLandmasses = [
-    { name: "North America", d: "M 100,80 L 150,70 L 220,100 L 240,120 L 200,160 L 170,180 L 150,220 L 140,240 L 130,220 L 140,180 L 110,150 L 90,130 Z" },
-    { name: "Greenland", d: "M 240,40 L 290,30 L 280,70 L 250,80 Z" },
-    { name: "South America", d: "M 180,240 L 220,250 L 250,290 L 260,330 L 240,380 L 220,395 L 205,370 L 195,300 L 175,260 Z" },
-    { name: "Africa", d: "M 360,200 L 410,190 L 450,210 L 490,260 L 480,290 L 460,340 L 440,360 L 430,340 L 400,280 L 375,250 L 350,220 Z" },
-    { name: "Europe", d: "M 370,100 L 410,80 L 450,80 L 470,100 L 460,140 L 420,160 L 380,180 L 360,160 L 350,120 Z" },
-    { name: "Asia", d: "M 460,100 L 550,60 L 680,60 L 730,90 L 750,150 L 720,230 L 680,250 L 620,260 L 580,220 L 530,230 L 470,160 Z" },
-    { name: "India/Indochina", d: "M 570,200 L 590,220 L 600,260 L 570,250 L 550,220 Z" },
-    { name: "Australia", d: "M 670,300 L 730,290 L 750,330 L 710,360 L 660,330 Z" },
-    { name: "Madagascar", d: "M 490,320 L 500,340 L 495,360 Z" },
-    { name: "Japan", d: "M 740,140 L 750,160 L 745,190 Z" },
-    { name: "United Kingdom", d: "M 345,115 L 355,110 L 350,125 Z" }
-  ];
 
-  const getMapCoords = (lat: number | null, lon: number | null) => {
-    if (lat == null || lon == null) return null;
-    const x = ((lon + 180) / 360) * 800;
-    const y = ((90 - lat) / 180) * 400;
-    return { x, y };
-  };
-
-  const coords = (recentVisitors || [])
-    .map((v) => ({
-      pos: getMapCoords(v.latitude, v.longitude),
-      city: v.city,
-      country: v.country,
-      ip: v.ip_address,
-      time: new Date(v.visited_at).toLocaleTimeString()
-    }))
-    .filter((c) => c.pos !== null);
-
-  return (
-    <div className="w-full relative border border-[var(--border)] rounded-2xl p-4 overflow-hidden bg-[var(--card)]/50">
-      <div className="absolute top-4 right-4 flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-        <span className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] font-mono">Telemetry Map</span>
-      </div>
-      <div className="w-full overflow-x-auto custom-scrollbar">
-        <svg className="w-full min-w-[650px] h-80 bg-[var(--background)] border border-[var(--border)] rounded-xl overflow-hidden" viewBox="0 0 800 400">
-          <g>
-            {worldLandmasses.map((land, idx) => (
-              <path
-                key={idx}
-                d={land.d}
-                fill="rgba(100, 116, 139, 0.08)"
-                stroke="rgba(100, 116, 139, 0.25)"
-                strokeWidth="1"
-                strokeLinejoin="round"
-                className="transition-all duration-300 hover:fill-blue-500/5"
-              />
-            ))}
-          </g>
-
-          {coords.map((c: any, idx) => {
-            const { x, y } = c.pos;
-            return (
-              <g key={idx} className="cursor-pointer">
-                <circle cx={x} cy={y} r="10" fill="none" stroke="#3b82f6" strokeWidth="1" className="animate-ping" style={{ transformOrigin: `${x}px ${y}px` }} />
-                <circle cx={x} cy={y} r="5" fill="#3b82f6" opacity="0.3" />
-                <circle cx={x} cy={y} r="2.5" fill="#3b82f6" stroke="var(--card)" strokeWidth="1" />
-                <title>{`${c.city ? `${c.city}, ` : ""}${c.country}\nIP: ${c.ip}\nActive: ${c.time}`}</title>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-    </div>
-  );
-};
 
 // ==========================================
 // CORE PORTAL COMPONENT
@@ -1545,72 +1309,217 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Area Chart Container */}
-                      <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
-                        <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Traffic History Over Time</h3>
-                        <AreaChart data={analyticsData.chartData} />
-                      </div>
+                        {/* Security Audit Telemetry Breakdown */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 rounded-2xl relative overflow-hidden">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">2FA Sign-Ins (Successful)</span>
+                              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                              <h3 className="text-2xl font-extrabold font-display text-emerald-500">
+                                {analyticsData.securityStats?.successLogins ?? 0}
+                              </h3>
+                              <span className="text-[10px] font-mono font-semibold text-emerald-500/80">Verified 2FA</span>
+                            </div>
+                          </div>
 
-                      {/* Vector Map */}
-                      <GeographyMap recentVisitors={analyticsData.recentVisitors} />
+                          <div className="p-4 border border-rose-500/20 bg-rose-500/5 rounded-2xl relative overflow-hidden">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-rose-500">Failed Login Attempts</span>
+                              <AlertTriangle className="w-4 h-4 text-rose-500" />
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                              <h3 className="text-2xl font-extrabold font-display text-rose-500">
+                                {analyticsData.securityStats?.failedLogins ?? 0}
+                              </h3>
+                              <span className="text-[10px] font-mono font-semibold text-rose-500/80">Security Alerts</span>
+                            </div>
+                          </div>
 
-                      {/* Stats grids (Donuts, Paths, Channels) */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Device distributions */}
-                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
-                          <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Device Types</h3>
-                          <DonutChart
-                            data={analyticsData.topDevices.map((d: any) => ({ label: d.device, value: d.count }))}
-                            colors={["#3b82f6", "#a855f7", "#10b981"]}
-                          />
+                          <div className="p-4 border border-blue-500/20 bg-blue-500/5 rounded-2xl relative overflow-hidden">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold tracking-wider text-blue-500">Public Page Hits</span>
+                              <Globe className="w-4 h-4 text-blue-500" />
+                            </div>
+                            <div className="flex items-baseline justify-between mt-2">
+                              <h3 className="text-2xl font-extrabold font-display text-blue-500">
+                                {analyticsData.securityStats?.regularVisits ?? analyticsData.totalVisits}
+                              </h3>
+                              <span className="text-[10px] font-mono font-semibold text-blue-500/80">Public Visits</span>
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Browser distributions */}
-                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
-                          <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Browsers</h3>
-                          <DonutChart
-                            data={analyticsData.topBrowsers.map((b: any) => ({ label: b.browser, value: b.count }))}
-                            colors={["#3b82f6", "#a855f7", "#10b981", "#f59e0b", "#6366f1"]}
-                          />
+                        {/* Top Cities & ISP Carrier Networks Matrix */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Top Cities & Geolocations */}
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-[var(--primary)]" /> Top Visitor Cities & Locations
+                              </h3>
+                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Location Breakdown</span>
+                            </div>
+                            <div className="space-y-3">
+                              {(analyticsData.topCities || []).length > 0 ? (
+                                analyticsData.topCities.slice(0, 6).map((c: any, idx: number) => {
+                                  const percent = Math.round((c.count / (analyticsData.totalVisits || 1)) * 100);
+                                  return (
+                                    <div key={idx} className="space-y-1.5 border-b border-[var(--glass-border)] pb-2.5 last:border-0 last:pb-0">
+                                      <div className="flex items-center justify-between text-xs gap-2">
+                                        <div className="flex items-center gap-2 truncate">
+                                          <span className="w-5 h-5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] font-bold font-mono text-[10px] flex items-center justify-center shrink-0">
+                                            #{idx + 1}
+                                          </span>
+                                          <span className="font-semibold text-[var(--foreground)] truncate">
+                                            {c.city && c.city !== "Unknown" ? c.city : "Direct Location"}, {c.country}
+                                          </span>
+                                        </div>
+                                        <span className="font-mono text-xs font-bold text-[var(--primary)] shrink-0">
+                                          {c.count} hits ({percent}%)
+                                        </span>
+                                      </div>
+                                      <div className="w-full h-1.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full transition-all duration-500" style={{ width: `${Math.max(percent, 5)}%` }} />
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                <p className="text-xs text-[var(--muted-foreground)] py-4 text-center">No location telemetry available yet.</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Top ISPs & Carrier Networks */}
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
+                                <Wifi className="w-4 h-4 text-emerald-500" /> ISP Networks & Carriers
+                              </h3>
+                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Network Providers</span>
+                            </div>
+                            <div className="space-y-3">
+                              {(analyticsData.topISPs || []).length > 0 ? (
+                                analyticsData.topISPs.slice(0, 6).map((ispItem: any, idx: number) => {
+                                  const percent = Math.round((ispItem.count / (analyticsData.totalVisits || 1)) * 100);
+                                  return (
+                                    <div key={idx} className="space-y-1.5 border-b border-[var(--glass-border)] pb-2.5 last:border-0 last:pb-0">
+                                      <div className="flex items-center justify-between text-xs gap-2">
+                                        <div className="flex items-center gap-2 truncate">
+                                          <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold font-mono text-[10px] flex items-center justify-center shrink-0">
+                                            #{idx + 1}
+                                          </span>
+                                          <span className="font-semibold text-[var(--foreground)] truncate" title={ispItem.isp}>
+                                            {ispItem.isp}
+                                          </span>
+                                        </div>
+                                        <span className="font-mono text-xs font-bold text-emerald-500 shrink-0">
+                                          {ispItem.count} ({percent}%)
+                                        </span>
+                                      </div>
+                                      <div className="w-full h-1.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${Math.max(percent, 5)}%` }} />
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                <p className="text-xs text-[var(--muted-foreground)] py-4 text-center">No ISP network data recorded yet.</p>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Referrers */}
-                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 flex flex-col justify-between min-w-0">
-                          <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Traffic Referrers</h3>
-                          <div className="space-y-3 flex-1 overflow-y-auto max-h-[140px] pr-1">
-                            {analyticsData.topReferrers.slice(0, 4).map((ref: any, idx: number) => {
-                              const percent = Math.round((ref.count / (analyticsData.totalVisits || 1)) * 100);
+                        {/* Traffic History Grid (Replacing line chart with clean progress bar frequency cards) */}
+                        <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-purple-500" /> Traffic Distribution & Peak Frequency
+                            </h3>
+                            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Visits vs Unique IPs</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            {(analyticsData.chartData || []).slice(-8).map((point: any, idx: number) => {
+                              const maxVisits = Math.max(...(analyticsData.chartData || []).map((p: any) => p.visits), 1);
+                              const barHeight = Math.round((point.visits / maxVisits) * 100);
                               return (
-                                <div key={idx} className="flex items-center justify-between text-xs border-b border-[var(--glass-border)] pb-2 gap-2 min-w-0">
-                                  <span className="text-[var(--muted-foreground)] font-semibold truncate block min-w-0 flex-1" title={ref.referrer}>{ref.referrer}</span>
-                                  <span className="font-mono text-[var(--primary)] font-bold shrink-0">{ref.count} ({percent}%)</span>
+                                <div key={idx} className="p-3 bg-[var(--glass-bg)]/30 border border-[var(--glass-border)] rounded-xl space-y-2">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="font-mono font-bold text-[var(--foreground)]">{point.label}</span>
+                                    <span className="text-[10px] font-mono text-purple-500 font-bold">{point.visits} hits</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style={{ width: `${Math.max(barHeight, 8)}%` }} />
+                                  </div>
+                                  <div className="flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
+                                    <span>Unique IPs</span>
+                                    <span className="font-mono font-semibold text-[var(--foreground)]">{point.unique}</span>
+                                  </div>
                                 </div>
                               );
                             })}
                           </div>
                         </div>
-                      </div>
 
-                      {/* Top Visited paths list */}
-                      <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 min-w-0">
-                        <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Top Visited Paths</h3>
-                        <div className="space-y-3">
-                          {analyticsData.topPages.slice(0, 5).map((page: any, idx: number) => {
-                            const percent = Math.round((page.count / (analyticsData.totalVisits || 1)) * 100);
-                            return (
-                              <div key={idx} className="space-y-1">
-                                <div className="flex items-center justify-between text-xs gap-2 min-w-0">
-                                  <span className="font-mono text-[var(--primary)] truncate block min-w-0 flex-1" title={page.page}>{page.page}</span>
-                                  <span className="font-bold text-[var(--foreground)] shrink-0">{page.count} views ({percent}%)</span>
-                                </div>
-                                <div className="w-full h-1 bg-[var(--glass-border)] rounded-full overflow-hidden">
-                                  <div className="h-full bg-[var(--primary)] rounded-full" style={{ width: `${percent}%` }} />
-                                </div>
-                              </div>
-                            );
-                          })}
+                        {/* Stats grids (Devices, Browsers, Referrers, Top Paths) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* Device distributions */}
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Device Types</h3>
+                            <DonutChart
+                              data={analyticsData.topDevices.map((d: any) => ({ label: d.device, value: d.count }))}
+                              colors={["#3b82f6", "#a855f7", "#10b981"]}
+                            />
+                          </div>
+
+                          {/* Browser distributions */}
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Browsers</h3>
+                            <DonutChart
+                              data={analyticsData.topBrowsers.map((b: any) => ({ label: b.browser, value: b.count }))}
+                              colors={["#3b82f6", "#a855f7", "#10b981", "#f59e0b", "#6366f1"]}
+                            />
+                          </div>
+
+                          {/* Referrers */}
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 flex flex-col justify-between min-w-0">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Traffic Referrers</h3>
+                            <div className="space-y-3 flex-1 overflow-y-auto max-h-[140px] pr-1">
+                              {analyticsData.topReferrers.slice(0, 4).map((ref: any, idx: number) => {
+                                const percent = Math.round((ref.count / (analyticsData.totalVisits || 1)) * 100);
+                                return (
+                                  <div key={idx} className="flex items-center justify-between text-xs border-b border-[var(--glass-border)] pb-2 gap-2 min-w-0">
+                                    <span className="text-[var(--muted-foreground)] font-semibold truncate block min-w-0 flex-1" title={ref.referrer}>{ref.referrer}</span>
+                                    <span className="font-mono text-[var(--primary)] font-bold shrink-0">{ref.count} ({percent}%)</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
-                      </div>
+
+                        {/* Top Visited paths list */}
+                        <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 min-w-0">
+                          <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Top Visited Paths</h3>
+                          <div className="space-y-3">
+                            {analyticsData.topPages.slice(0, 5).map((page: any, idx: number) => {
+                              const percent = Math.round((page.count / (analyticsData.totalVisits || 1)) * 100);
+                              return (
+                                <div key={idx} className="space-y-1">
+                                  <div className="flex items-center justify-between text-xs gap-2 min-w-0">
+                                    <span className="font-mono text-[var(--primary)] truncate block min-w-0 flex-1" title={page.page}>{page.page}</span>
+                                    <span className="font-bold text-[var(--foreground)] shrink-0">{page.count} views ({percent}%)</span>
+                                  </div>
+                                  <div className="w-full h-1 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                    <div className="h-full bg-[var(--primary)] rounded-full" style={{ width: `${percent}%` }} />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
 
                       {/* Stream Search and Table */}
                       <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 space-y-4">
