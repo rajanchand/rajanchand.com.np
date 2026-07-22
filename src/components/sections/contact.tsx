@@ -214,9 +214,14 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                 )}
 
                 {success && (
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500">
-                    <CheckCircle className="w-5 h-5 shrink-0" />
-                    <span>Message sent! I&apos;ll get back to you soon.</span>
+                  <div className="p-4.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col gap-1 text-sm text-emerald-500 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 font-bold text-base">
+                      <CheckCircle className="w-5 h-5 shrink-0 text-emerald-500" />
+                      <span>Thank you for contacting!</span>
+                    </div>
+                    <p className="text-xs text-emerald-500/90 pl-7">
+                      An automated email response has been sent to your inbox. We will review your message and inform you shortly.
+                    </p>
                   </div>
                 )}
 

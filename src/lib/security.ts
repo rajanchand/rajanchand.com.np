@@ -395,3 +395,154 @@ export async function logSecurityEvent(
     console.warn("Failed to log security event to visitors table:", err);
   }
 }
+
+export async function sendContactAutoReplyEmail(
+  name: string,
+  email: string,
+  subject: string,
+  message: string
+) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const emailSubject = `Thank you for contacting Rajan Prakash Chand`;
+
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 16px; background-color: #ffffff; color: #1f2937;">
+      <div style="margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #1e40af;">Thank You for Reaching Out!</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Rajan Prakash Chand &bull; Portfolio Inquiry Response</p>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6; color: #374151;">
+        Hi <strong>${name}</strong>,
+      </p>
+      <p style="font-size: 14px; line-height: 1.6; color: #374151;">
+        Thank you for contacting me through my portfolio website. Your message has been received successfully! <strong>We will review your inquiry and inform you shortly.</strong>
+      </p>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin: 20px 0;">
+        <h3 style="margin: 0 0 8px 0; font-size: 12px; uppercase font-bold text-slate-500; tracking-wider;">
+          Inquiry Summary
+        </h3>
+        <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #1e293b;">
+          Subject: ${subject || "General Inquiry"}
+        </p>
+        <p style="margin: 0; font-size: 13px; color: #475569; font-style: italic; white-space: pre-wrap;">
+          "${message}"
+        </p>
+      </div>
+
+      <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
+        If your request is urgent, you can also reach me directly at <a href="mailto:rajanchand48@gmail.com" style="color: #2563eb; font-weight: 600;">rajanchand48@gmail.com</a>.
+      </p>
+
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9; font-size: 11px; color: #94a3b8; text-align: center;">
+        Rajan Prakash Chand &bull; Network & Zero Trust Security Specialist &bull; Automated Response System
+      </div>
+    </div>
+  `;
+
+  if (resendApiKey) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Rajan Prakash Chand <onboarding@resend.dev>",
+          to: [email],
+          subject: emailSubject,
+          html: htmlContent,
+        }),
+      });
+      if (!res.ok) {
+        console.error("[AUTO-REPLY EMAIL FAILED]", res.status, await res.text());
+      } else {
+        console.log(`[AUTO-REPLY EMAIL SENT] Successfully sent auto-reply to ${email}`);
+      }
+    } catch (err) {
+      console.error("[AUTO-REPLY FETCH ERROR]", err);
+    }
+  } else {
+    console.log(`[AUTO-REPLY DISPATCHED] To: ${email} | Subject: ${emailSubject}`);
+  }
+}
+
+export async function sendContactAdminNotificationEmail(
+  name: string,
+  email: string,
+  subject: string,
+  message: string,
+  ip: string
+) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const adminEmail = "rajanchand48@gmail.com";
+  const notificationSubject = `📬 New Contact Inquiry from ${name}`;
+
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 16px; background-color: #ffffff; color: #1f2937;">
+      <div style="margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 12px;">
+        <h2 style="margin: 0; font-size: 20px; color: #065f46;">New Portfolio Contact Message</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Rajan Chand Portfolio System Notification</p>
+      </div>
+
+      <p style="font-size: 14px; line-height: 1.6; color: #374151;">
+        You received a new inquiry from your website contact form:
+      </p>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; width: 100px;">Sender:</td>
+            <td style="padding: 6px 0; font-weight: 700; color: #0f172a;">${name} &lt;${email}&gt;</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b;">Subject:</td>
+            <td style="padding: 6px 0; font-weight: 600;">${subject || "General Inquiry"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b;">Sender IP:</td>
+            <td style="padding: 6px 0; font-family: monospace;">${ip}</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 4px 0; font-size: 11px; uppercase font-bold text-slate-500;">Message Content:</p>
+          <p style="margin: 0; font-size: 13px; color: #1e293b; white-space: pre-wrap; line-height: 1.6;">${message}</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <a href="mailto:${email}" style="display: inline-block; padding: 10px 20px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 13px;">
+          Reply to ${name}
+        </a>
+      </div>
+    </div>
+  `;
+
+  if (resendApiKey) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Portfolio Contact <onboarding@resend.dev>",
+          to: [adminEmail],
+          subject: notificationSubject,
+          html: htmlContent,
+        }),
+      });
+      if (!res.ok) {
+        console.error("[ADMIN NOTIFICATION EMAIL FAILED]", res.status, await res.text());
+      } else {
+        console.log(`[ADMIN NOTIFICATION SENT] Delivered new message alert to ${adminEmail}`);
+      }
+    } catch (err) {
+      console.error("[ADMIN NOTIFICATION FETCH ERROR]", err);
+    }
+  }
+}

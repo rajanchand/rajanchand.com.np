@@ -5,6 +5,7 @@ import { getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { sanitizeObject } from "@/lib/sanitize";
 import { serverError } from "@/lib/api-response";
+import { sendContactAutoReplyEmail, sendContactAdminNotificationEmail } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +81,20 @@ export async function POST(request: Request) {
       return serverError("Contact insert error:", error, "Couldn't send your message. Please try again.");
     }
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    // Trigger instant background automations (Auto-reply to sender + Notification to Admin)
+    Promise.allSettled([
+      sendContactAutoReplyEmail(sanitized.name, sanitized.email, sanitized.subject, sanitized.message),
+      sendContactAdminNotificationEmail(sanitized.name, sanitized.email, sanitized.subject, sanitized.message, clientIp),
+    ]).catch((err) => console.error("Contact automation background error:", err));
+
+    return NextResponse.json(
+      {
+        success: true,
+        autoReplySent: true,
+        message: "Thank you for contacting! We will inform you shortly.",
+      },
+      { status: 201 }
+    );
   } catch (error) {
     return serverError("Contact route error:", error, "Couldn't send your message. Please try again.");
   }
