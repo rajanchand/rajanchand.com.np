@@ -1310,193 +1310,239 @@ export default function AdminDashboard() {
                       </div>
 
                         {/* Security Audit Telemetry Breakdown */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 rounded-2xl relative overflow-hidden">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-500">2FA Sign-Ins (Successful)</span>
-                              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <div className="space-y-4 pt-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4 text-emerald-500" /> Security & Auth Audit Telemetry
+                            </h3>
+                            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Login Audit Engine</span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="p-4 border border-blue-500/20 bg-blue-500/5 rounded-2xl">
+                              <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider block">Total Admin Logins</span>
+                              <h4 className="text-2xl font-extrabold font-display text-blue-500 mt-1">
+                                {analyticsData.securityStats?.totalLogins ?? 0}
+                              </h4>
                             </div>
-                            <div className="flex items-baseline justify-between mt-2">
-                              <h3 className="text-2xl font-extrabold font-display text-emerald-500">
+
+                            <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 rounded-2xl">
+                              <span className="text-[10px] uppercase font-bold text-emerald-500 tracking-wider block">2FA Successes</span>
+                              <h4 className="text-2xl font-extrabold font-display text-emerald-500 mt-1">
                                 {analyticsData.securityStats?.successLogins ?? 0}
-                              </h3>
-                              <span className="text-[10px] font-mono font-semibold text-emerald-500/80">Verified 2FA</span>
+                              </h4>
                             </div>
-                          </div>
 
-                          <div className="p-4 border border-rose-500/20 bg-rose-500/5 rounded-2xl relative overflow-hidden">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] uppercase font-bold tracking-wider text-rose-500">Failed Login Attempts</span>
-                              <AlertTriangle className="w-4 h-4 text-rose-500" />
-                            </div>
-                            <div className="flex items-baseline justify-between mt-2">
-                              <h3 className="text-2xl font-extrabold font-display text-rose-500">
+                            <div className="p-4 border border-rose-500/20 bg-rose-500/5 rounded-2xl">
+                              <span className="text-[10px] uppercase font-bold text-rose-500 tracking-wider block">Failed Password Attempts</span>
+                              <h4 className="text-2xl font-extrabold font-display text-rose-500 mt-1">
                                 {analyticsData.securityStats?.failedLogins ?? 0}
-                              </h3>
-                              <span className="text-[10px] font-mono font-semibold text-rose-500/80">Security Alerts</span>
+                              </h4>
                             </div>
                           </div>
 
-                          <div className="p-4 border border-blue-500/20 bg-blue-500/5 rounded-2xl relative overflow-hidden">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] uppercase font-bold tracking-wider text-blue-500">Public Page Hits</span>
-                              <Globe className="w-4 h-4 text-blue-500" />
+                          {/* Security Audit Event Log Table */}
+                          {(analyticsData.securityAuditLogs || []).length > 0 && (
+                            <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 space-y-3">
+                              <h4 className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">Detailed Security Event Log</h4>
+                              <div className="overflow-x-auto custom-scrollbar">
+                                <table className="w-full text-left border-collapse text-xs">
+                                  <thead>
+                                    <tr className="border-b border-[var(--glass-border)] text-[var(--muted-foreground)]">
+                                      <th className="p-2.5 font-semibold">Event Status</th>
+                                      <th className="p-2.5 font-semibold">Target Account</th>
+                                      <th className="p-2.5 font-semibold">IP Address</th>
+                                      <th className="p-2.5 font-semibold">Location</th>
+                                      <th className="p-2.5 font-semibold">ISP Network</th>
+                                      <th className="p-2.5 font-semibold">Device & Browser</th>
+                                      <th className="p-2.5 font-semibold text-right">Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-[var(--glass-border)]">
+                                    {analyticsData.securityAuditLogs.map((log: any, idx: number) => {
+                                      const isSuccess = log.type === "2FA_SUCCESS";
+                                      return (
+                                        <tr key={idx} className="hover:bg-[var(--glass-bg)]/30 transition-colors">
+                                          <td className="p-2.5">
+                                            <span className={`px-2 py-0.5 rounded-md font-bold text-[9px] inline-flex items-center gap-1 ${isSuccess ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
+                                              {isSuccess ? <ShieldCheck className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                                              {isSuccess ? '2FA SUCCESS' : 'LOGIN FAILED'}
+                                            </span>
+                                          </td>
+                                          <td className="p-2.5 font-mono text-[var(--foreground)] font-semibold">rajanchand48@gmail.com</td>
+                                          <td className="p-2.5 font-mono font-bold text-[var(--primary)]">{log.ip}</td>
+                                          <td className="p-2.5 font-semibold text-[var(--foreground)]">{log.city}, {log.country}</td>
+                                          <td className="p-2.5 text-[var(--muted-foreground)] font-semibold">{log.isp}</td>
+                                          <td className="p-2.5 text-[var(--muted-foreground)]">{log.browser} &bull; {log.os}</td>
+                                          <td className="p-2.5 text-right font-mono text-[var(--muted-foreground)]">
+                                            {new Date(log.visited_at).toLocaleTimeString()}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
                             </div>
-                            <div className="flex items-baseline justify-between mt-2">
-                              <h3 className="text-2xl font-extrabold font-display text-blue-500">
-                                {analyticsData.securityStats?.regularVisits ?? analyticsData.totalVisits}
-                              </h3>
-                              <span className="text-[10px] font-mono font-semibold text-blue-500/80">Public Visits</span>
-                            </div>
+                          )}
+                        </div>
+
+                        {/* Total Individual User Visits & Spent Time Matrix */}
+                        <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
+                              <User className="w-4 h-4 text-purple-500" /> Individual User Visit Sessions & Spend Time
+                            </h3>
+                            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Per-IP Session Analytics</span>
+                          </div>
+
+                          <div className="overflow-x-auto custom-scrollbar">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="border-b border-[var(--glass-border)] text-[var(--muted-foreground)]">
+                                  <th className="p-3 font-semibold">IP & Device</th>
+                                  <th className="p-3 font-semibold">Location</th>
+                                  <th className="p-3 font-semibold">ISP Network</th>
+                                  <th className="p-3 font-semibold">Pages Hit</th>
+                                  <th className="p-3 font-semibold">Time Spent</th>
+                                  <th className="p-3 font-semibold text-right">Last Active</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[var(--glass-border)]">
+                                {(analyticsData.individualSessions || []).map((session: any, idx: number) => {
+                                  const dev = session.device?.toLowerCase() || "desktop";
+                                  const DevIcon = dev === "desktop" ? Laptop : dev === "mobile" ? Smartphone : dev === "tablet" ? Tablet : Laptop;
+
+                                  return (
+                                    <tr key={idx} className="hover:bg-[var(--primary)]/5 transition-colors">
+                                      <td className="p-3">
+                                        <div className="space-y-0.5">
+                                          <div className="flex items-center gap-1.5">
+                                            <DevIcon className="w-3.5 h-3.5 text-[var(--muted-foreground)] shrink-0" />
+                                            <span className="font-mono font-bold text-[var(--foreground)]">
+                                              {session.ip}
+                                            </span>
+                                          </div>
+                                          <div className="text-[9px] text-[var(--muted-foreground)]">
+                                            {session.browser} &bull; {session.os}
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="p-3 font-semibold text-[var(--foreground)]">
+                                        {session.city ? `${session.city}, ` : ""}{session.country}
+                                      </td>
+                                      <td className="p-3 font-semibold text-[var(--muted-foreground)]">
+                                        <span className="flex items-center gap-1.5">
+                                          <Wifi className="w-3 h-3 text-[var(--primary)] shrink-0" />
+                                          <span className="truncate max-w-[130px]" title={session.isp}>{session.isp}</span>
+                                        </span>
+                                      </td>
+                                      <td className="p-3">
+                                        <div className="flex flex-wrap gap-1">
+                                          {session.pagesHit.map((p: string, pIdx: number) => (
+                                            <span key={pIdx} className="px-1.5 py-0.5 rounded bg-[var(--primary)]/10 text-[var(--primary)] font-mono text-[9px]">
+                                              {p}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </td>
+                                      <td className="p-3">
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-500 font-mono font-bold text-[10px]">
+                                          ⏱ {session.spendTime}
+                                        </span>
+                                      </td>
+                                      <td className="p-3 text-right font-mono text-[var(--muted-foreground)]">
+                                        {new Date(session.lastSeen).toLocaleTimeString()}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
 
-                        {/* Top Cities & ISP Carrier Networks Matrix */}
+                        {/* Geographic Country & Cities Breakdown */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Top Cities & Geolocations */}
                           <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
                             <div className="flex items-center justify-between">
                               <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-[var(--primary)]" /> Top Visitor Cities & Locations
+                                <Globe className="w-4 h-4 text-blue-500" /> Country & City Telemetry Hierarchy
                               </h3>
-                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Location Breakdown</span>
+                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Country Breakdown</span>
                             </div>
-                            <div className="space-y-3">
-                              {(analyticsData.topCities || []).length > 0 ? (
-                                analyticsData.topCities.slice(0, 6).map((c: any, idx: number) => {
-                                  const percent = Math.round((c.count / (analyticsData.totalVisits || 1)) * 100);
-                                  return (
-                                    <div key={idx} className="space-y-1.5 border-b border-[var(--glass-border)] pb-2.5 last:border-0 last:pb-0">
-                                      <div className="flex items-center justify-between text-xs gap-2">
-                                        <div className="flex items-center gap-2 truncate">
-                                          <span className="w-5 h-5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] font-bold font-mono text-[10px] flex items-center justify-center shrink-0">
-                                            #{idx + 1}
-                                          </span>
-                                          <span className="font-semibold text-[var(--foreground)] truncate">
-                                            {c.city && c.city !== "Unknown" ? c.city : "Direct Location"}, {c.country}
-                                          </span>
-                                        </div>
-                                        <span className="font-mono text-xs font-bold text-[var(--primary)] shrink-0">
-                                          {c.count} hits ({percent}%)
-                                        </span>
-                                      </div>
-                                      <div className="w-full h-1.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] rounded-full transition-all duration-500" style={{ width: `${Math.max(percent, 5)}%` }} />
-                                      </div>
+                            <div className="space-y-4">
+                              {(analyticsData.countryCityBreakdown || []).map((cGroup: any, idx: number) => {
+                                const percent = Math.round((cGroup.totalHits / (analyticsData.totalVisits || 1)) * 100);
+                                return (
+                                  <div key={idx} className="border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-xl p-3.5 space-y-2">
+                                    <div className="flex items-center justify-between text-xs font-bold text-[var(--foreground)]">
+                                      <span>🌐 {cGroup.country}</span>
+                                      <span className="font-mono text-blue-500">{cGroup.totalHits} visits ({percent}%)</span>
                                     </div>
-                                  );
-                                })
-                              ) : (
-                                <p className="text-xs text-[var(--muted-foreground)] py-4 text-center">No location telemetry available yet.</p>
-                              )}
+                                    <div className="w-full h-1 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.max(percent, 5)}%` }} />
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5 pt-1">
+                                      {cGroup.cities.map((cityObj: any, cityIdx: number) => (
+                                        <span key={cityIdx} className="px-2 py-0.5 rounded-md bg-[var(--glass-bg)] border border-[var(--glass-border)] text-[10px] text-[var(--muted-foreground)]">
+                                          {cityObj.city}: <strong className="text-[var(--foreground)]">{cityObj.hits}</strong>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
 
-                          {/* Top ISPs & Carrier Networks */}
+                          {/* ISP Carrier & Provider Matrix */}
                           <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
                             <div className="flex items-center justify-between">
                               <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
                                 <Wifi className="w-4 h-4 text-emerald-500" /> ISP Networks & Carriers
                               </h3>
-                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Network Providers</span>
+                              <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Telecom Providers</span>
                             </div>
                             <div className="space-y-3">
-                              {(analyticsData.topISPs || []).length > 0 ? (
-                                analyticsData.topISPs.slice(0, 6).map((ispItem: any, idx: number) => {
-                                  const percent = Math.round((ispItem.count / (analyticsData.totalVisits || 1)) * 100);
-                                  return (
-                                    <div key={idx} className="space-y-1.5 border-b border-[var(--glass-border)] pb-2.5 last:border-0 last:pb-0">
-                                      <div className="flex items-center justify-between text-xs gap-2">
-                                        <div className="flex items-center gap-2 truncate">
-                                          <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold font-mono text-[10px] flex items-center justify-center shrink-0">
-                                            #{idx + 1}
-                                          </span>
-                                          <span className="font-semibold text-[var(--foreground)] truncate" title={ispItem.isp}>
-                                            {ispItem.isp}
-                                          </span>
-                                        </div>
-                                        <span className="font-mono text-xs font-bold text-emerald-500 shrink-0">
-                                          {ispItem.count} ({percent}%)
-                                        </span>
-                                      </div>
-                                      <div className="w-full h-1.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${Math.max(percent, 5)}%` }} />
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                              ) : (
-                                <p className="text-xs text-[var(--muted-foreground)] py-4 text-center">No ISP network data recorded yet.</p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Traffic History Grid (Replacing line chart with clean progress bar frequency cards) */}
-                        <div className="border border-[var(--glass-border)] rounded-2xl p-5 bg-[var(--glass-bg)]/10 space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider flex items-center gap-2">
-                              <Activity className="w-4 h-4 text-purple-500" /> Traffic Distribution & Peak Frequency
-                            </h3>
-                            <span className="text-[10px] font-mono text-[var(--muted-foreground)]">Visits vs Unique IPs</span>
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                            {(analyticsData.chartData || []).slice(-8).map((point: any, idx: number) => {
-                              const maxVisits = Math.max(...(analyticsData.chartData || []).map((p: any) => p.visits), 1);
-                              const barHeight = Math.round((point.visits / maxVisits) * 100);
-                              return (
-                                <div key={idx} className="p-3 bg-[var(--glass-bg)]/30 border border-[var(--glass-border)] rounded-xl space-y-2">
-                                  <div className="flex items-center justify-between text-xs">
-                                    <span className="font-mono font-bold text-[var(--foreground)]">{point.label}</span>
-                                    <span className="text-[10px] font-mono text-purple-500 font-bold">{point.visits} hits</span>
-                                  </div>
-                                  <div className="w-full h-2 bg-[var(--glass-border)] rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style={{ width: `${Math.max(barHeight, 8)}%` }} />
-                                  </div>
-                                  <div className="flex items-center justify-between text-[10px] text-[var(--muted-foreground)]">
-                                    <span>Unique IPs</span>
-                                    <span className="font-mono font-semibold text-[var(--foreground)]">{point.unique}</span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Stats grids (Devices, Browsers, Referrers, Top Paths) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {/* Device distributions */}
-                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
-                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Device Types</h3>
-                            <DonutChart
-                              data={analyticsData.topDevices.map((d: any) => ({ label: d.device, value: d.count }))}
-                              colors={["#3b82f6", "#a855f7", "#10b981"]}
-                            />
-                          </div>
-
-                          {/* Browser distributions */}
-                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
-                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Browsers</h3>
-                            <DonutChart
-                              data={analyticsData.topBrowsers.map((b: any) => ({ label: b.browser, value: b.count }))}
-                              colors={["#3b82f6", "#a855f7", "#10b981", "#f59e0b", "#6366f1"]}
-                            />
-                          </div>
-
-                          {/* Referrers */}
-                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10 flex flex-col justify-between min-w-0">
-                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-3">Traffic Referrers</h3>
-                            <div className="space-y-3 flex-1 overflow-y-auto max-h-[140px] pr-1">
-                              {analyticsData.topReferrers.slice(0, 4).map((ref: any, idx: number) => {
-                                const percent = Math.round((ref.count / (analyticsData.totalVisits || 1)) * 100);
+                              {(analyticsData.topISPs || []).map((ispItem: any, idx: number) => {
+                                const percent = Math.round((ispItem.count / (analyticsData.totalVisits || 1)) * 100);
                                 return (
-                                  <div key={idx} className="flex items-center justify-between text-xs border-b border-[var(--glass-border)] pb-2 gap-2 min-w-0">
-                                    <span className="text-[var(--muted-foreground)] font-semibold truncate block min-w-0 flex-1" title={ref.referrer}>{ref.referrer}</span>
-                                    <span className="font-mono text-[var(--primary)] font-bold shrink-0">{ref.count} ({percent}%)</span>
+                                  <div key={idx} className="space-y-1.5 border-b border-[var(--glass-border)] pb-2.5 last:border-0 last:pb-0">
+                                    <div className="flex items-center justify-between text-xs gap-2">
+                                      <span className="font-semibold text-[var(--foreground)] truncate" title={ispItem.isp}>
+                                        #{idx + 1} {ispItem.isp}
+                                      </span>
+                                      <span className="font-mono text-xs font-bold text-emerald-500 shrink-0">
+                                        {ispItem.count} ({percent}%)
+                                      </span>
+                                    </div>
+                                    <div className="w-full h-1.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
+                                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${Math.max(percent, 5)}%` }} />
+                                    </div>
                                   </div>
                                 );
                               })}
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Device Types and Browsers Donut Charts */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Device Environments</h3>
+                            <DonutChart
+                              data={(analyticsData.topDevices || []).map((d: any) => ({ label: d.device, value: d.count }))}
+                              colors={["#3b82f6", "#a855f7", "#10b981"]}
+                            />
+                          </div>
+
+                          <div className="border border-[var(--glass-border)] rounded-2xl p-4 bg-[var(--glass-bg)]/10">
+                            <h3 className="text-xs uppercase font-bold text-[var(--muted-foreground)] tracking-wider mb-2">Browser Environments</h3>
+                            <DonutChart
+                              data={(analyticsData.topBrowsers || []).map((b: any) => ({ label: b.browser, value: b.count }))}
+                              colors={["#3b82f6", "#a855f7", "#10b981", "#f59e0b", "#6366f1"]}
+                            />
                           </div>
                         </div>
 

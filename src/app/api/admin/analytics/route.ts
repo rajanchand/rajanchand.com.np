@@ -9,6 +9,51 @@ export const dynamic = "force-dynamic";
 
 const analyticsRateLimiter = createRateLimiter({ max: 60, windowMs: 60 * 1000 });
 
+interface SecurityAuditLog {
+  id?: string | number;
+  type: "2FA_SUCCESS" | "LOGIN_FAILED";
+  ip: string;
+  city: string;
+  region: string;
+  country: string;
+  isp: string;
+  browser: string;
+  os: string;
+  device: string;
+  visited_at: string;
+  user_agent: string;
+}
+
+interface VisitorRecord {
+  id?: string | number;
+  ip_address: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  isp?: string;
+  browser?: string;
+  os?: string;
+  device_type?: string;
+  user_agent?: string;
+  visited_at: string;
+  page_url?: string;
+}
+
+interface VisitorSessionGroup {
+  ip: string;
+  city: string;
+  region: string;
+  country: string;
+  isp: string;
+  browser: string;
+  os: string;
+  device: string;
+  user_agent: string;
+  visits: VisitorRecord[];
+  firstSeen: string;
+  lastSeen: string;
+}
+
 export async function GET(request: Request) {
   try {
     if (!(await isAdminAuthenticated())) {
@@ -46,7 +91,6 @@ export async function GET(request: Request) {
         break;
     }
 
-    // Fetch recent visitors - query up to 2000 records for accurate aggregates in range
     let query = supabase
       .from("visitors")
       .select("*")
@@ -64,9 +108,8 @@ export async function GET(request: Request) {
       return serverError("Analytics query error:", error);
     }
 
-    const visitorList = visitors || [];
+    const visitorList: VisitorRecord[] = visitors || [];
 
-    // Aggregate basic stats
     const totalVisits = visitorList.length;
     const uniqueIPs = new Set(visitorList.map((v) => v.ip_address)).size;
 
@@ -78,93 +121,122 @@ export async function GET(request: Request) {
         .map((v) => v.ip_address)
     ).size;
 
-    // Bounce Rate and Session Duration Calculations
-    const ipGroups: Record<string, typeof visitorList> = {};
-    visitorList.forEach((v) => {
-      if (!ipGroups[v.ip_address]) {
-        ipGroups[v.ip_address] = [];
-      }
-      ipGroups[v.ip_address].push(v);
-    });
-
-    let singlePageIPs = 0;
-    let totalDurationSeconds = 0;
-    let sessionCountWithDuration = 0;
-
-    Object.values(ipGroups).forEach((group) => {
-      group.sort((a, b) => new Date(a.visited_at).getTime() - new Date(b.visited_at).getTime());
-
-      if (group.length === 1) {
-        singlePageIPs++;
-      } else {
-        const start = new Date(group[0].visited_at).getTime();
-        const end = new Date(group[group.length - 1].visited_at).getTime();
-        const diff = (end - start) / 1000; // in seconds
-        const cappedDiff = Math.min(diff, 7200);
-        totalDurationSeconds += cappedDiff;
-        sessionCountWithDuration++;
-      }
-    });
-
-    const totalIPs = Object.keys(ipGroups).length;
-    const bounceRate = totalIPs > 0 ? Math.round((singlePageIPs / totalIPs) * 100) : 0;
-    const avgSessionDuration = sessionCountWithDuration > 0 ? Math.round(totalDurationSeconds / sessionCountWithDuration) : 0;
-
-    // Historical Chart Data (group by hour for today, day for other ranges)
-    const chartData: { label: string; visits: number; unique: number }[] = [];
-
-    if (range === "today") {
-      for (let i = 23; i >= 0; i--) {
-        const d = new Date(now.getTime() - i * 60 * 60 * 1000);
-        const hourLabel = d.toLocaleString("en-US", { hour: "numeric", hour12: true });
-
-        const hourVisits = visitorList.filter((v) => {
-          const vDate = new Date(v.visited_at);
-          return (
-            vDate.getFullYear() === d.getFullYear() &&
-            vDate.getMonth() === d.getMonth() &&
-            vDate.getDate() === d.getDate() &&
-            vDate.getHours() === d.getHours()
-          );
-        });
-
-        chartData.push({
-          label: hourLabel,
-          visits: hourVisits.length,
-          unique: new Set(hourVisits.map((v) => v.ip_address)).size,
-        });
-      }
-    } else {
-      const daysCount = range === "30d" || range === "all" ? 30 : 7;
-      for (let i = daysCount - 1; i >= 0; i--) {
-        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        const dayLabel = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-        const dayVisits = visitorList.filter((v) => {
-          const vDate = new Date(v.visited_at);
-          return (
-            vDate.getFullYear() === d.getFullYear() &&
-            vDate.getMonth() === d.getMonth() &&
-            vDate.getDate() === d.getDate()
-          );
-        });
-
-        chartData.push({
-          label: dayLabel,
-          visits: dayVisits.length,
-          unique: new Set(dayVisits.map((v) => v.ip_address)).size,
-        });
-      }
-    }
-
-    // Security Audit Aggregates
+    // Security Audit Event Classification
+    const securityAuditLogs: SecurityAuditLog[] = [];
     let successLogins = 0;
     let failedLogins = 0;
+
     visitorList.forEach((v) => {
-      const ua = (v.browser || "") + (v.user_agent || "");
-      if (ua.includes("ADMIN LOGIN SUCCESS")) successLogins++;
-      else if (ua.includes("ADMIN LOGIN FAILED")) failedLogins++;
+      const combined = `${v.browser || ""} ${v.user_agent || ""}`;
+      const isSuccess = combined.includes("ADMIN LOGIN SUCCESS");
+      const isFailed = combined.includes("ADMIN LOGIN FAILED");
+
+      if (isSuccess || isFailed) {
+        if (isSuccess) successLogins++;
+        if (isFailed) failedLogins++;
+
+        securityAuditLogs.push({
+          id: v.id,
+          type: isSuccess ? "2FA_SUCCESS" : "LOGIN_FAILED",
+          ip: v.ip_address,
+          city: v.city || "Unknown",
+          region: v.region || "",
+          country: v.country || "Unknown",
+          isp: v.isp || "Direct ISP",
+          browser: v.browser || "Unknown",
+          os: v.os || "Unknown",
+          device: v.device_type || "Desktop",
+          visited_at: v.visited_at,
+          user_agent: v.user_agent || "",
+        });
+      }
     });
+
+    // Group Individual Visitor Sessions by IP
+    const ipMap: Record<string, VisitorSessionGroup> = {};
+    visitorList.forEach((v) => {
+      const ip = v.ip_address;
+      if (!ipMap[ip]) {
+        ipMap[ip] = {
+          ip,
+          city: v.city || "Unknown",
+          region: v.region || "",
+          country: v.country || "Unknown",
+          isp: v.isp || "Direct ISP",
+          browser: v.browser || "Unknown",
+          os: v.os || "Unknown",
+          device: v.device_type || "Desktop",
+          user_agent: v.user_agent || "",
+          visits: [],
+          firstSeen: v.visited_at,
+          lastSeen: v.visited_at,
+        };
+      }
+      ipMap[ip].visits.push(v);
+      if (new Date(v.visited_at).getTime() < new Date(ipMap[ip].firstSeen).getTime()) {
+        ipMap[ip].firstSeen = v.visited_at;
+      }
+      if (new Date(v.visited_at).getTime() > new Date(ipMap[ip].lastSeen).getTime()) {
+        ipMap[ip].lastSeen = v.visited_at;
+      }
+    });
+
+    // Calculate spend time per IP session
+    const individualSessions = Object.values(ipMap).map((session: VisitorSessionGroup) => {
+      const first = new Date(session.firstSeen).getTime();
+      const last = new Date(session.lastSeen).getTime();
+      const durationSec = Math.round((last - first) / 1000);
+
+      let spendTimeStr = "Single Hit (< 30s)";
+      if (durationSec > 0) {
+        const mins = Math.floor(durationSec / 60);
+        const secs = durationSec % 60;
+        spendTimeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+      }
+
+      const pagesHit = Array.from(new Set(session.visits.map((v: VisitorRecord) => v.page_url || "/")));
+
+      return {
+        ip: session.ip,
+        city: session.city,
+        region: session.region,
+        country: session.country,
+        isp: session.isp,
+        browser: session.browser,
+        os: session.os,
+        device: session.device,
+        user_agent: session.user_agent,
+        totalVisits: session.visits.length,
+        spendTime: spendTimeStr,
+        durationSec,
+        pagesHit,
+        latestPage: session.visits[0]?.page_url || "/",
+        lastSeen: session.lastSeen,
+      };
+    });
+
+    // Country & City Breakdown
+    const countryCityMap: Record<string, { country: string; totalHits: number; cities: Record<string, number> }> = {};
+    visitorList.forEach((v) => {
+      const country = v.country || "Unknown Country";
+      const city = v.city || "Unknown City";
+      if (!countryCityMap[country]) {
+        countryCityMap[country] = { country, totalHits: 0, cities: {} };
+      }
+      countryCityMap[country].totalHits++;
+      countryCityMap[country].cities[city] = (countryCityMap[country].cities[city] || 0) + 1;
+    });
+
+    const countryCityBreakdown = Object.values(countryCityMap)
+      .sort((a, b) => b.totalHits - a.totalHits)
+      .slice(0, 10)
+      .map((c) => ({
+        country: c.country,
+        totalHits: c.totalHits,
+        cities: Object.entries(c.cities)
+          .sort((a, b) => b[1] - a[1])
+          .map(([city, hits]) => ({ city, hits })),
+      }));
 
     // Top Cities
     const cityCounts: Record<string, { city: string; country: string; count: number }> = {};
@@ -184,24 +256,13 @@ export async function GET(request: Request) {
     // Top ISPs
     const ispCounts: Record<string, number> = {};
     visitorList.forEach((v) => {
-      const isp = v.isp || "Direct / Local";
+      const isp = v.isp || "Direct / Local ISP";
       ispCounts[isp] = (ispCounts[isp] || 0) + 1;
     });
     const topISPs = Object.entries(ispCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
+      .slice(0, 10)
       .map(([isp, count]) => ({ isp, count }));
-
-    // Top countries
-    const countryCounts: Record<string, number> = {};
-    visitorList.forEach((v) => {
-      const c = v.country || "Unknown";
-      countryCounts[c] = (countryCounts[c] || 0) + 1;
-    });
-    const topCountries = Object.entries(countryCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([country, count]) => ({ country, count }));
 
     // Top browsers
     const browserCounts: Record<string, number> = {};
@@ -235,36 +296,24 @@ export async function GET(request: Request) {
       .slice(0, 10)
       .map(([page, count]) => ({ page, count }));
 
-    // Top Referrers
-    const referrerCounts: Record<string, number> = {};
-    visitorList.forEach((v) => {
-      const ref = v.referrer || "Direct / Bookmark";
-      referrerCounts[ref] = (referrerCounts[ref] || 0) + 1;
-    });
-    const topReferrers = Object.entries(referrerCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([referrer, count]) => ({ referrer, count }));
-
     return NextResponse.json({
       totalVisits,
       uniqueIPs,
       activeSessions,
-      bounceRate,
-      avgSessionDuration,
       securityStats: {
+        totalLogins: successLogins + failedLogins,
         successLogins,
         failedLogins,
         regularVisits: Math.max(0, totalVisits - (successLogins + failedLogins)),
       },
+      securityAuditLogs: securityAuditLogs.slice(0, 30),
+      individualSessions: individualSessions.slice(0, 30),
+      countryCityBreakdown,
       topCities,
       topISPs,
-      topCountries,
       topBrowsers,
       topDevices,
       topPages,
-      topReferrers,
-      chartData,
       recentVisitors: visitorList.slice(0, 50),
     });
   } catch (error) {
