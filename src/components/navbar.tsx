@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown, Github, Rss } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { siteConfig as defaultSiteConfig, socialLinks } from "@/lib/data";
@@ -31,34 +31,35 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Active section detection via IntersectionObserver
-  const updateActiveSection = useCallback(() => {
-    if (pathname !== "/") return;
-    
-    const offsets: { id: string; top: number }[] = [];
-    for (const id of sectionIds) {
-      const el = document.getElementById(id);
-      if (el) {
-        offsets.push({ id, top: el.getBoundingClientRect().top });
-      }
-    }
-    
-    // Find the section closest to the top that's within a reasonable range
-    let current = "home";
-    for (const { id, top } of offsets) {
-      if (top <= 120) {
-        current = id;
-      }
-    }
-    setActiveSection(current);
-  }, [pathname]);
-
+  // Active section detection via scroll offsets
   useEffect(() => {
     if (pathname !== "/") return;
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
-    updateActiveSection();
-    return () => window.removeEventListener("scroll", updateActiveSection);
-  }, [pathname, updateActiveSection]);
+
+    const handleScroll = () => {
+      const offsets: { id: string; top: number }[] = [];
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          offsets.push({ id, top: el.getBoundingClientRect().top });
+        }
+      }
+
+      let current = "home";
+      for (const { id, top } of offsets) {
+        if (top <= 120) {
+          current = id;
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    const animId = requestAnimationFrame(handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(animId);
+    };
+  }, [pathname]);
 
   // Escape key closes docs dropdown
   useEffect(() => {
