@@ -2,6 +2,7 @@ import { cache } from "react";
 import staticData from "./data.json";
 
 let data = staticData;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let cachedMemoryData: any = null;
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 60 * 1000; // 60 seconds
