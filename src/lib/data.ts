@@ -1,6 +1,11 @@
+import { cache } from "react";
 import staticData from "./data.json";
 
 let data = staticData;
+let cachedMemoryData: any = null;
+let lastFetchTime = 0;
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const FETCH_TIMEOUT_MS = 2500; // 2.5 seconds max wait for Supabase
 
 // On the server, read the file dynamically to bypass the Node.js module cache
 // and ensure fresh values propagate immediately on revalidatePath
@@ -69,21 +74,40 @@ export function updatePortfolioData(newData: any) {
   if (newData.navLinks) syncArray(navLinks, newData.navLinks);
 }
 
-// Server-side loader to fetch portfolio data directly from Supabase with local fallback
-export async function loadPortfolioData() {
+// Server-side loader to fetch portfolio data directly from Supabase with local fallback & caching
+export const loadPortfolioData = cache(async function loadPortfolioDataInternal() {
   if (typeof window !== "undefined") return;
+
+  const now = Date.now();
+
+  // Return fresh in-memory cached data if still within TTL
+  if (cachedMemoryData && now - lastFetchTime < CACHE_TTL_MS) {
+    updatePortfolioData(cachedMemoryData);
+    return cachedMemoryData;
+  }
 
   try {
     const { supabase } = await import("@/lib/supabase");
-    const { data: dbData, error } = await supabase
+
+    const fetchPromise = supabase
       .from("portfolio")
       .select("content")
       .eq("id", 1)
       .maybeSingle();
 
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("Supabase fetch timeout") }), FETCH_TIMEOUT_MS)
+    );
+
+    const result = await Promise.race([fetchPromise, timeoutPromise]);
+    const dbData = result.data;
+    const error = result.error;
+
     if (!error && dbData && dbData.content) {
       const content = { ...dbData.content };
       delete content._adminPasswordHash;
+      cachedMemoryData = content;
+      lastFetchTime = now;
       updatePortfolioData(content);
       return content;
     }
@@ -91,7 +115,13 @@ export async function loadPortfolioData() {
     console.error("Error loading portfolio data from Supabase:", err);
   }
 
-  // If there's an error or no database record, the preloaded staticData values are already in the exports
+  // Fallback to in-memory cached data if available or disk data
+  if (cachedMemoryData) {
+    updatePortfolioData(cachedMemoryData);
+    return cachedMemoryData;
+  }
+
   return data;
-}
+});
+
 

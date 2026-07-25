@@ -115,12 +115,26 @@ body {
   color: white;
 }
 
-/* ===== GLASSMORPHISM ===== */
+/* ===== GLASSMORPHISM (Mobile Safari / WebKit Optimized) ===== */
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  transform: translateZ(0);
+}
+
+@media (max-width: 768px) {
+  .glass {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+/* ===== PERFORMANCE UTILITIES ===== */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 250px;
 }
 
 /* ===== GRADIENT TEXT ===== */
@@ -161,10 +175,16 @@ body {
 }
 
 @keyframes orb-drift {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -25px) scale(1.08); }
-  66% { transform: translate(-25px, 40px) scale(0.92); }
-  100% { transform: translate(0, 0) scale(1); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(24px, -15px, 0) scale(1.04); }
+  66% { transform: translate3d(-15px, 24px, 0) scale(0.96); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 640px), (prefers-reduced-motion: reduce) {
+  @keyframes orb-drift {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+  }
 }
 
 @keyframes shimmer {

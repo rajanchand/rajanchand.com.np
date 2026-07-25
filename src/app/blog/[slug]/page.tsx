@@ -82,13 +82,15 @@ function renderMarkdown(content: string) {
   const lines = content.split("\n");
   const renderedElements: React.ReactNode[] = [];
   let listItems: string[] = [];
+  let inCodeBlock = false;
+  let codeBlockLines: string[] = [];
 
   const flushList = (key: number) => {
     if (listItems.length > 0) {
       renderedElements.push(
         <ul key={`list-${key}`} className="list-disc pl-6 mb-6 space-y-2 text-[var(--muted-foreground)] leading-relaxed">
           {listItems.map((item, i) => (
-            <li key={i}>{item}</li>
+            <li key={i}>{parseInlineMarkdown(item)}</li>
           ))}
         </ul>
       );
@@ -96,9 +98,51 @@ function renderMarkdown(content: string) {
     }
   };
 
+  const parseInlineMarkdown = (text: string) => {
+    // Basic bold **text** and inline code `code`
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    const parts: React.ReactNode[] = [];
+    let lastIdx = 0;
+    let match;
+
+    while ((match = boldRegex.exec(text)) !== null) {
+      if (match.index > lastIdx) {
+        parts.push(text.substring(lastIdx, match.index));
+      }
+      parts.push(<strong key={match.index} className="font-bold text-[var(--foreground)]">{match[1]}</strong>);
+      lastIdx = boldRegex.lastIndex;
+    }
+    if (lastIdx < text.length) {
+      parts.push(text.substring(lastIdx));
+    }
+    return parts.length > 0 ? parts : text;
+  };
+
   lines.forEach((line, index) => {
     const trimmed = line.trim();
-    
+
+    if (trimmed.startsWith("```")) {
+      flushList(index);
+      if (inCodeBlock) {
+        // Close code block
+        renderedElements.push(
+          <pre key={`code-${index}`} className="bg-[var(--muted)] p-4 rounded-xl overflow-x-auto my-6 text-xs md:text-sm font-mono border border-[var(--glass-border)]">
+            <code>{codeBlockLines.join("\n")}</code>
+          </pre>
+        );
+        codeBlockLines = [];
+        inCodeBlock = false;
+      } else {
+        inCodeBlock = true;
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeBlockLines.push(line);
+      return;
+    }
+
     if (trimmed.startsWith("# ")) {
       flushList(index);
       renderedElements.push(
@@ -120,34 +164,22 @@ function renderMarkdown(content: string) {
           {trimmed.substring(4)}
         </h3>
       );
+    } else if (trimmed.startsWith("> ")) {
+      flushList(index);
+      renderedElements.push(
+        <blockquote key={index} className="border-l-4 border-[var(--primary)] pl-4 py-2 my-6 italic text-[var(--muted-foreground)] bg-[var(--primary)]/5 rounded-r-lg">
+          {parseInlineMarkdown(trimmed.substring(2))}
+        </blockquote>
+      );
     } else if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
       listItems.push(trimmed.substring(2));
     } else if (trimmed === "") {
       flushList(index);
     } else {
       flushList(index);
-      // Process bold/italics
-      const text = trimmed;
-      // Basic bold transformation: **text**
-      const boldRegex = /\*\*(.*?)\*\*/g;
-      const parts = [];
-      let lastIdx = 0;
-      let match;
-      
-      while ((match = boldRegex.exec(text)) !== null) {
-        if (match.index > lastIdx) {
-          parts.push(text.substring(lastIdx, match.index));
-        }
-        parts.push(<strong key={match.index} className="font-bold text-[var(--foreground)]">{match[1]}</strong>);
-        lastIdx = boldRegex.lastIndex;
-      }
-      if (lastIdx < text.length) {
-        parts.push(text.substring(lastIdx));
-      }
-
       renderedElements.push(
         <p key={index} className="text-sm md:text-base text-[var(--muted-foreground)] leading-relaxed mb-6">
-          {parts.length > 0 ? parts : text}
+          {parseInlineMarkdown(trimmed)}
         </p>
       );
     }

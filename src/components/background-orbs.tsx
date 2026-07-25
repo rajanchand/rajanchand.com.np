@@ -1,61 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-interface Orb {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  duration: number;
-  delay: number;
-}
+// Deterministic static orb definitions to guarantee instant SSR paint without client re-render delay
+const ORB_CONFIGS = [
+  { id: 1, x: 20, y: 15, size: 360, color: "rgba(96, 165, 250, 0.08)", duration: 22, delay: 0 },
+  { id: 2, x: 75, y: 35, size: 280, color: "rgba(139, 92, 246, 0.06)", duration: 28, delay: 2 },
+  { id: 3, x: 40, y: 70, size: 320, color: "rgba(59, 130, 246, 0.07)", duration: 25, delay: 4 },
+];
 
 export function BackgroundOrbs() {
-  const [orbs, setOrbs] = useState<Orb[]>([]);
-
-  useEffect(() => {
-    const colors = [
-      "rgba(96, 165, 250, 0.08)",  // blue
-      "rgba(139, 92, 246, 0.06)",   // violet
-      "rgba(59, 130, 246, 0.07)",   // indigo
-      "rgba(34, 211, 238, 0.05)",   // cyan
-    ];
-
-    const generated: Orb[] = Array.from({ length: 4 }, (_, i) => ({
-      id: i,
-      x: 15 + Math.random() * 70,
-      y: 10 + Math.random() * 80,
-      size: 200 + Math.random() * 300,
-      color: colors[i % colors.length],
-      duration: 18 + Math.random() * 12,
-      delay: i * 2.5,
-    }));
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrbs(generated);
-  }, []);
-
-  if (orbs.length === 0) return null;
-
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
-      {orbs.map((orb) => (
+      {ORB_CONFIGS.map((orb) => (
         <div
           key={orb.id}
-          className="absolute rounded-full"
+          className="absolute rounded-full transform-gpu"
           style={{
             left: `${orb.x}%`,
             top: `${orb.y}%`,
             width: `${orb.size}px`,
             height: `${orb.size}px`,
             background: `radial-gradient(circle, ${orb.color} 0%, transparent 70%)`,
+            transform: "translate3d(0,0,0)",
             animation: `orb-drift ${orb.duration}s ease-in-out ${orb.delay}s infinite`,
-            willChange: "transform",
           }}
         />
       ))}
     </div>
   );
 }
+
