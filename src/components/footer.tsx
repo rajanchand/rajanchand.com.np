@@ -2,7 +2,7 @@
 
 import { siteConfig as defaultSiteConfig, socialLinks as defaultSocialLinks } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
-import { Mail, Zap } from "lucide-react";
+import { Mail } from "lucide-react";
 import Link from "next/link";
 
 const links = [
@@ -126,10 +126,6 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="text-xs text-gray-500 mr-4 dark:text-slate-400">
               &copy; Rajan Prakash Chand | <span suppressHydrationWarning>{new Date().getFullYear()}</span>
-            </div>
-            <div className="text-[10px] text-gray-400 dark:text-slate-500 flex items-center gap-1">
-              <Zap className="w-3 h-3" />
-              Built with Next.js & Supabase
             </div>
           </div>
         </div>
