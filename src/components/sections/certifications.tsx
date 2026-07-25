@@ -36,7 +36,7 @@ export function Certifications({ certifications: customCertifications }: { certi
   }, [selectedPhoto]);
 
   return (
-    <section className={`relative pt-16 pb-20 md:pt-24 md:pb-28 bg-[var(--background)] section-pattern ${selectedPhoto ? 'z-[60]' : 'z-10'}`} id="certifications">
+    <section className={`relative py-10 md:py-12 bg-[var(--background)] section-pattern ${selectedPhoto ? 'z-[60]' : 'z-10'}`} id="certifications">
       {/* Background radial gradient glow */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none" aria-hidden="true" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[var(--accent)]/5 rounded-full blur-[100px] pointer-events-none" aria-hidden="true" />
@@ -44,7 +44,7 @@ export function Certifications({ certifications: customCertifications }: { certi
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <ScrollReveal>
-          <div className="mb-16 text-center select-none">
+          <div className="mb-10 text-center select-none">
             <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-[var(--primary)] mb-4 font-mono">
               <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
               CREDENTIALS

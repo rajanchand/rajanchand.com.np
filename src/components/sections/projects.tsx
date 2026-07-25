@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { projects as defaultProjects } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { FolderGit2, Building2, Github, ExternalLink, Tag } from "lucide-react";
+import { FolderGit2, Building2, Github, ExternalLink, Tag, Filter } from "lucide-react";
+import Image from "next/image";
 
 // Helper to parse and sanitize tags into clean individual badge items
 function parseTags(tags?: unknown): string[] {
@@ -33,16 +35,25 @@ function parseTags(tags?: unknown): string[] {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Projects({ projects: customProjects }: { projects?: any[] } = {}) {
   const projects = customProjects || defaultProjects;
+  const [activeFilter, setActiveFilter] = useState("All");
+
+  // Extract unique categories
+  const categories = ["All", ...Array.from(new Set(projects.map((p) => p.category).filter(Boolean)))];
+
+  const filteredProjects = activeFilter === "All"
+    ? projects
+    : projects.filter((p) => p.category === activeFilter);
+
   return (
-    <section className="relative scroll-mt-16 pt-6 pb-10 md:pt-8 md:pb-12 bg-[var(--background)] section-pattern" id="projects">
+    <section className="relative scroll-mt-16 py-10 md:py-12 bg-[var(--background)] section-pattern" id="projects">
       {/* Background shape */}
-      <div className="absolute inset-0 bg-[var(--primary)]/5 dark:bg-zinc-950/20 pointer-events-none mb-32" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[var(--primary)]/5 dark:bg-zinc-950/20 pointer-events-none" aria-hidden="true" />
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 z-10">
-        <div className="py-4 pt-8 sm:py-6 lg:py-8 lg:pt-12">
+        <div>
           {/* Header */}
           <ScrollReveal>
-            <div className="mb-16 text-center select-none">
+            <div className="mb-10 text-center select-none">
               <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-[var(--primary)] mb-4 font-mono">
                 <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
                 PORTFOLIO
@@ -61,17 +72,58 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
             </div>
           </ScrollReveal>
 
+          {/* Category Filter Pills */}
+          {categories.length > 2 && (
+            <ScrollReveal delay={0.05}>
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+                <Filter className="w-3.5 h-3.5 text-[var(--muted-foreground)] mr-1" />
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveFilter(cat)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-300 cursor-pointer ${
+                      activeFilter === cat
+                        ? "bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white border-transparent shadow-[0_0_15px_var(--glow-primary)]"
+                        : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-[var(--primary)] hover:border-[var(--primary)]/30"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </ScrollReveal>
+          )}
+
           {/* Cards Grid */}
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch my-12">
-            {projects.map((proj, i) => {
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch mt-6">
+            {filteredProjects.map((proj, i) => {
               const Icon = getIcon(proj.icon || "FolderGit2") || FolderGit2;
               const formattedTags = parseTags(proj.tags);
               return (
                 <ScrollReveal key={proj.title} delay={i * 0.1}>
-                  <div className="group relative flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-900/60 rounded-[24px] border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 hover:shadow-[0_15px_45px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_15px_45px_rgba(59,130,246,0.15)] transition-all duration-500 ease-out cursor-default">
+                  <div className="group relative flex flex-col justify-between h-full bg-white dark:bg-slate-900/60 rounded-[24px] border border-slate-100 dark:border-slate-800/80 shadow-[0_8px_30px_rgba(0,0,0,0.015)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-1.5 hover:shadow-[0_15px_45px_rgba(59,130,246,0.08)] dark:hover:shadow-[0_15px_45px_rgba(59,130,246,0.15)] transition-all duration-500 ease-out cursor-default overflow-hidden">
                     
+                    {/* Project Screenshot */}
+                    {proj.image && (
+                      <div className="relative w-full aspect-[16/9] overflow-hidden">
+                        <Image
+                          src={proj.image}
+                          alt={proj.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900/90 via-transparent to-transparent opacity-70" />
+                        {proj.category && (
+                          <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded-full text-[10px] font-semibold tracking-wider uppercase text-white">
+                            {proj.category}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {/* Top Content */}
-                    <div>
+                    <div className="p-6">
                       {/* Organization / Company Badge */}
                       {proj.company && (
                         <div className="flex justify-between items-start gap-4 mb-4">
@@ -119,9 +171,9 @@ export function Projects({ projects: customProjects }: { projects?: any[] } = {}
                     </div>
 
                     {/* Bottom Content (Tags & optional Link Buttons) */}
-                    <div>
+                    <div className="px-6 pb-6">
                       {/* Tech Stack Badges */}
-                      <div className="flex flex-wrap gap-2 mt-5">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {formattedTags.map((tag: string, idx: number) => (
                           <span
                             key={`${tag}-${idx}`}

@@ -63,7 +63,7 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
   };
 
   return (
-    <section id="contact" className="relative z-10 py-12 md:py-16">
+    <section id="contact" className="relative z-10 py-10 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="glass rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
@@ -117,6 +117,28 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                       </a>
                     </div>
                   </div>
+
+                  {/* Origin Location */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center shrink-0">
+                      <MapPin className="w-5 h-5 text-[var(--primary)]" />
+                    </div>
+                    <div>
+                      <span className="text-xs text-[var(--muted-foreground)] block">Originally From</span>
+                      <span className="text-sm font-medium">{siteConfig.locationOrigin || "Nepal"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Availability Status */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-6">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    Open to Opportunities
+                  </span>
                 </div>
 
                 {/* Hire Me */}

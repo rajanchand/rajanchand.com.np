@@ -2,7 +2,7 @@
 
 import { siteConfig as defaultSiteConfig, socialLinks as defaultSocialLinks } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
-import { Mail } from "lucide-react";
+import { Mail, Zap } from "lucide-react";
 import Link from "next/link";
 
 const links = [
@@ -60,8 +60,21 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
                 {siteConfig.title}
               </span>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 my-4">
-              {siteConfig.location} | {siteConfig.locationOrigin}
+            <div className="text-sm text-gray-500 dark:text-gray-400 my-3 flex items-center gap-2">
+              <span>🏴󠁧󠁢󠁳󠁣󠁴󠁿 {siteConfig.location}</span>
+              <span className="text-gray-300 dark:text-gray-600">·</span>
+              <span>🇳🇵 {siteConfig.locationOrigin}</span>
+            </div>
+
+            {/* Availability Status Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                Open to Opportunities
+              </span>
             </div>
           </div>
 
@@ -110,8 +123,14 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
             })}
           </ul>
 
-          <div className="text-xs text-gray-500 mr-4 dark:text-slate-400">
-            &copy; Rajan Prakash Chand | <span suppressHydrationWarning>{new Date().getFullYear()}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="text-xs text-gray-500 mr-4 dark:text-slate-400">
+              &copy; Rajan Prakash Chand | <span suppressHydrationWarning>{new Date().getFullYear()}</span>
+            </div>
+            <div className="text-[10px] text-gray-400 dark:text-slate-500 flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              Built with Next.js & Supabase
+            </div>
           </div>
         </div>
       </div>

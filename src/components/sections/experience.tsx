@@ -91,11 +91,11 @@ export function Experience({ experience: customExperience }: { experience?: any[
     .sort(sortDescending);
 
   return (
-    <section id="experience" className="px-4 pt-6 pb-10 sm:px-6 mx-auto lg:px-8 lg:pt-8 lg:pb-12 max-w-7xl z-10 relative bg-[var(--background)]">
+    <section id="experience" className="px-4 py-10 sm:px-6 mx-auto lg:px-8 md:py-12 max-w-7xl z-10 relative bg-[var(--background)]">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <ScrollReveal>
-          <div className="text-center mb-16 select-none">
+          <div className="text-center mb-10 select-none">
             <span className="inline-flex items-center justify-center gap-4 text-xs font-bold tracking-[0.25em] uppercase text-[var(--primary)] mb-4 font-mono">
               <span className="w-8 h-[1.5px] bg-[var(--primary)]/30 rounded-full" />
               HISTORY

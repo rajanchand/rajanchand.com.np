@@ -150,6 +150,7 @@
     {
       "icon": "Bell",
       "role": "Supervisor",
+      "image": "/images/project-monitoring.png",
       "tags": [
         "Python",
         "API Integration",
@@ -171,7 +172,14 @@
     {
       "icon": "Network",
       "role": "Outdoor Network management",
-      "tags": [],
+      "image": "/images/project-network.png",
+      "tags": [
+        "OSPF",
+        "BGP",
+        "Failover",
+        "Load Balancing",
+        "High Availability"
+      ],
       "title": "Redundant Network Configuration",
       "impact": [
         "Achieved 99.9% network uptime",
@@ -229,6 +237,7 @@
     {
       "icon": "ShieldCheck",
       "role": "Student",
+      "image": "/images/project-zerotrust.png",
       "tags": [
         "Zero Trust",
         "Micro-segmentation",
@@ -279,6 +288,24 @@
       "excerpt": "An in-depth analysis of migrating from perimeter-based VPN models to risk-adaptive Zero Trust framework models in modern carrier-grade networks.",
       "category": "Network Security",
       "readTime": "8 min read"
+    },
+    {
+      "date": "2026-07-10",
+      "slug": "building-multi-channel-network-monitoring-chatbot",
+      "title": "Building a Multi-Channel Network Monitoring Chatbot with Nagios, Viber & SMS",
+      "content": "# Building a Multi-Channel Network Monitoring Chatbot with Nagios, Viber & SMS\n\nIn modern ISP operations, the speed at which network incidents are detected and communicated directly impacts service reliability. Traditional monitoring dashboards require engineers to be constantly watching screens — an approach that doesn't scale. During my tenure as a Supervisor at Dish Media Network, I designed and implemented a multi-channel alert integration that bridged Nagios Core monitoring with instant messaging platforms including Viber, SMS, and Telegram.\n\n## The Problem: Alert Fatigue and Delayed Response\n\nBefore the integration, our incident workflow looked like this:\n1. Nagios detects a threshold breach (link down, high CPU, packet loss)\n2. An email notification is sent to the NOC team\n3. Engineers manually check email, assess severity, and begin troubleshooting\n\nThis pipeline had critical bottlenecks:\n- **Email latency**: Notifications were often buried under other messages, with average response times exceeding 15 minutes.\n- **No mobile-first alerting**: Field technicians didn't have access to dashboards while on-site.\n- **No severity-based routing**: Critical and warning alerts were treated identically.\n\n## Architecture Overview\n\nThe solution involved three key layers:\n\n### 1. Nagios Event Handler\nNagios was configured with custom event handlers that trigger Python scripts upon state changes. Each event handler captures the host/service name, current state, output text, and timestamp.\n\n### 2. Python Middleware API\nA lightweight Flask-based API receives the Nagios event payload and performs:\n- **Severity classification**: Maps Nagios states (CRITICAL, WARNING, UNKNOWN, OK) to priority tiers.\n- **Channel routing**: CRITICAL alerts go to Viber group + SMS to on-call engineer. WARNING alerts go to Viber only. OK (recovery) alerts go to Viber as resolution confirmations.\n- **Rate limiting**: Prevents notification flooding during cascading failures by implementing a cooldown window per host.\n\n### 3. Multi-Channel Dispatch\n- **Viber Bot**: Using the Viber REST API, messages are formatted with rich cards showing severity colour coding, affected device, and a direct link to the Nagios status page.\n- **SMS Gateway**: Integration with a local telecom SMS API for critical-only alerts when internet connectivity to Viber may itself be impacted.\n- **Telegram Bot**: Secondary channel for the engineering team's Telegram group, using Markdown-formatted messages.\n\n## Results and Impact\n\nAfter deploying the integration across our monitoring infrastructure:\n- **Incident response time decreased by 30%** — from an average of 15 minutes to under 10 minutes for critical alerts.\n- **Field technicians** received real-time alerts on their mobile devices without needing VPN access to internal dashboards.\n- **Alert fatigue was reduced** through intelligent severity routing — engineers only received SMS for truly critical events.\n- **Recovery notifications** provided automatic closure confirmation, reducing manual status update overhead.\n\n## Lessons Learned\n\n- **Always implement rate limiting**: During a fibre cut affecting multiple nodes, the system initially generated hundreds of alerts per minute. The cooldown mechanism was essential.\n- **Test failover scenarios**: If the Viber API is unreachable (the network itself is down), the SMS fallback becomes the primary channel — this path must be tested regularly.\n- **Keep messages actionable**: Each alert includes the device name, location, and a suggested first-response action rather than just raw Nagios output.\n\n## Conclusion\n\nIntegrating network monitoring with multi-channel messaging transforms reactive NOC operations into a proactive, mobile-first incident response workflow. The combination of severity-based routing and channel fallback ensures that the right engineer gets the right information at the right time.",
+      "excerpt": "How I integrated Nagios monitoring with Viber, SMS, and Telegram to reduce incident response time by 30% at Dish Media Network.",
+      "category": "Network Monitoring",
+      "readTime": "6 min read"
+    },
+    {
+      "date": "2026-07-20",
+      "slug": "redundant-network-design-patterns-isp-infrastructure",
+      "title": "Redundant Network Design Patterns for ISP Infrastructure",
+      "content": "# Redundant Network Design Patterns for ISP Infrastructure\n\nNetwork redundancy is not a luxury for Internet Service Providers — it is a fundamental requirement. A single point of failure in an ISP backbone can disrupt service for thousands of subscribers simultaneously. During my three years as a Technical Supervisor at WorldLink Communications — Nepal's largest ISP serving over 500,000 users — I was directly involved in designing and deploying redundant network architectures that achieved 99.9% uptime.\n\n## Why Redundancy Matters at ISP Scale\n\nAt consumer scale, a brief network outage might mean a webpage loads slowly. At ISP scale, the consequences are far more severe:\n- **Revenue loss**: Enterprise SLA breaches can trigger financial penalties within minutes.\n- **Cascading failures**: A single core switch failure can black-hole traffic for entire metropolitan areas.\n- **Reputation damage**: In competitive ISP markets, uptime is the primary differentiator.\n\n## Core Redundancy Patterns\n\n### 1. Dual-Homed Core Architecture\nThe most fundamental pattern involves connecting every distribution switch to two independent core switches. Traffic is load-balanced across both paths using ECMP (Equal-Cost Multi-Path) routing, and if one core fails, the other absorbs 100% of the traffic within sub-second convergence times.\n\n**Key Implementation Details:**\n- Use OSPF or IS-IS as the interior gateway protocol for fast convergence (typically under 500ms).\n- Configure BFD (Bidirectional Forwarding Detection) for sub-second link failure detection.\n- Ensure both core switches have independent power feeds and UPS systems.\n\n### 2. Ring Topology for Access Layer\nIn metropolitan fibre networks, ring topologies provide inherent redundancy. If a fibre cut occurs at any point in the ring, traffic automatically reroutes through the opposite direction.\n\n**Implementation at WorldLink:**\n- Deployed ERPS (Ethernet Ring Protection Switching) across 12 metropolitan rings.\n- Achieved sub-50ms failover times — imperceptible to end users.\n- Each ring node connects to a minimum of 200 subscribers.\n\n### 3. Multi-Homed BGP Peering\nFor upstream internet connectivity, we implemented multi-homed BGP peering with multiple transit providers. This ensures that if one upstream provider experiences issues, traffic seamlessly shifts to alternative paths.\n\n**Configuration Approach:**\n- Announce customer prefixes to all upstream providers.\n- Use BGP local preference to designate primary and backup paths.\n- Implement prefix-based traffic engineering to balance load across links.\n- Configure BGP communities for granular route control.\n\n### 4. VRRP/HSRP Gateway Redundancy\nAt the customer-facing edge, Virtual Router Redundancy Protocol (VRRP) ensures that subscriber default gateways remain available even if the primary gateway router fails.\n\n**Deployment Pattern:**\n- Two edge routers share a virtual IP address.\n- The primary router handles traffic under normal conditions.\n- If the primary fails health checks, the backup assumes the virtual IP within 3 seconds.\n- We tracked failover events and found less than 0.01% of subscribers noticed any disruption.\n\n## Monitoring Redundancy\n\nRedundancy is only effective if failures are detected and reported. Our monitoring stack included:\n- **Observium** for SNMP-based device health monitoring.\n- **Cacti** for historical bandwidth and utilisation graphing.\n- **Custom alerting** integrated with Viber and SMS for real-time notifications.\n\n## Real-World Results\n\n| Metric | Before Redundancy | After Redundancy |\n|--------|-------------------|------------------|\n| Annual Uptime | 99.2% | 99.9% |\n| Mean Time to Recovery | 45 minutes | 8 minutes |\n| Customer Complaints (monthly) | 1,200+ | Under 300 |\n| SLA Breach Incidents | 15/year | 1/year |\n\n## Conclusion\n\nBuilding redundant network infrastructure requires upfront investment in hardware, planning, and testing. However, the return on investment is clear: fewer outages, faster recovery, happier customers, and a network that scales confidently. For any ISP operating at scale, redundancy should be designed into the network from day one — not bolted on after the first major outage.",
+      "excerpt": "Design patterns and real-world results from building redundant ISP infrastructure achieving 99.9% uptime at WorldLink Communications.",
+      "category": "Network Engineering",
+      "readTime": "7 min read"
     }
   ],
   "experience": [

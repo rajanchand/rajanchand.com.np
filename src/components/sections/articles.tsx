@@ -27,7 +27,7 @@ function formatDate(dateStr: string) {
 export function Articles({ blogPosts: customBlogPosts }: { blogPosts?: any[] } = {}) {
   const blogPosts = customBlogPosts || defaultBlogPosts;
   return (
-    <section id="articles" className="relative z-10 pt-6 pb-10 md:pt-8 md:pb-12">
+    <section id="articles" className="relative z-10 py-10 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <SectionHeader

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Menu, X, ChevronDown, Github, Rss } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { siteConfig as defaultSiteConfig, socialLinks } from "@/lib/data";
@@ -12,13 +12,17 @@ interface NavbarProps {
   siteConfig?: any;
 }
 
+const sectionIds = ["home", "skills", "experience", "projects", "certifications", "contact"];
+
 export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
   const siteConfig = customSiteConfig || defaultSiteConfig;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
   const pathname = usePathname();
 
+  // Track scroll for background blur
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -27,6 +31,36 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Active section detection via IntersectionObserver
+  const updateActiveSection = useCallback(() => {
+    if (pathname !== "/") return;
+    
+    const offsets: { id: string; top: number }[] = [];
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (el) {
+        offsets.push({ id, top: el.getBoundingClientRect().top });
+      }
+    }
+    
+    // Find the section closest to the top that's within a reasonable range
+    let current = "home";
+    for (const { id, top } of offsets) {
+      if (top <= 120) {
+        current = id;
+      }
+    }
+    setActiveSection(current);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    updateActiveSection();
+    return () => window.removeEventListener("scroll", updateActiveSection);
+  }, [pathname, updateActiveSection]);
+
+  // Escape key closes docs dropdown
   useEffect(() => {
     if (!docsOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -36,13 +70,32 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [docsOpen]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   const isBlog = pathname?.startsWith("/blog") || pathname?.startsWith("/dissertions") || pathname?.startsWith("/admin");
+
+  const navItems = [
+    { id: "home", label: "Home", href: "#home" },
+    { id: "skills", label: "Skills", href: "#skills" },
+    { id: "experience", label: "Experience", href: "#experience" },
+    { id: "projects", label: "Projects", href: "#projects" },
+  ];
+
+  const isActive = (id: string) => !isBlog && activeSection === id;
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-40 flex-none mx-auto w-full transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-40 flex-none mx-auto w-full transition-all duration-500 ${
         scrolled
-          ? "bg-white/95 dark:bg-zinc-900/95 border-b border-gray-200 dark:border-zinc-800/80 shadow-md md:backdrop-blur-sm"
+          ? "bg-white/80 dark:bg-zinc-900/80 border-b border-gray-200/80 dark:border-zinc-800/60 shadow-lg backdrop-blur-xl"
           : "bg-white md:bg-white/90 dark:bg-zinc-900 dark:md:bg-zinc-900/90 md:backdrop-blur-sm"
       }`}
       id="header"
@@ -95,65 +148,34 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
           aria-label="Main navigation"
         >
           <ul className="flex flex-col md:flex-row md:self-center w-full md:w-auto text-base md:items-center gap-1">
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  className={`font-medium px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer relative ${
+                    isActive(item.id)
+                      ? "text-[var(--primary)]"
+                      : "hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                  href={isBlog ? `/#${item.id}` : item.href}
+                  onClick={(e) => {
+                    if (!isBlog) {
+                      e.preventDefault();
+                      document.querySelector(`#${item.id}`)?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
+                  {item.label}
+                  {isActive(item.id) && (
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[var(--primary)] rounded-full" />
+                  )}
+                </Link>
+              </li>
+            ))}
             <li>
               <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
-                href={isBlog ? "/#home" : "#home"}
-                onClick={(e) => {
-                  if (!isBlog) {
-                    e.preventDefault();
-                    document.querySelector("#home")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
-                href={isBlog ? "/#skills" : "#skills"}
-                onClick={(e) => {
-                  if (!isBlog) {
-                    e.preventDefault();
-                    document.querySelector("#skills")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                Skills
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
-                href={isBlog ? "/#experience" : "#experience"}
-                onClick={(e) => {
-                  if (!isBlog) {
-                    e.preventDefault();
-                    document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                Experience
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
-                href={isBlog ? "/#projects" : "#projects"}
-                onClick={(e) => {
-                  if (!isBlog) {
-                    e.preventDefault();
-                    document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                Projects
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
+                className={`font-medium px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer ${
+                  pathname?.startsWith("/blog") ? "text-[var(--primary)]" : "hover:text-gray-900 dark:hover:text-white"
+                }`}
                 href="/blog"
               >
                 Blogs
@@ -161,7 +183,11 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
             </li>
             <li>
               <Link
-                className="font-medium hover:text-gray-900 dark:hover:text-white px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer"
+                className={`font-medium px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer relative ${
+                  isActive("contact")
+                    ? "text-[var(--primary)]"
+                    : "hover:text-gray-900 dark:hover:text-white"
+                }`}
                 href={isBlog ? "/#contact" : "#contact"}
                 onClick={(e) => {
                   if (!isBlog) {
@@ -171,6 +197,9 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
                 }}
               >
                 Contact
+                {isActive("contact") && (
+                  <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[var(--primary)] rounded-full" />
+                )}
               </Link>
             </li>
 
@@ -244,71 +273,58 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <nav className="md:hidden bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 w-full max-h-[calc(100vh-60px)] overflow-y-auto">
+      {/* Mobile Menu — Slide animation */}
+      <div
+        className={`md:hidden fixed inset-0 top-[60px] z-50 transition-all duration-300 ease-in-out ${
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Backdrop overlay */}
+        <div
+          className={`absolute inset-0 bg-black/20 dark:bg-black/40 transition-opacity duration-300 ${
+            mobileOpen ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setMobileOpen(false)}
+        />
+
+        {/* Menu panel */}
+        <nav
+          className={`relative bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 w-full max-h-[calc(100vh-60px)] overflow-y-auto transition-transform duration-300 ease-out ${
+            mobileOpen ? "translate-y-0" : "-translate-y-4"
+          }`}
+        >
           <ul className="flex flex-col px-4 py-4 space-y-2 text-base font-semibold text-gray-700 dark:text-slate-300">
-            <li>
-              <Link
-                href={isBlog ? "/#home" : "#home"}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (!isBlog) {
-                    document.querySelector("#home")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={isBlog ? "/#skills" : "#skills"}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (!isBlog) {
-                    document.querySelector("#skills")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Skills
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={isBlog ? "/#experience" : "#experience"}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (!isBlog) {
-                    document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Experience
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={isBlog ? "/#projects" : "#projects"}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (!isBlog) {
-                    document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Projects
-              </Link>
-            </li>
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={isBlog ? `/#${item.id}` : item.href}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (!isBlog) {
+                      document.querySelector(`#${item.id}`)?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className={`block py-2.5 px-4 rounded-lg transition-colors ${
+                    isActive(item.id)
+                      ? "bg-[var(--primary)]/10 text-[var(--primary)]"
+                      : "hover:bg-gray-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
             <li>
               <Link
                 href="/blog"
                 onClick={() => setMobileOpen(false)}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                className={`block py-2.5 px-4 rounded-lg transition-colors ${
+                  pathname?.startsWith("/blog")
+                    ? "bg-[var(--primary)]/10 text-[var(--primary)]"
+                    : "hover:bg-gray-100 dark:hover:bg-zinc-800"
+                }`}
               >
                 Blogs
               </Link>
@@ -322,7 +338,11 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
                     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="block py-2.5 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                className={`block py-2.5 px-4 rounded-lg transition-colors ${
+                  isActive("contact")
+                    ? "bg-[var(--primary)]/10 text-[var(--primary)]"
+                    : "hover:bg-gray-100 dark:hover:bg-zinc-800"
+                }`}
               >
                 Contact
               </Link>
@@ -362,7 +382,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
             </li>
           </ul>
         </nav>
-      )}
+      </div>
     </header>
   );
 }
