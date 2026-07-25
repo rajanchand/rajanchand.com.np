@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
+import { BreadcrumbJsonLd } from "@/components/json-ld";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -68,6 +69,12 @@ export default async function DissertionsListing() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-[var(--primary)]/30 relative overflow-hidden transition-colors duration-300">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Dissertations", url: "/dissertions" },
+        ]}
+      />
       <BackgroundOrbs />
       <Navbar siteConfig={data?.siteConfig} />
 

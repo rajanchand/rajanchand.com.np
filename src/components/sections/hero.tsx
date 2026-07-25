@@ -69,9 +69,12 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
 
           {/* Right Column — Intro Text */}
           <div className="w-full lg:w-2/3 text-left">
-            <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
+            <h1 className="mb-2 text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 font-[family-name:var(--font-inter)] tracking-tight">
               <TypingAnimation text={`${siteConfig.name}!`} />
             </h1>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--primary)] mb-4">
+              Network Engineer & MSc IT Researcher
+            </h2>
 
             <div className="space-y-6">
               <p className="text-base text-gray-600 dark:text-slate-400 text-justify leading-relaxed">

@@ -4,9 +4,10 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { BlogClient } from "./blog-client";
+import { BreadcrumbJsonLd } from "@/components/json-ld";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Blog & Articles — Network Engineering & Security",
   description:
     "Insights, tutorials, and in-depth articles on network engineering, cybersecurity, ISP infrastructure, and IT research by Rajan Prakash Chand.",
   alternates: {
@@ -37,6 +38,12 @@ export default async function BlogListing() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Blog", url: "/blog" },
+        ]}
+      />
       <BackgroundOrbs />
       <Navbar siteConfig={data?.siteConfig} />
       <BlogClient initialPosts={posts} />
@@ -44,3 +51,4 @@ export default async function BlogListing() {
     </main>
   );
 }
+
