@@ -235,11 +235,12 @@ export default function AdminDashboard() {
     const newStatus = currentStatus === "read" ? "unread" : "read";
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, status: newStatus } : m)));
     try {
-      await fetch("/api/admin/messages", {
+      const res = await fetch("/api/admin/messages", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: newStatus }),
       });
+      if (!res.ok) loadMessages();
     } catch (err) {
       console.error("Failed to update message status:", err);
       loadMessages();
@@ -248,12 +249,14 @@ export default function AdminDashboard() {
 
   const handleDeleteMessage = async (id: number) => {
     if (!window.confirm("Delete this message? This cannot be undone.")) return;
+    const previous = messages;
     setMessages((prev) => prev.filter((m) => m.id !== id));
     try {
-      await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/messages?id=${id}`, { method: "DELETE" });
+      if (!res.ok) setMessages(previous);
     } catch (err) {
       console.error("Failed to delete message:", err);
-      loadMessages();
+      setMessages(previous);
     }
   };
 
@@ -354,7 +357,17 @@ export default function AdminDashboard() {
         // Reload page configuration data to display the changes immediately
         const dataRes = await fetch("/api/admin");
         if (dataRes.ok) {
-          setData(await dataRes.json());
+          const synced = await dataRes.json();
+          setData({
+            ...synced,
+            experience: Array.isArray(synced.experience) ? synced.experience : [],
+            projects: Array.isArray(synced.projects) ? synced.projects : [],
+            skills: Array.isArray(synced.skills) ? synced.skills : [],
+            certifications: Array.isArray(synced.certifications) ? synced.certifications : [],
+            dissertations: Array.isArray(synced.dissertations) ? synced.dissertations : [],
+            blogPosts: Array.isArray(synced.blogPosts) ? synced.blogPosts : [],
+            socialLinks: Array.isArray(synced.socialLinks) ? synced.socialLinks : [],
+          });
         }
       } else {
         setSyncStatus({ success: false, message: resData.error || "Sync action failed" });
@@ -402,7 +415,17 @@ export default function AdminDashboard() {
           setLoading(false);
           return;
         }
-        setData(jsonData);
+        // Normalize arrays so missing fields never crash CMS tabs / add handlers
+        setData({
+          ...jsonData,
+          experience: Array.isArray(jsonData.experience) ? jsonData.experience : [],
+          projects: Array.isArray(jsonData.projects) ? jsonData.projects : [],
+          skills: Array.isArray(jsonData.skills) ? jsonData.skills : [],
+          certifications: Array.isArray(jsonData.certifications) ? jsonData.certifications : [],
+          dissertations: Array.isArray(jsonData.dissertations) ? jsonData.dissertations : [],
+          blogPosts: Array.isArray(jsonData.blogPosts) ? jsonData.blogPosts : [],
+          socialLinks: Array.isArray(jsonData.socialLinks) ? jsonData.socialLinks : [],
+        });
         setLoading(false);
       } catch (err) {
         console.error("Error loading admin data:", err);
@@ -500,6 +523,28 @@ export default function AdminDashboard() {
         <div className="text-center relative z-10 space-y-3">
           <div className="w-10 h-10 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs text-[var(--muted-foreground)]">Loading Portfolio Console...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <BackgroundOrbs />
+        <div className="text-center relative z-10 space-y-4 max-w-sm px-4">
+          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
+          <p className="text-sm font-semibold">Failed to load portfolio data</p>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            The admin API returned an invalid response. Check your Supabase connection or try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-[var(--primary)] text-white text-xs font-semibold rounded-lg cursor-pointer"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -1882,12 +1927,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-[10px] font-mono font-bold text-[var(--muted-foreground)]">
-                        {data.experience.length} entr{data.experience.length !== 1 ? "ies" : "y"}
+                        {(data.experience || []).length} entr{(data.experience || []).length !== 1 ? "ies" : "y"}
                       </span>
                       <button
                         onClick={() => {
                           const newExp = { type: "work", title: "", company: "", companyUrl: "", period: "", description: "", bullets: [], tags: [] };
-                          setData((prev: any) => ({ ...prev, experience: [newExp, ...prev.experience] }));
+                          setData((prev: any) => ({ ...prev, experience: [newExp, ...(prev.experience || [])] }));
                         }}
                         className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
                       >
@@ -1897,7 +1942,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Empty State */}
-                  {data.experience.length === 0 && (
+                  {(data.experience || []).length === 0 && (
                     <div className="p-12 border-2 border-dashed border-[var(--glass-border)] rounded-2xl text-center space-y-3">
                       <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 flex items-center justify-center">
                         <Briefcase className="w-8 h-8 text-blue-500/50" />
@@ -1909,7 +1954,7 @@ export default function AdminDashboard() {
 
                   {/* Experience Cards */}
                   <div className="space-y-5">
-                    {data.experience.map((item: any, idx: number) => {
+                    {(data.experience || []).map((item: any, idx: number) => {
                       const titleVal = item.title || item.role || "";
                       const periodVal = item.period || item.duration || "";
                       const typeVal = item.type || "work";
@@ -2050,7 +2095,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-[10px] font-mono font-bold text-[var(--muted-foreground)]">
-                        {data.projects.length} project{data.projects.length !== 1 ? "s" : ""}
+                        {(data.projects || []).length} project{(data.projects || []).length !== 1 ? "s" : ""}
                       </span>
                       <button
                         onClick={() => {
@@ -2067,7 +2112,7 @@ export default function AdminDashboard() {
                             demo: "", 
                             impact: [] 
                           };
-                          setData((prev: any) => ({ ...prev, projects: [newProj, ...prev.projects] }));
+                          setData((prev: any) => ({ ...prev, projects: [newProj, ...(prev.projects || [])] }));
                         }}
                         className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
                       >
@@ -2077,7 +2122,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Empty State */}
-                  {data.projects.length === 0 && (
+                  {(data.projects || []).length === 0 && (
                     <div className="p-12 border-2 border-dashed border-[var(--glass-border)] rounded-2xl text-center space-y-3">
                       <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center">
                         <FolderGit2 className="w-8 h-8 text-indigo-500/50" />
@@ -2089,7 +2134,7 @@ export default function AdminDashboard() {
 
                   {/* Project Cards */}
                   <div className="space-y-5">
-                    {data.projects.map((proj: any, idx: number) => {
+                    {(data.projects || []).map((proj: any, idx: number) => {
                       const githubVal = proj.githubUrl || proj.github || "";
                       const websiteVal = proj.websiteUrl || proj.demo || "";
                       const companyVal = proj.company || "";
@@ -2396,12 +2441,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-[10px] font-mono font-bold text-[var(--muted-foreground)]">
-                        {data.skills.length} skill{data.skills.length !== 1 ? "s" : ""}
+                        {(data.skills || []).length} skill{(data.skills || []).length !== 1 ? "s" : ""}
                       </span>
                       <button
                         onClick={() => {
                           const newSkill = { icon: "Cpu", name: "", category: "" };
-                          setData((prev: any) => ({ ...prev, skills: [...prev.skills, newSkill] }));
+                          setData((prev: any) => ({ ...prev, skills: [...(prev.skills || []), newSkill] }));
                         }}
                         className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
                       >
@@ -2411,7 +2456,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Empty State */}
-                  {data.skills.length === 0 && (
+                  {(data.skills || []).length === 0 && (
                     <div className="p-12 border-2 border-dashed border-[var(--glass-border)] rounded-2xl text-center space-y-3">
                       <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center">
                         <Cpu className="w-8 h-8 text-emerald-500/50" />
@@ -2423,7 +2468,7 @@ export default function AdminDashboard() {
 
                   {/* Skills Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.skills.map((skill: any, idx: number) => {
+                    {(data.skills || []).map((skill: any, idx: number) => {
                       // Attempt to resolve custom Lucide icon dynamic preview
                       const iconName = skill.icon || "Cpu";
                       const iconMap: Record<string, typeof Cpu> = {
@@ -2556,12 +2601,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-lg text-[10px] font-mono font-bold text-[var(--muted-foreground)]">
-                        {data.certifications.length} credential{data.certifications.length !== 1 ? "s" : ""}
+                        {(data.certifications || []).length} credential{(data.certifications || []).length !== 1 ? "s" : ""}
                       </span>
                       <button
                         onClick={() => {
                           const newCert = { title: "", name: "", issuer: "", date: "", credentialId: "", url: "", photo: "", description: "" };
-                          setData((prev: any) => ({ ...prev, certifications: [newCert, ...prev.certifications] }));
+                          setData((prev: any) => ({ ...prev, certifications: [newCert, ...(prev.certifications || [])] }));
                         }}
                         className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
                       >
@@ -2571,7 +2616,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Empty State */}
-                  {data.certifications.length === 0 && (
+                  {(data.certifications || []).length === 0 && (
                     <div className="p-12 border-2 border-dashed border-[var(--glass-border)] rounded-2xl text-center space-y-3">
                       <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex items-center justify-center">
                         <Award className="w-8 h-8 text-amber-500/50" />
@@ -2583,7 +2628,7 @@ export default function AdminDashboard() {
 
                   {/* Certification Cards */}
                   <div className="space-y-5">
-                    {data.certifications.map((cert: any, idx: number) => (
+                    {(data.certifications || []).map((cert: any, idx: number) => (
                       <div key={idx} className="border border-[var(--glass-border)] bg-[var(--glass-bg)]/10 rounded-2xl overflow-hidden hover:border-amber-500/20 transition-all duration-300 group/cert">
                         {/* Card Header Strip */}
                         <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-amber-500/5 to-orange-500/5 border-b border-[var(--glass-border)]">
@@ -2846,8 +2891,8 @@ export default function AdminDashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        const newDiss = { title: "Thesis Title", author: "Rajan Prakash Chand", institution: "UWS, Scotland", year: "2026", abstract: "Abstract...", pdfUrl: "" };
-                        setData((prev: any) => ({ ...prev, dissertations: [newDiss, ...prev.dissertations] }));
+                        const newDiss = { title: "", author: "Rajan Prakash Chand", institution: "", year: "", abstract: "", pdfUrl: "", websiteUrl: "", githubUrl: "" };
+                        setData((prev: any) => ({ ...prev, dissertations: [newDiss, ...(prev.dissertations || [])] }));
                       }}
                       className="px-3 py-1.5 bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 text-xs font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
                     >
@@ -2856,12 +2901,12 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-6">
-                    {data.dissertations.length === 0 && (
+                    {(data.dissertations || []).length === 0 && (
                       <div className="p-8 border border-dashed border-[var(--glass-border)] rounded-2xl text-center text-xs text-[var(--muted-foreground)]">
                         No dissertations yet — click &quot;Add Dissertation&quot; above to create one.
                       </div>
                     )}
-                    {data.dissertations.map((diss: any, idx: number) => (
+                    {(data.dissertations || []).map((diss: any, idx: number) => (
                       <div key={idx} className="p-5 border border-[var(--glass-border)] bg-[var(--glass-bg)]/20 rounded-2xl space-y-4 relative">
                         <button
                           onClick={() => {

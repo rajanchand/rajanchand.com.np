@@ -6,6 +6,7 @@ import { BackgroundOrbs } from "@/components/background-orbs";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { SectionHeader } from "@/components/ui/section-header";
 import { BreadcrumbJsonLd } from "@/components/json-ld";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import { 
   ArrowLeft, 
   ExternalLink, 
@@ -52,10 +53,17 @@ interface DissertionItem {
 export default async function DissertionsListing() {
   const data = await loadPortfolioData();
   const rawList = (data?.dissertations || dissertions) as DissertionItem[];
-  
-  // Deduplicate and normalize data lists safely
-  const dataList = (rawList || []).map((item) => {
-    return {
+
+  // Hide unfinished CMS drafts / accidental placeholders from the public page
+  const dataList = (rawList || [])
+    .filter((item) => {
+      const title = (item.title || "").trim();
+      const abstract = (item.abstract || item.description || "").trim();
+      if (!title || title === "Thesis Title") return false;
+      if (!abstract || abstract === "Abstract...") return false;
+      return true;
+    })
+    .map((item) => ({
       title: item.title || "Untitled Research Paper",
       author: item.author || "Rajan Prakash Chand",
       institution: item.institution || item.type || "Academic Research",
@@ -63,9 +71,8 @@ export default async function DissertionsListing() {
       abstract: item.abstract || item.description || "No abstract description provided.",
       pdfUrl: item.pdfUrl || item.url || "",
       websiteUrl: item.websiteUrl || "",
-      githubUrl: item.githubUrl || ""
-    };
-  });
+      githubUrl: item.githubUrl || "",
+    }));
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-[var(--primary)]/30 relative overflow-hidden transition-colors duration-300">
@@ -198,6 +205,7 @@ export default async function DissertionsListing() {
       </div>
 
       <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
+      <ScrollToTop />
     </main>
   );
 }

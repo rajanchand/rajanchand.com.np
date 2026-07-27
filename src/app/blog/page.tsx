@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { BlogClient } from "./blog-client";
 import { BreadcrumbJsonLd } from "@/components/json-ld";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata: Metadata = {
   title: "Blog & Articles — Network Engineering & Security",
@@ -48,6 +49,7 @@ export default async function BlogListing() {
       <Navbar siteConfig={data?.siteConfig} />
       <BlogClient initialPosts={posts} />
       <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
+      <ScrollToTop />
     </main>
   );
 }

@@ -143,9 +143,9 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
 
                 {/* Hire Me */}
                 <a
-                  href={siteConfig.calendlyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={siteConfig.calendlyUrl || "#contact"}
+                  target={siteConfig.calendlyUrl ? "_blank" : undefined}
+                  rel={siteConfig.calendlyUrl ? "noopener noreferrer" : undefined}
                   className="inline-flex items-center gap-2 px-6 py-3 glass rounded-xl text-sm font-semibold hover:border-[var(--primary)]/30 hover:-translate-y-0.5 transition-all duration-300 mb-8"
                 >
                   <Calendar className="w-4 h-4 text-[var(--accent)]" />

@@ -67,7 +67,7 @@ export function Certifications({ certifications: customCertifications }: { certi
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {typedCertifications.map((cert, i) => {
             const certTitle = cert.title || cert.name || "Certification Title";
-            if (!certTitle.trim() && !cert.issuer.trim()) return null;
+            if (!certTitle.trim() && !(cert.issuer || "").trim()) return null;
 
             const hasPhoto = !!cert.photo;
             return (

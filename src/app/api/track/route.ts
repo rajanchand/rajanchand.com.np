@@ -101,9 +101,16 @@ export async function POST(request: Request) {
       isp: "",
     };
 
-    // Only hit third-party geo APIs with something that actually looks like an IP —
-    // ip is client-supplied (via x-forwarded-for) and gets interpolated into these URLs.
-    if (isValidIp(ip)) {
+    // Only hit third-party geo APIs with a public IP — localhost/private ranges
+    // hang or return useless data and slow down every page's tracker beacon.
+    const isLocalOrPrivate =
+      ip === "::1" ||
+      ip === "127.0.0.1" ||
+      ip.startsWith("10.") ||
+      ip.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(ip);
+
+    if (isValidIp(ip) && !isLocalOrPrivate) {
       try {
         // ip-api.com: request status + all useful fields for precise location
         // district gives sub-city accuracy; zip helps refine; isp/org for network name
@@ -149,6 +156,10 @@ export async function POST(request: Request) {
           // Fallback also failed — continue with defaults
         }
       }
+    } else if (isLocalOrPrivate) {
+      geo.city = "Local";
+      geo.country = "Local";
+      geo.isp = "Localhost";
     }
 
     // Store in Supabase

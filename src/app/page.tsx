@@ -12,6 +12,7 @@ import { Contact } from "@/components/sections/contact";
 import { loadPortfolioData } from "@/lib/data";
 import { PortfolioSync } from "@/components/portfolio-sync";
 import { HomeJsonLd } from "@/components/json-ld";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export default async function Home() {
   const data = await loadPortfolioData();
@@ -33,6 +34,7 @@ export default async function Home() {
         <Contact siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
       </main>
       <Footer siteConfig={data?.siteConfig} socialLinks={data?.socialLinks} />
+      <ScrollToTop />
     </>
   );
 }

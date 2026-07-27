@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
+import { assertSameOrigin } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,9 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -77,6 +81,9 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

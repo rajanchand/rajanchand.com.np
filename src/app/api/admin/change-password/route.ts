@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { isAdminAuthenticated, verifyAdminPassword, getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
+import { assertSameOrigin } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,9 @@ function hashPassword(password: string): string {
 
 export async function POST(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -65,28 +69,35 @@ export async function POST(request: Request) {
       console.warn("Failed to write credentials.json locally (likely serverless environment):", fsErr);
     }
 
-    // 4. Write to Supabase under row id = 1 (_adminPasswordHash inside content)
+    // 4. Write to Supabase under row id = 1 (_adminPasswordHash inside content).
+    // Never upsert a hash-only payload — that would wipe the portfolio if content is missing.
     let dbError = null;
     try {
-      const { data: existingData } = await supabase
+      const { data: existingData, error: fetchError } = await supabase
         .from("portfolio")
         .select("content")
         .eq("id", 1)
         .maybeSingle();
 
-      const updatedContent = {
-        ...(existingData?.content || {}),
-        _adminPasswordHash: newHash,
-      };
+      if (fetchError) {
+        dbError = fetchError;
+      } else if (!existingData?.content || typeof existingData.content !== "object") {
+        dbError = new Error("Portfolio content missing in Supabase; refusing to overwrite with hash-only payload");
+      } else {
+        const updatedContent = {
+          ...existingData.content,
+          _adminPasswordHash: newHash,
+        };
 
-      const { error } = await supabase
-        .from("portfolio")
-        .upsert({
-          id: 1,
-          content: updatedContent,
-          updated_at: new Date().toISOString()
-        });
-      dbError = error;
+        const { error } = await supabase
+          .from("portfolio")
+          .upsert({
+            id: 1,
+            content: updatedContent,
+            updated_at: new Date().toISOString()
+          });
+        dbError = error;
+      }
     } catch (dbErr: unknown) {
       console.error("Supabase upsert crashed for password hash:", dbErr instanceof Error ? dbErr.message : dbErr);
       dbError = dbErr;

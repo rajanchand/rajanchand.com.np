@@ -78,10 +78,10 @@ export function BlogManager({ blogPosts = [], onUpdatePosts }: BlogManagerProps)
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
-        post.title.toLowerCase().includes(q) ||
-        post.excerpt.toLowerCase().includes(q) ||
-        post.category.toLowerCase().includes(q) ||
-        (post.slug && post.slug.toLowerCase().includes(q));
+        (post.title || "").toLowerCase().includes(q) ||
+        (post.excerpt || "").toLowerCase().includes(q) ||
+        (post.category || "").toLowerCase().includes(q) ||
+        (post.slug || "").toLowerCase().includes(q);
 
       return matchesCat && matchesSearch;
     });

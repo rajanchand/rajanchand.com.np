@@ -4,42 +4,76 @@ import fs from "fs";
 import path from "path";
 
 const SESSION_COOKIE_NAME = "admin_session";
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
 
 function timingSafeEqualStrings(a: string, b: string): boolean {
   const aBuf = Buffer.from(a);
   const bBuf = Buffer.from(b);
   if (aBuf.length !== bBuf.length) {
-    // Run a dummy comparison so a length mismatch doesn't return faster
-    // than a full comparison and leak length via timing.
     crypto.timingSafeEqual(aBuf, aBuf);
     return false;
   }
   return crypto.timingSafeEqual(aBuf, bBuf);
 }
 
-const DEFAULT_SESSION_SECRET = "rajanchand-default-admin-session-secret-key-2026";
-const DEFAULT_PASSWORD_HASH = "57c4251b954458005a5814df8535184d:f64f1a67adc6b25d33b2e1574a5c5788ef12cddb8483f1857e21a561c00817edcf972f9a5dc85c59aadec05ce16bb5f7dcd5d4e6684bbb0143263ed8cbf7de68";
+/** Fails closed — never falls back to a hardcoded secret. */
+export function getSessionSecret(): string | null {
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim();
+  if (!secret || secret.length < 32) return null;
+  return secret;
+}
 
 /**
- * Verifies the admin_session cookie against ADMIN_SESSION_SECRET.
+ * Creates a time-limited HMAC session token.
+ * Format: `<expiresAtMs>.<hmac>`
+ */
+export function createAdminSessionToken(secret: string = getSessionSecret() || ""): string | null {
+  if (!secret) return null;
+  const expiresAt = Date.now() + SESSION_TTL_MS;
+  const payload = String(expiresAt);
+  const sig = crypto.createHmac("sha256", secret).update(`session:${payload}`).digest("hex");
+  return `${payload}.${sig}`;
+}
+
+/** Verifies a signed session token (Node runtime). */
+export function verifyAdminSessionToken(
+  token: string | undefined | null,
+  secret: string = getSessionSecret() || ""
+): boolean {
+  if (!token || !secret) return false;
+
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+
+  const [expiresAtStr, sig] = parts;
+  const expiresAt = Number(expiresAtStr);
+  if (!expiresAtStr || !sig || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
+    return false;
+  }
+
+  const expected = crypto.createHmac("sha256", secret).update(`session:${expiresAtStr}`).digest("hex");
+  return timingSafeEqualStrings(sig, expected);
+}
+
+/**
+ * Verifies the admin_session cookie against a signed, expiring token.
  */
 export async function isAdminAuthenticated(): Promise<boolean> {
-  const secret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+  const secret = getSessionSecret();
+  if (!secret) return false;
 
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE_NAME);
-  if (!session?.value) return false;
-
-  return timingSafeEqualStrings(session.value, secret);
+  return verifyAdminSessionToken(session?.value, secret);
 }
 
-export { SESSION_COOKIE_NAME, DEFAULT_SESSION_SECRET };
+export { SESSION_COOKIE_NAME, SESSION_TTL_MS };
 
 /**
- * Retrieves the current password hash from Supabase (row id=1), local file, or environment fallback.
+ * Retrieves the current password hash from Supabase, local file, or env.
+ * No hardcoded fallback — admin login fails closed when unset.
  */
-export async function getAdminPasswordHash(): Promise<string> {
-  // 1. Try Supabase row id = 1 (_adminPasswordHash inside content)
+export async function getAdminPasswordHash(): Promise<string | null> {
   try {
     const { supabase } = await import("@/lib/supabase");
     const { data, error } = await supabase
@@ -54,7 +88,6 @@ export async function getAdminPasswordHash(): Promise<string> {
     console.warn("Supabase fetch failed in getAdminPasswordHash:", err);
   }
 
-  // 2. Try local credentials.json
   try {
     const credPath = path.join(process.cwd(), "src/lib/credentials.json");
     if (fs.existsSync(credPath)) {
@@ -68,8 +101,7 @@ export async function getAdminPasswordHash(): Promise<string> {
     console.warn("Local credentials read failed:", err);
   }
 
-  // 3. Fallback to env or default hash
-  return process.env.ADMIN_PASSWORD_HASH || DEFAULT_PASSWORD_HASH;
+  return process.env.ADMIN_PASSWORD_HASH?.trim() || null;
 }
 
 /**
@@ -111,4 +143,15 @@ export function isValidIp(ip: string): boolean {
   }
 
   return ip.includes(":") && ip.length <= 45 && IPV6_REGEX.test(ip);
+}
+
+/** Cookie options shared by admin session/OTP setters. */
+export function secureCookieOptions(maxAgeSec: number) {
+  return {
+    httpOnly: true as const,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+    maxAge: maxAgeSec,
+    path: "/",
+  };
 }

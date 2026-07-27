@@ -8,6 +8,7 @@ import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 import { sanitizeObject } from "@/lib/sanitize";
+import { assertSameOrigin } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,9 @@ async function checkRateLimit() {
 
 export async function POST(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -49,6 +53,20 @@ export async function POST(request: Request) {
       const localData = JSON.parse(fileContent);
 
       const sanitizedData = sanitizeObject(localData);
+
+      // Preserve admin password hash stored in Supabase so a push doesn't wipe auth
+      try {
+        const { data: existingData } = await supabase
+          .from("portfolio")
+          .select("content")
+          .eq("id", 1)
+          .maybeSingle();
+        if (existingData?.content?._adminPasswordHash) {
+          sanitizedData._adminPasswordHash = existingData.content._adminPasswordHash;
+        }
+      } catch (e: unknown) {
+        console.warn("Failed to preserve password hash during sync push:", e);
+      }
 
       // 2. Write to Supabase (id=1)
       const { error } = await supabase

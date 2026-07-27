@@ -8,6 +8,7 @@ import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { sanitizeObject } from "@/lib/sanitize";
 import { serverError } from "@/lib/api-response";
+import { assertSameOrigin } from "@/lib/request-security";
 
 const dataFilePath = path.join(process.cwd(), "src/lib/data.json");
 const adminRateLimiter = createRateLimiter({ max: 30, windowMs: 60 * 1000 });
@@ -88,6 +89,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

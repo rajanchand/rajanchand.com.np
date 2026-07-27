@@ -449,14 +449,6 @@
   ],
   "dissertations": [
     {
-      "year": "2026",
-      "title": "Thesis Title",
-      "author": "Rajan Prakash Chand",
-      "pdfUrl": "",
-      "abstract": "Abstract...",
-      "institution": "UWS, Scotland"
-    },
-    {
       "url": "https://drive.google.com/file/d/1anVkV0WWAd_VLvVtrJf9ZY2N_sy_Yry9/view?usp=sharing",
       "type": "Academic Research Paper",
       "title": "Zero Trust Security in Remote Work Environments",

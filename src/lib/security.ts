@@ -14,24 +14,32 @@ export interface SecurityDeviceInfo {
 }
 
 import crypto from "crypto";
-import { DEFAULT_SESSION_SECRET } from "@/lib/auth";
+import { getSessionSecret } from "@/lib/auth";
 
 export const OTP_COOKIE_NAME = "pending_otp_token";
 
 export function generateOtpCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
+/**
+ * Stores only expiry + HMAC of the OTP (never the OTP itself).
+ * Cookie theft alone cannot reveal the code.
+ * Format: `<expiresAt>:<hmac>`
+ */
 export function createSignedOtpToken(otpCode: string): { token: string; expiresAt: number } {
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
-  const secret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+  const secret = getSessionSecret();
+  if (!secret) {
+    throw new Error("ADMIN_SESSION_SECRET is required to issue OTP tokens");
+  }
   const hmac = crypto
     .createHmac("sha256", secret)
-    .update(`${otpCode}:${expiresAt}`)
+    .update(`otp:${otpCode.trim()}:${expiresAt}`)
     .digest("hex");
 
   return {
-    token: `${otpCode}:${expiresAt}:${hmac}`,
+    token: `${expiresAt}:${hmac}`,
     expiresAt,
   };
 }
@@ -39,20 +47,22 @@ export function createSignedOtpToken(otpCode: string): { token: string; expiresA
 export function verifySignedOtpToken(token: string | undefined | null, enteredOtp: string): boolean {
   if (!token || !enteredOtp) return false;
 
-  const parts = token.split(":");
-  if (parts.length !== 3) return false;
+  const secret = getSessionSecret();
+  if (!secret) return false;
 
-  const [expectedOtp, expiresAtStr, hmac] = parts;
+  const parts = token.split(":");
+  if (parts.length !== 2) return false;
+
+  const [expiresAtStr, hmac] = parts;
   const expiresAt = Number(expiresAtStr);
 
-  if (isNaN(expiresAt) || Date.now() > expiresAt) {
+  if (!expiresAtStr || !hmac || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
     return false;
   }
 
-  const secret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
   const expectedHmac = crypto
     .createHmac("sha256", secret)
-    .update(`${expectedOtp}:${expiresAtStr}`)
+    .update(`otp:${enteredOtp.trim()}:${expiresAtStr}`)
     .digest("hex");
 
   const hmacBuf = Buffer.from(hmac);
@@ -62,7 +72,7 @@ export function verifySignedOtpToken(token: string | undefined | null, enteredOt
     return false;
   }
 
-  return expectedOtp.trim() === enteredOtp.trim();
+  return true;
 }
 
 export function parseUserAgent(ua: string) {
@@ -117,7 +127,15 @@ export async function getDeviceInfo(headersList: Headers): Promise<SecurityDevic
     isp: "",
   };
 
-  if (isValidIp(ip)) {
+  // Skip geo for localhost / private ranges — lookups hang or return useless data
+  const isLocalOrPrivate =
+    ip === "::1" ||
+    ip === "127.0.0.1" ||
+    ip.startsWith("10.") ||
+    ip.startsWith("192.168.") ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(ip);
+
+  if (isValidIp(ip) && !isLocalOrPrivate) {
     try {
       const geoRes = await fetch(
         `https://ip-api.com/json/${ip}?fields=status,city,country,regionName,isp,org`,

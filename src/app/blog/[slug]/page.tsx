@@ -9,11 +9,12 @@ export async function generateStaticParams() {
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
-import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, User } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortfolioSync } from "@/components/portfolio-sync";
 import { BlogPostJsonLd } from "@/components/json-ld";
+import { ShareButton } from "@/components/share-button";
 
 interface BlogPostItem {
   slug: string;
@@ -268,10 +269,7 @@ export default async function BlogPost({ params }: PageProps) {
             <div className="text-xs text-[var(--muted-foreground)]">
               Published by <span className="font-semibold text-[var(--foreground)]">{data?.siteConfig?.name || siteConfig.name}</span>
             </div>
-            <button className="inline-flex items-center gap-2 px-4 py-2 glass rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 transition-all cursor-pointer">
-              <Share2 className="w-3.5 h-3.5" />
-              Share Article
-            </button>
+            <ShareButton title={post.title} text={post.excerpt} />
           </div>
         </article>
       </div>

@@ -32,7 +32,11 @@ export default function AdminLogin() {
 
       if (data.success && data.requireOtp) {
         setStep("otp");
-        setInfoMsg(`A 6-digit OTP code has been sent to ${data.email || "your email"}.`);
+        setInfoMsg(
+          data.hasResendKey === false
+            ? "OTP generated. Email delivery is not configured (RESEND_API_KEY missing) — check the server console for the 6-digit code."
+            : `A 6-digit OTP code has been sent to ${data.email || "your email"}.`
+        );
         setLoading(false);
       } else if (data.success) {
         setSuccess(true);

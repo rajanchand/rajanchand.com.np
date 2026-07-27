@@ -52,7 +52,10 @@ const nextConfig: NextConfig = {
               // site relies on for blog posts, and framer-motion animates via inline style
               // attributes on nearly every section. Removing either would break real behavior,
               // not just "harden" it — see next.config.ts history/PR notes for the full reasoning.
-              "script-src 'self' 'unsafe-inline'",
+              // 'unsafe-eval' is only for Next/React dev tooling (source maps / call stacks).
+              process.env.NODE_ENV === "development"
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+                : "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' https: data: blob:",
               "font-src 'self' data:",
@@ -61,6 +64,9 @@ const nextConfig: NextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
+              ...(process.env.NODE_ENV === "production"
+                ? ["upgrade-insecure-requests"]
+                : []),
             ].join("; "),
           },
         ],

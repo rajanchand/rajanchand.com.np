@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { verifyAdminPassword, getAdminPasswordHash, DEFAULT_SESSION_SECRET } from "@/lib/auth";
+import { verifyAdminPassword, getAdminPasswordHash, getSessionSecret, secureCookieOptions } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
+import { assertSameOrigin } from "@/lib/request-security";
 import {
   getDeviceInfo,
   generateOtpCode,
@@ -15,13 +16,16 @@ import {
 
 const loginRateLimiter = createRateLimiter({
   max: process.env.NODE_ENV === "development" ? 100 : 5,
-  windowMs: process.env.NODE_ENV === "development" ? 1000 : 15 * 60 * 1000, // 1s dev, 15min prod
+  windowMs: process.env.NODE_ENV === "development" ? 1000 : 15 * 60 * 1000,
 });
 
 export async function POST(request: Request) {
   try {
+    const originBlock = assertSameOrigin(request);
+    if (originBlock) return originBlock;
+
     const targetHash = await getAdminPasswordHash();
-    const sessionSecret = process.env.ADMIN_SESSION_SECRET || DEFAULT_SESSION_SECRET;
+    const sessionSecret = getSessionSecret();
 
     if (!sessionSecret || !targetHash) {
       console.error("Admin login attempted but sessionSecret/targetHash could not be resolved");
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
 
     const { password } = await request.json();
 
-    if (!password || typeof password !== "string") {
+    if (!password || typeof password !== "string" || password.length > 200) {
       return NextResponse.json(
         { success: false, error: "Password is required" },
         { status: 400 }
@@ -70,38 +74,30 @@ export async function POST(request: Request) {
     if (isValid) {
       loginRateLimiter.reset(deviceInfo.ip);
 
-      // Generate 6-digit OTP code & create signed token
       const otpCode = generateOtpCode();
       const { token } = createSignedOtpToken(otpCode);
 
-      // Dispatch 2FA OTP Email
       await sendOtpEmailNotification(otpCode, deviceInfo, "rajanchand48@gmail.com");
 
       const response = NextResponse.json({
         success: true,
         requireOtp: true,
-        email: "rajanchand48@gmail.com",
+        email: "your registered email",
         hasResendKey: !!process.env.RESEND_API_KEY,
       });
 
-      // Store signed OTP token in HTTP-only cookie for serverless verification
-      response.cookies.set(OTP_COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 10, // 10 minutes
-        path: "/",
-      });
+      response.cookies.set(OTP_COOKIE_NAME, token, secureCookieOptions(60 * 10));
 
       return response;
     }
 
-    // FAILED LOGIN: Log event & send instant security alert email
-    await logSecurityEvent(false, deviceInfo);
-    await sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com");
+    void Promise.allSettled([
+      logSecurityEvent(false, deviceInfo),
+      sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com"),
+    ]);
 
     return NextResponse.json(
-      { success: false, error: "Incorrect password. Security alert sent to rajanchand48@gmail.com" },
+      { success: false, error: "Incorrect password." },
       { status: 401 }
     );
   } catch (error) {
