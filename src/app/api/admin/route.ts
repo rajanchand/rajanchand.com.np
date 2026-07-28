@@ -121,18 +121,17 @@ export async function POST(request: Request) {
       }
     }
 
-    // Preserve existing _adminPasswordHash when saving content edits
+    // Preserve existing admin credentials when saving content edits
     try {
+      const { preserveAdminSecrets } = await import("@/lib/auth");
       const { data: existingData } = await supabase
         .from("portfolio")
         .select("content")
         .eq("id", 1)
         .maybeSingle();
-      if (existingData?.content?._adminPasswordHash) {
-        sanitizedData._adminPasswordHash = existingData.content._adminPasswordHash;
-      }
+      preserveAdminSecrets(sanitizedData, existingData?.content);
     } catch (e: unknown) {
-      console.warn("Failed to fetch existing password hash during save:", e);
+      console.warn("Failed to fetch existing admin credentials during save:", e);
     }
 
     // 1. Write to the local JSON file (so local environment stays in sync)

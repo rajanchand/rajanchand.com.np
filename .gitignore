@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local admin credential store (password hash / username)
+src/lib/credentials.json
+
 # vercel
 .vercel
 

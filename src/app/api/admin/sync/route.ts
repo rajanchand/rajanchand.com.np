@@ -54,18 +54,17 @@ export async function POST(request: Request) {
 
       const sanitizedData = sanitizeObject(localData);
 
-      // Preserve admin password hash stored in Supabase so a push doesn't wipe auth
+      // Preserve admin credentials stored in Supabase so a push doesn't wipe auth
       try {
+        const { preserveAdminSecrets } = await import("@/lib/auth");
         const { data: existingData } = await supabase
           .from("portfolio")
           .select("content")
           .eq("id", 1)
           .maybeSingle();
-        if (existingData?.content?._adminPasswordHash) {
-          sanitizedData._adminPasswordHash = existingData.content._adminPasswordHash;
-        }
+        preserveAdminSecrets(sanitizedData, existingData?.content);
       } catch (e: unknown) {
-        console.warn("Failed to preserve password hash during sync push:", e);
+        console.warn("Failed to preserve admin credentials during sync push:", e);
       }
 
       // 2. Write to Supabase (id=1)

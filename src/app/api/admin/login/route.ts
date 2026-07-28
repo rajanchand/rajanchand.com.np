@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { verifyAdminPassword, getAdminPasswordHash, getSessionSecret, secureCookieOptions } from "@/lib/auth";
+import {
+  verifyAdminPassword,
+  verifyAdminUsername,
+  getAdminPasswordHash,
+  getSessionSecret,
+  getAdminEmail,
+  secureCookieOptions,
+} from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 import { assertSameOrigin } from "@/lib/request-security";
@@ -60,7 +67,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const { password } = await request.json();
+    const { username, password } = await request.json();
+
+    if (!username || typeof username !== "string" || username.length > 64) {
+      return NextResponse.json(
+        { success: false, error: "Username is required" },
+        { status: 400 }
+      );
+    }
 
     if (!password || typeof password !== "string" || password.length > 200) {
       return NextResponse.json(
@@ -69,15 +83,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const isValid = await verifyAdminPassword(password);
+    const [usernameOk, passwordOk] = await Promise.all([
+      verifyAdminUsername(username),
+      verifyAdminPassword(password),
+    ]);
 
-    if (isValid) {
+    if (usernameOk && passwordOk) {
       loginRateLimiter.reset(deviceInfo.ip);
 
       const otpCode = generateOtpCode();
       const { token } = createSignedOtpToken(otpCode);
+      const adminEmail = getAdminEmail();
 
-      await sendOtpEmailNotification(otpCode, deviceInfo, "rajanchand48@gmail.com");
+      await sendOtpEmailNotification(otpCode, deviceInfo, adminEmail);
 
       const response = NextResponse.json({
         success: true,
@@ -93,11 +111,11 @@ export async function POST(request: Request) {
 
     void Promise.allSettled([
       logSecurityEvent(false, deviceInfo),
-      sendSecurityEmailNotification(false, deviceInfo, "rajanchand48@gmail.com"),
+      sendSecurityEmailNotification(false, deviceInfo, getAdminEmail()),
     ]);
 
     return NextResponse.json(
-      { success: false, error: "Incorrect password." },
+      { success: false, error: "Incorrect username or password." },
       { status: 401 }
     );
   } catch (error) {

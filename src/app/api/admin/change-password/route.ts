@@ -1,27 +1,40 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import crypto from "crypto";
-import fs from "fs";
-import path from "path";
 import { supabase } from "@/lib/supabase";
-import { isAdminAuthenticated, verifyAdminPassword, getClientIp } from "@/lib/auth";
+import {
+  isAdminAuthenticated,
+  verifyAdminPassword,
+  getClientIp,
+  getAdminUsername,
+  isValidAdminUsername,
+  hashAdminPassword,
+  writeLocalCredentials,
+  invalidateAdminCredentialsCache,
+} from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 import { assertSameOrigin } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
-const changePasswordRateLimiter = createRateLimiter({ max: 5, windowMs: 15 * 60 * 1000 }); // 5 attempts per 15 mins
+const changePasswordRateLimiter = createRateLimiter({ max: 5, windowMs: 15 * 60 * 1000 });
 
 async function checkRateLimit() {
   const clientIp = getClientIp(await headers());
   return changePasswordRateLimiter(clientIp);
 }
 
-function hashPassword(password: string): string {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const derivedKey = crypto.scryptSync(password, Buffer.from(salt, "hex"), 64);
-  return `${salt}:${derivedKey.toString("hex")}`;
+export async function GET() {
+  try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const username = await getAdminUsername();
+    return NextResponse.json({ success: true, username });
+  } catch (error) {
+    return serverError("Get admin credentials error:", error);
+  }
 }
 
 export async function POST(request: Request) {
@@ -36,42 +49,61 @@ export async function POST(request: Request) {
     const rateCheck = await checkRateLimit();
     if (!rateCheck.allowed) {
       return NextResponse.json(
-        { error: `Too many password change attempts. Please try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minute(s).` },
+        {
+          error: `Too many credential change attempts. Please try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minute(s).`,
+        },
         { status: 429, headers: { "Retry-After": String(rateCheck.retryAfterSec) } }
       );
     }
 
-    const { currentPassword, newPassword } = await request.json();
+    const { currentPassword, newPassword, newUsername } = await request.json();
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json({ error: "Current password and new password are required" }, { status: 400 });
+    if (!currentPassword || typeof currentPassword !== "string") {
+      return NextResponse.json({ error: "Current password is required" }, { status: 400 });
     }
 
-    if (newPassword.length < 8) {
-      return NextResponse.json({ error: "New password must be at least 8 characters long" }, { status: 400 });
+    const wantsPasswordChange = typeof newPassword === "string" && newPassword.length > 0;
+    const wantsUsernameChange = typeof newUsername === "string" && newUsername.trim().length > 0;
+
+    if (!wantsPasswordChange && !wantsUsernameChange) {
+      return NextResponse.json(
+        { error: "Provide a new username and/or a new password to update" },
+        { status: 400 }
+      );
     }
 
-    // 1. Verify current password
+    if (wantsPasswordChange && newPassword.length < 8) {
+      return NextResponse.json(
+        { error: "New password must be at least 8 characters long" },
+        { status: 400 }
+      );
+    }
+
+    if (wantsUsernameChange && !isValidAdminUsername(newUsername.trim())) {
+      return NextResponse.json(
+        {
+          error:
+            "Username must be 3–32 characters and only use letters, numbers, dots, underscores, or hyphens",
+        },
+        { status: 400 }
+      );
+    }
+
     const isCurrentValid = await verifyAdminPassword(currentPassword);
     if (!isCurrentValid) {
       return NextResponse.json({ error: "Incorrect current password" }, { status: 400 });
     }
 
-    // 2. Generate new hash
-    const newHash = hashPassword(newPassword);
+    const currentUsername = await getAdminUsername();
+    const nextUsername = wantsUsernameChange ? newUsername.trim() : currentUsername;
+    const nextHash = wantsPasswordChange ? hashAdminPassword(newPassword) : null;
 
-    // 3. Write locally to src/lib/credentials.json
-    try {
-      const credPath = path.join(process.cwd(), "src/lib/credentials.json");
-      const credData = { passwordHash: newHash, updated_at: new Date().toISOString() };
-      fs.writeFileSync(credPath, JSON.stringify(credData, null, 2), "utf8");
-    } catch (fsErr) {
-      console.warn("Failed to write credentials.json locally (likely serverless environment):", fsErr);
-    }
+    const wroteLocal = writeLocalCredentials({
+      username: nextUsername,
+      ...(nextHash ? { passwordHash: nextHash } : {}),
+    });
 
-    // 4. Write to Supabase under row id = 1 (_adminPasswordHash inside content).
-    // Never upsert a hash-only payload — that would wipe the portfolio if content is missing.
-    let dbError = null;
+    let dbError: unknown = null;
     try {
       const { data: existingData, error: fetchError } = await supabase
         .from("portfolio")
@@ -82,38 +114,67 @@ export async function POST(request: Request) {
       if (fetchError) {
         dbError = fetchError;
       } else if (!existingData?.content || typeof existingData.content !== "object") {
-        dbError = new Error("Portfolio content missing in Supabase; refusing to overwrite with hash-only payload");
+        dbError = new Error(
+          "Portfolio content missing in Supabase; refusing to overwrite with credentials-only payload"
+        );
       } else {
-        const updatedContent = {
+        const updatedContent: Record<string, unknown> = {
           ...existingData.content,
-          _adminPasswordHash: newHash,
+          _adminUsername: nextUsername,
         };
+        if (nextHash) {
+          updatedContent._adminPasswordHash = nextHash;
+        }
 
-        const { error } = await supabase
-          .from("portfolio")
-          .upsert({
-            id: 1,
-            content: updatedContent,
-            updated_at: new Date().toISOString()
-          });
+        const { error } = await supabase.from("portfolio").upsert({
+          id: 1,
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        });
         dbError = error;
       }
     } catch (dbErr: unknown) {
-      console.error("Supabase upsert crashed for password hash:", dbErr instanceof Error ? dbErr.message : dbErr);
+      console.error(
+        "Supabase upsert crashed for admin credentials:",
+        dbErr instanceof Error ? dbErr.message : dbErr
+      );
       dbError = dbErr;
     }
 
+    invalidateAdminCredentialsCache();
+
     if (dbError) {
-      console.error("Database update error for password:", dbError instanceof Error ? dbError.message : dbError);
-      return NextResponse.json({
-        success: true,
-        message: "Password updated locally, but failed to sync to Supabase database. Make sure Supabase connection is functional."
-      });
+      console.error(
+        "Database update error for credentials:",
+        dbError instanceof Error ? dbError.message : dbError
+      );
+      // Local write alone is not enough in production (ephemeral FS). Fail closed.
+      if (!wroteLocal) {
+        return NextResponse.json(
+          {
+            error:
+              "Failed to update credentials in Supabase, and local credentials file is not writable. Check your database connection.",
+          },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json(
+        {
+          error:
+            "Credentials were saved locally but failed to sync to Supabase. On Vercel/serverless the local file may be lost on redeploy — fix the database connection and try again.",
+        },
+        { status: 500 }
+      );
     }
+
+    const parts: string[] = [];
+    if (wantsUsernameChange) parts.push("username");
+    if (wantsPasswordChange) parts.push("password");
 
     return NextResponse.json({
       success: true,
-      message: "Password updated successfully!"
+      username: nextUsername,
+      message: `Admin ${parts.join(" and ")} updated successfully!`,
     });
   } catch (error) {
     return serverError("Change password error:", error);

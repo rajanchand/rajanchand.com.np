@@ -4,6 +4,7 @@ import {
   SESSION_COOKIE_NAME,
   createAdminSessionToken,
   getSessionSecret,
+  getAdminEmail,
   secureCookieOptions,
   SESSION_TTL_MS,
 } from "@/lib/auth";
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
     }
 
     void logSecurityEvent(true, deviceInfo);
-    void sendSecurityEmailNotification(true, deviceInfo, "rajanchand48@gmail.com");
+    void sendSecurityEmailNotification(true, deviceInfo, getAdminEmail());
 
     const response = NextResponse.json({ success: true, redirect: "/admin/dashboard" });
 

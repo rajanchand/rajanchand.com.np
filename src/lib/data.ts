@@ -107,6 +107,7 @@ export const loadPortfolioData = cache(async function loadPortfolioDataInternal(
     if (!error && dbData && dbData.content) {
       const content = { ...dbData.content };
       delete content._adminPasswordHash;
+      delete content._adminUsername;
       cachedMemoryData = content;
       lastFetchTime = now;
       updatePortfolioData(content);

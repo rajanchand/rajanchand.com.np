@@ -193,6 +193,8 @@ export default function AdminDashboard() {
   const [statusData, setStatusData] = useState<any>(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  const [currentUsername, setCurrentUsername] = useState("admin");
+  const [newUsername, setNewUsername] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -299,16 +301,42 @@ export default function AdminDashboard() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    if (activeTab !== "security") return;
+    const loadCredentials = async () => {
+      try {
+        const res = await fetch("/api/admin/change-password");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.username) {
+          setCurrentUsername(json.username);
+          setNewUsername(json.username);
+        }
+      } catch (err) {
+        console.error("Failed to load admin username:", err);
+      }
+    };
+    loadCredentials();
+  }, [activeTab]);
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordStatus({ success: false, message: "" });
 
-    if (newPassword !== confirmPassword) {
+    const usernameChanged = newUsername.trim() !== "" && newUsername.trim() !== currentUsername;
+    const passwordChanged = newPassword.length > 0;
+
+    if (!usernameChanged && !passwordChanged) {
+      setPasswordStatus({ success: false, message: "Change the username and/or enter a new password" });
+      return;
+    }
+
+    if (passwordChanged && newPassword !== confirmPassword) {
       setPasswordStatus({ success: false, message: "New passwords do not match" });
       return;
     }
 
-    if (newPassword.length < 8) {
+    if (passwordChanged && newPassword.length < 8) {
       setPasswordStatus({ success: false, message: "New password must be at least 8 characters long" });
       return;
     }
@@ -318,16 +346,24 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({
+          currentPassword,
+          ...(passwordChanged ? { newPassword } : {}),
+          ...(usernameChanged ? { newUsername: newUsername.trim() } : {}),
+        }),
       });
       const resData = await res.json();
       if (res.ok) {
-        setPasswordStatus({ success: true, message: resData.message || "Password updated successfully!" });
+        setPasswordStatus({ success: true, message: resData.message || "Credentials updated successfully!" });
+        if (resData.username) {
+          setCurrentUsername(resData.username);
+          setNewUsername(resData.username);
+        }
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setPasswordStatus({ success: false, message: resData.error || "Failed to update password" });
+        setPasswordStatus({ success: false, message: resData.error || "Failed to update credentials" });
       }
     } catch (err: any) {
       setPasswordStatus({ success: false, message: err.message || "An unexpected error occurred" });
@@ -944,16 +980,34 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    {/* Change Password Form */}
+                    {/* Change Username / Password Form */}
                     <div className="lg:col-span-3 border border-[var(--glass-border)] bg-[var(--glass-bg)]/10 rounded-2xl overflow-hidden">
                       <div className="px-5 py-3 bg-gradient-to-r from-rose-500/5 to-purple-500/5 border-b border-[var(--glass-border)] flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center">
                           <KeyRound className="w-3.5 h-3.5 text-rose-500" />
                         </div>
-                        <h3 className="text-sm font-bold">Change Console Password</h3>
+                        <div>
+                          <h3 className="text-sm font-bold">Change Login Credentials</h3>
+                          <p className="text-[10px] text-[var(--muted-foreground)]">Current username: <span className="font-mono text-[var(--foreground)]">{currentUsername}</span></p>
+                        </div>
                       </div>
                       <div className="p-5">
                         <form onSubmit={handleChangePassword} className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase flex items-center gap-1">
+                              <User className="w-3 h-3" /> Username
+                            </label>
+                            <input
+                              type="text"
+                              autoComplete="username"
+                              value={newUsername}
+                              onChange={(e) => setNewUsername(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs focus:outline-none focus:border-rose-500/40 text-[var(--foreground)] transition-colors"
+                              placeholder="admin"
+                            />
+                            <p className="text-[9px] text-[var(--muted-foreground)]">3–32 characters: letters, numbers, dots, underscores, hyphens</p>
+                          </div>
+
                           <div className="space-y-1.5">
                             <label className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase flex items-center gap-1">
                               <Lock className="w-3 h-3" /> Current Password
@@ -961,6 +1015,7 @@ export default function AdminDashboard() {
                             <input
                               type="password"
                               required
+                              autoComplete="current-password"
                               value={currentPassword}
                               onChange={(e) => setCurrentPassword(e.target.value)}
                               className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs focus:outline-none focus:border-rose-500/40 text-[var(--foreground)] transition-colors"
@@ -970,17 +1025,16 @@ export default function AdminDashboard() {
 
                           <div className="space-y-1.5">
                             <label className="text-[10px] font-semibold text-[var(--muted-foreground)] uppercase flex items-center gap-1">
-                              <Fingerprint className="w-3 h-3" /> New Password
+                              <Fingerprint className="w-3 h-3" /> New Password <span className="normal-case font-normal">(optional)</span>
                             </label>
                             <input
                               type="password"
-                              required
+                              autoComplete="new-password"
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
                               className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs focus:outline-none focus:border-rose-500/40 text-[var(--foreground)] transition-colors"
-                              placeholder="••••••••••••"
+                              placeholder="Leave blank to keep current password"
                             />
-                            {/* Password strength indicator */}
                             {newPassword && (
                               <div className="space-y-1">
                                 <div className="flex gap-1">
@@ -1005,7 +1059,8 @@ export default function AdminDashboard() {
                             </label>
                             <input
                               type="password"
-                              required
+                              autoComplete="new-password"
+                              required={newPassword.length > 0}
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
                               className={`w-full px-4 py-2.5 bg-[var(--glass-bg)] border rounded-xl text-xs focus:outline-none text-[var(--foreground)] transition-colors ${
@@ -1039,7 +1094,7 @@ export default function AdminDashboard() {
                             className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-purple-500 hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] text-white text-xs font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
-                            {changingPassword ? "Updating..." : "Update Password"}
+                            {changingPassword ? "Updating..." : "Update Credentials"}
                           </button>
                         </form>
                       </div>
@@ -1129,6 +1184,8 @@ export default function AdminDashboard() {
                                   { key: "SUPABASE_SERVICE_ROLE_KEY", ok: statusData?.environment?.supabaseServiceRoleKey, icon: KeyRound },
                                   { key: "ADMIN_SESSION_SECRET", ok: statusData?.environment?.adminSessionSecret, icon: Lock },
                                   { key: "ADMIN_PASSWORD_HASH", ok: statusData?.environment?.adminPasswordHash, icon: Fingerprint },
+                                  { key: "ADMIN_USERNAME", ok: statusData?.environment?.adminUsernameEnv || !!statusData?.admin?.username, icon: User },
+                                  { key: "RESEND_API_KEY", ok: statusData?.environment?.resendApiKey, icon: Mail },
                                 ].map((env, i) => (
                                   <div key={i} className="flex items-center justify-between p-2 bg-[var(--glass-bg)]/20 border border-[var(--glass-border)] rounded-lg">
                                     <span className="flex items-center gap-1.5 text-[9px] font-mono">

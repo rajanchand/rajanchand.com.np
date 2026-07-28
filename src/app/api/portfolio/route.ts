@@ -32,6 +32,7 @@ export async function GET() {
     if (!error && dbData && dbData.content) {
       const content = { ...dbData.content };
       delete content._adminPasswordHash;
+      delete content._adminUsername;
       return NextResponse.json(content);
     }
 

@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import fs from "fs";
 import path from "path";
 import { supabase } from "@/lib/supabase";
-import { isAdminAuthenticated, getClientIp } from "@/lib/auth";
+import { isAdminAuthenticated, getClientIp, getSessionSecret, getAdminUsername } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 
@@ -104,14 +104,19 @@ export async function GET() {
     const dataJsonStatus = checkFileWriteable("src/lib/data.json");
     const credentialsJsonStatus = checkFileWriteable("src/lib/credentials.json");
 
-    // 3. Environment status (presence check)
+    // 3. Environment status — session secret must be ≥32 chars (same rule as login)
     const envStatus = {
       supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       supabaseServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      adminSessionSecret: !!process.env.ADMIN_SESSION_SECRET,
+      adminSessionSecret: !!getSessionSecret(),
       adminPasswordHash: !!process.env.ADMIN_PASSWORD_HASH,
+      adminUsernameEnv: !!process.env.ADMIN_USERNAME?.trim(),
+      adminEmailEnv: !!process.env.ADMIN_EMAIL?.trim(),
+      resendApiKey: !!process.env.RESEND_API_KEY,
     };
+
+    const adminUsername = await getAdminUsername();
 
     return NextResponse.json({
       supabase: {
@@ -130,6 +135,9 @@ export async function GET() {
         credentialsJson: credentialsJsonStatus,
       },
       environment: envStatus,
+      admin: {
+        username: adminUsername,
+      },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
