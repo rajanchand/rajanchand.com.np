@@ -4,6 +4,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BlogManager } from "@/components/admin/blog-manager";
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  canonicalizePortfolioContent,
+  companiesMatch,
+  getDuplicateExperienceCompanies,
+  getExperienceCompanies,
+  getPortfolioValidationIssues,
+} from "@/lib/portfolio-validation";
 import {
   Save,
   LogOut,
@@ -64,6 +72,16 @@ import {
   Code
 } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
+
+function safeHttpUrl(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 // ==========================================
 // CUSTOM INTERACTIVE SVG COMPONENTS (Light-Theme Adaptive)
@@ -321,6 +339,7 @@ export default function AdminDashboard() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (changingPassword) return;
     setPasswordStatus({ success: false, message: "" });
 
     const usernameChanged = newUsername.trim() !== "" && newUsername.trim() !== currentUsername;
@@ -373,6 +392,7 @@ export default function AdminDashboard() {
   };
 
   const handleSync = async (action: "push" | "pull") => {
+    if (syncing) return;
     const confirmationMessage = action === "push" 
       ? "Warning: This will overwrite Supabase database content with your local data.json config. Continue?"
       : "Warning: This will overwrite your local data.json file with Supabase content. Continue?";
@@ -442,7 +462,7 @@ export default function AdminDashboard() {
       try {
         const res = await fetch("/api/admin");
         if (res.status === 401) {
-          router.push("/admin");
+          router.replace("/admin");
           return;
         }
         const jsonData = await res.json();
@@ -473,7 +493,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin");
+    router.replace("/admin");
   };
 
   const handleExportCSV = () => {
@@ -520,12 +540,77 @@ export default function AdminDashboard() {
     }));
   };
 
+  const handleExperienceCompanyChange = (index: number, nextCompany: string) => {
+    setData((previous: any) => {
+      const currentCompany = previous.experience?.[index]?.company || "";
+      const companyUsedByAnotherEntry = (previous.experience || []).some(
+        (entry: any, entryIndex: number) =>
+          entryIndex !== index && companiesMatch(entry.company, currentCompany)
+      );
+
+      return {
+        ...previous,
+        experience: (previous.experience || []).map((entry: any, entryIndex: number) =>
+          entryIndex === index ? { ...entry, company: nextCompany } : entry
+        ),
+        projects: companyUsedByAnotherEntry
+          ? previous.projects
+          : (previous.projects || []).map((project: any) =>
+              companiesMatch(project.company, currentCompany)
+                ? { ...project, company: nextCompany }
+                : project
+            ),
+      };
+    });
+  };
+
+  const handleDeleteExperience = (index: number) => {
+    const entry = data.experience?.[index];
+    if (!entry) return;
+
+    const linkedProjects = (data.projects || []).filter((project: any) =>
+      companiesMatch(project.company, entry.company)
+    );
+    const anotherEntryKeepsLink = (data.experience || []).some(
+      (candidate: any, candidateIndex: number) =>
+        candidateIndex !== index && companiesMatch(candidate.company, entry.company)
+    );
+
+    if (linkedProjects.length > 0 && !anotherEntryKeepsLink) {
+      window.alert(
+        `This entry has ${linkedProjects.length} linked project${linkedProjects.length === 1 ? "" : "s"}. Reassign or delete those projects first.`
+      );
+      setActiveTab("projects");
+      return;
+    }
+
+    if (!window.confirm("Delete this experience entry?")) return;
+    setData((previous: any) => ({
+      ...previous,
+      experience: (previous.experience || []).filter(
+        (_entry: any, entryIndex: number) => entryIndex !== index
+      ),
+    }));
+  };
+
   const handleSave = async () => {
+    if (saving || !data) return;
+
+    const validationIssues = getPortfolioValidationIssues(data);
+    if (validationIssues.length > 0) {
+      const remaining = validationIssues.length - 1;
+      setSaveStatus({
+        success: false,
+        message: `Fix before saving: ${validationIssues[0]}${remaining > 0 ? ` (+${remaining} more)` : ""}`,
+      });
+      return;
+    }
+
     setSaving(true);
     setSaveStatus({ success: false, message: "" });
 
     try {
-      const payload = { ...data };
+      const payload = canonicalizePortfolioContent({ ...data });
 
       const res = await fetch("/api/admin", {
         method: "POST",
@@ -536,6 +621,7 @@ export default function AdminDashboard() {
       const resData = await res.json();
 
       if (res.ok) {
+        setData(payload);
         setSaveStatus({ success: true, message: resData.message || "Saved successfully!" });
         setTimeout(() => setSaveStatus({ success: false, message: "" }), 4000);
       } else {
@@ -586,6 +672,10 @@ export default function AdminDashboard() {
     );
   }
 
+  const experienceCompanies = getExperienceCompanies(data);
+  const contentValidationIssues = getPortfolioValidationIssues(data);
+  const duplicateExperienceCompanies = getDuplicateExperienceCompanies(data);
+
   // Sparkline coordinates
   const visitsPoints = analyticsData?.chartData ? analyticsData.chartData.map((d: any) => d.visits) : [0, 0];
   const uniquePoints = analyticsData?.chartData ? analyticsData.chartData.map((d: any) => d.unique) : [0, 0];
@@ -625,22 +715,36 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 border border-[var(--glass-border)] hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/5 text-[var(--muted-foreground)] hover:text-[var(--primary)] rounded-lg text-xs font-semibold transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              View website
+            </a>
+            <ThemeToggle />
             {activeTab !== "analytics" && (
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_25px_var(--glow-primary)] text-white text-xs font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_25px_var(--glow-primary)] text-white text-xs font-semibold rounded-lg transition-[box-shadow,opacity] duration-300 disabled:opacity-50 cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5" />
-                {saving ? "Saving..." : "Save Changes"}
+                <span className="hidden sm:inline">{saving ? "Saving..." : "Save Changes"}</span>
+                <span className="sm:hidden">{saving ? "Saving" : "Save"}</span>
               </button>
             )}
 
             <button
+              type="button"
               onClick={handleLogout}
               className="p-2 border border-[var(--glass-border)] hover:border-rose-500/30 hover:bg-rose-500/10 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
               title="Sign Out"
+              aria-label="Sign out of admin console"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -652,6 +756,8 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
         {saveStatus.message && (
           <div
+            role="status"
+            aria-live="polite"
             className={`p-4 rounded-xl mb-6 border text-sm max-w-xl mx-auto flex items-center justify-between no-print ${
               saveStatus.success
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
@@ -659,7 +765,12 @@ export default function AdminDashboard() {
             }`}
           >
             <span>{saveStatus.message}</span>
-            <button onClick={() => setSaveStatus({ success: false, message: "" })} className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+            <button
+              type="button"
+              onClick={() => setSaveStatus({ success: false, message: "" })}
+              className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              aria-label="Dismiss save status"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -667,13 +778,13 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Navigation Card (Original) */}
-          <div className="lg:col-span-1 space-y-2 no-print">
-            <div className="glass rounded-2xl p-4 space-y-1 bg-[var(--card)] border border-[var(--glass-border)]">
+          <div className="lg:col-span-1 space-y-2 no-print lg:sticky lg:top-24 lg:self-start">
+            <div className="glass rounded-2xl p-2 lg:p-4 flex lg:block gap-1 lg:space-y-1 overflow-x-auto bg-[var(--card)] border border-[var(--glass-border)]">
               {[
                 { id: "overview", label: "Console Overview", icon: Grid },
                 { id: "profile", label: "Profile Info", icon: User },
-                { id: "experience", label: "Experience Timeline", icon: Briefcase },
-                { id: "projects", label: "Projects Grid", icon: Layers },
+                { id: "experience", label: "Work & Education", icon: Briefcase },
+                { id: "projects", label: "Projects by Company", icon: Layers },
                 { id: "skills", label: "Technical Skills", icon: Activity },
                 { id: "blogs", label: "Blog Articles", icon: BookOpen },
                 { id: "certifications", label: "Certifications", icon: Award },
@@ -686,9 +797,11 @@ export default function AdminDashboard() {
                 const active = activeTab === tab.id;
                 return (
                   <button
+                    type="button"
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
+                    aria-pressed={active}
+                    className={`min-w-max lg:w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-[color,background-color,box-shadow] ${
                       active
                         ? "bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white shadow-md"
                         : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--glass-border)]"
@@ -704,7 +817,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-4 bg-[var(--primary)]/5 border border-[var(--primary)]/10 rounded-2xl text-[10px] leading-relaxed text-[var(--muted-foreground)]">
-              💡 <strong>Pro-Tip</strong>: After configuring details, click <strong>Save Changes</strong> above to push changes live and instantly re-render static routes.
+              💡 <strong>Publishing tip</strong>: Link every project to a company or institution from Work &amp; Education, then click <strong>Save Changes</strong> to publish.
             </div>
           </div>
 
@@ -718,6 +831,33 @@ export default function AdminDashboard() {
                   <div className="border-b border-[var(--glass-border)] pb-4">
                     <h2 className="text-xl font-bold font-display">Console Overview</h2>
                     <p className="text-xs text-[var(--muted-foreground)]">Welcome back. Here is a summary of your website metrics, dashboard status, and quick shortcuts.</p>
+                  </div>
+
+                  <div
+                    role="status"
+                    className={`p-4 rounded-2xl border flex items-start gap-3 ${
+                      contentValidationIssues.length === 0
+                        ? "bg-emerald-500/10 border-emerald-500/20"
+                        : "bg-amber-500/10 border-amber-500/20"
+                    }`}
+                  >
+                    {contentValidationIssues.length === 0 ? (
+                      <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+                    ) : (
+                      <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                    )}
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold">
+                        {contentValidationIssues.length === 0
+                          ? "Content is ready to publish"
+                          : `${contentValidationIssues.length} content issue${contentValidationIssues.length === 1 ? "" : "s"} need attention`}
+                      </p>
+                      <p className="text-xs text-[var(--muted-foreground)]">
+                        {contentValidationIssues.length === 0
+                          ? "Every project is linked to a company or institution in Work & Education."
+                          : contentValidationIssues[0]}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Metrics Grid */}
@@ -759,7 +899,12 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Unread Messages */}
-                    <div className="p-4 border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 rounded-2xl relative overflow-hidden group hover:border-[var(--primary)]/30 transition-all duration-300 cursor-pointer" onClick={() => setActiveTab("messages")}>
+                    <button
+                      type="button"
+                      className="w-full p-4 border border-[var(--glass-border)] bg-[var(--glass-bg)]/30 rounded-2xl relative overflow-hidden group hover:border-[var(--primary)]/30 transition-colors duration-300 cursor-pointer text-left"
+                      onClick={() => setActiveTab("messages")}
+                      aria-label="Open contact messages"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--muted-foreground)]">Inbox</span>
                         <Mail className="w-4 h-4 text-amber-500" />
@@ -772,7 +917,7 @@ export default function AdminDashboard() {
                           Unread of {statusData?.supabase?.messages ? statusData.supabase.messages.total : "..."} messages
                         </p>
                       </div>
-                    </div>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -858,7 +1003,7 @@ export default function AdminDashboard() {
                       <button onClick={() => setActiveTab("projects")} className="p-4 bg-[var(--glass-bg)]/30 border border-[var(--glass-border)] hover:border-[var(--primary)]/30 rounded-xl text-left space-y-1 transition-all group cursor-pointer">
                         <Layers className="w-5 h-5 text-indigo-500 group-hover:scale-110 transition-transform" />
                         <h4 className="text-xs font-bold pt-1">Add New Project</h4>
-                        <p className="text-[9px] text-[var(--muted-foreground)]">Manage portfolio grid entries</p>
+                        <p className="text-[9px] text-[var(--muted-foreground)]">Link work to a company or institution</p>
                       </button>
 
                       <button onClick={() => setActiveTab("messages")} className="p-4 bg-[var(--glass-bg)]/30 border border-[var(--glass-border)] hover:border-[var(--primary)]/30 rounded-xl text-left space-y-1 transition-all group cursor-pointer">
@@ -1978,8 +2123,8 @@ export default function AdminDashboard() {
                         <Briefcase className="w-5 h-5 text-blue-500" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold font-display">Experience Timeline</h2>
-                        <p className="text-xs text-[var(--muted-foreground)]">Manage your employment history & job definitions</p>
+                        <h2 className="text-xl font-bold font-display">Work &amp; Education</h2>
+                        <p className="text-xs text-[var(--muted-foreground)]">Manage roles and institutions that projects can be linked to</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1987,16 +2132,31 @@ export default function AdminDashboard() {
                         {(data.experience || []).length} entr{(data.experience || []).length !== 1 ? "ies" : "y"}
                       </span>
                       <button
+                        type="button"
                         onClick={() => {
                           const newExp = { type: "work", title: "", company: "", companyUrl: "", period: "", description: "", bullets: [], tags: [] };
                           setData((prev: any) => ({ ...prev, experience: [newExp, ...(prev.experience || [])] }));
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-shadow duration-300"
                       >
                         <Plus className="w-3.5 h-3.5" /> Add Position
                       </button>
                     </div>
                   </div>
+
+                  {duplicateExperienceCompanies.length > 0 && (
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold text-amber-600 dark:text-amber-400">
+                          Repeated company or institution
+                        </p>
+                        <p className="text-[var(--muted-foreground)] mt-1">
+                          {duplicateExperienceCompanies.join(", ")} appears in multiple entries. Linked projects display only under the most recent entry to avoid duplication.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Empty State */}
                   {(data.experience || []).length === 0 && (
@@ -2017,9 +2177,13 @@ export default function AdminDashboard() {
                       const typeVal = item.type || "work";
                       const companyVal = item.company || "";
                       const companyUrlVal = item.companyUrl || "";
+                      const companyLink = safeHttpUrl(companyUrlVal);
                       const descVal = typeof item.description === "string" ? item.description : (Array.isArray(item.description) ? item.description.join(" ") : "");
                       const bulletsVal = Array.isArray(item.bullets) ? item.bullets : (Array.isArray(item.description) ? item.description : []);
                       const tagsVal = Array.isArray(item.tags) ? item.tags.join(", ") : (typeof item.tags === "string" ? item.tags : "");
+                      const linkedProjects = (data.projects || []).filter((project: any) =>
+                        companiesMatch(project.company, companyVal)
+                      );
 
                       return (
                         <div key={idx} className="border border-[var(--glass-border)] bg-[var(--glass-bg)]/10 rounded-2xl overflow-hidden hover:border-blue-500/20 transition-all duration-300">
@@ -2035,12 +2199,17 @@ export default function AdminDashboard() {
                                 {typeVal === "education" ? "Education" : "Work"}
                               </span>
                               {companyVal && <span className="hidden md:inline-flex text-[10px] text-[var(--muted-foreground)] font-semibold">@ {companyVal}</span>}
+                              {linkedProjects.length > 0 && (
+                                <span className="hidden lg:inline-flex px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[9px] font-bold rounded-full">
+                                  {linkedProjects.length} linked project{linkedProjects.length === 1 ? "" : "s"}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-1.5">
-                              {companyUrlVal && (
-                                <a href={companyUrlVal} target="_blank" rel="noopener noreferrer" className="p-1.5 border border-[var(--glass-border)] hover:border-blue-500/30 text-[var(--muted-foreground)] hover:text-blue-500 rounded-lg transition-colors cursor-pointer"><ExternalLink className="w-3.5 h-3.5" /></a>
+                              {companyLink && (
+                                <a href={companyLink} target="_blank" rel="noopener noreferrer" aria-label={`Open ${companyVal || "company"} website`} className="p-1.5 border border-[var(--glass-border)] hover:border-blue-500/30 text-[var(--muted-foreground)] hover:text-blue-500 rounded-lg transition-colors cursor-pointer"><ExternalLink className="w-3.5 h-3.5" /></a>
                               )}
-                              <button onClick={() => { if (!window.confirm("Delete this experience entry?")) return; const updated = data.experience.filter((_: any, i: number) => i !== idx); setData((prev: any) => ({ ...prev, experience: updated })); }} className="p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer">
+                              <button type="button" aria-label={`Delete ${titleVal || `experience entry ${idx + 1}`}`} onClick={() => handleDeleteExperience(idx)} className="p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg transition-colors cursor-pointer">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -2050,41 +2219,41 @@ export default function AdminDashboard() {
                           <div className="p-5 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Layers className="w-3 h-3" /> Type</label>
-                                <select value={typeVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].type = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors cursor-pointer">
+                                <label htmlFor={`experience-type-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Layers className="w-3 h-3" /> Type</label>
+                                <select id={`experience-type-${idx}`} value={typeVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].type = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors cursor-pointer">
                                   <option value="work">Professional Work</option>
                                   <option value="education">Academic & Education</option>
                                 </select>
                               </div>
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Briefcase className="w-3 h-3" /> Role / Degree Title</label>
-                                <input type="text" value={titleVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].title = e.target.value; updated[idx].role = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Network Engineer" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs font-semibold text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                                <label htmlFor={`experience-title-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Briefcase className="w-3 h-3" /> Role / Degree Title</label>
+                                <input id={`experience-title-${idx}`} type="text" value={titleVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].title = e.target.value; updated[idx].role = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Network Engineer" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs font-semibold text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
                               </div>
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Calendar className="w-3 h-3" /> Duration / Period</label>
-                                <input type="text" value={periodVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].period = e.target.value; updated[idx].duration = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., 2024 — Present" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                                <label htmlFor={`experience-period-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Calendar className="w-3 h-3" /> Duration / Period</label>
+                                <input id={`experience-period-${idx}`} type="text" value={periodVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].period = e.target.value; updated[idx].duration = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., 2024 — Present" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4">
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Globe className="w-3 h-3" /> Company / Institution</label>
-                                <input type="text" value={companyVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].company = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Subisu Cablenet Pvt. Ltd." className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                                <label htmlFor={`experience-company-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Globe className="w-3 h-3" /> Company / Institution</label>
+                                <input id={`experience-company-${idx}`} type="text" value={companyVal} onChange={(e) => handleExperienceCompanyChange(idx, e.target.value)} placeholder="e.g., Subisu Cablenet Pvt. Ltd." className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
                               </div>
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Link2 className="w-3 h-3" /> Company Website URL</label>
+                                <label htmlFor={`experience-company-url-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Link2 className="w-3 h-3" /> Company Website URL</label>
                                 <div className="flex items-center gap-2">
-                                  <input type="url" value={companyUrlVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].companyUrl = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="https://company.com" className="flex-1 px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
-                                  {companyUrlVal && (
-                                    <a href={companyUrlVal} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-blue-500/20 hover:bg-blue-500/10 text-blue-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0"><ExternalLink className="w-3 h-3" /> Visit</a>
+                                  <input id={`experience-company-url-${idx}`} type="url" value={companyUrlVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].companyUrl = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="https://company.com" className="flex-1 px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                                  {companyLink && (
+                                    <a href={companyLink} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-blue-500/20 hover:bg-blue-500/10 text-blue-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0"><ExternalLink className="w-3 h-3" /> Visit</a>
                                   )}
                                 </div>
                               </div>
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Hash className="w-3 h-3" /> Skills / Tags (Comma-separated)</label>
-                              <input type="text" value={tagsVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean); setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Cisco, OSPF, BGP, Network Administration" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                              <label htmlFor={`experience-tags-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Hash className="w-3 h-3" /> Skills / Tags (Comma-separated)</label>
+                              <input id={`experience-tags-${idx}`} type="text" value={tagsVal} onChange={(e) => { const updated = [...data.experience]; updated[idx] = { ...updated[idx], tags: e.target.value }; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Cisco, OSPF, BGP, Network Administration" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
                               {tagsVal && (
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {tagsVal.split(",").map((t: string, i: number) => t.trim() && <span key={i} className="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[9px] font-bold rounded-full">{t.trim()}</span>)}
@@ -2093,15 +2262,15 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><FileText className="w-3 h-3" /> Role Overview / Summary</label>
-                              <textarea rows={2} value={descVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].description = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="Describe your responsibilities and scope of work..." className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed placeholder:text-[var(--muted-foreground)]/40" />
+                              <label htmlFor={`experience-description-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><FileText className="w-3 h-3" /> Role Overview / Summary</label>
+                              <textarea id={`experience-description-${idx}`} rows={2} value={descVal} onChange={(e) => { const updated = [...data.experience]; updated[idx].description = e.target.value; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="Describe your responsibilities and scope of work..." className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors resize-none leading-relaxed placeholder:text-[var(--muted-foreground)]/40" />
                             </div>
 
                             {/* Bullet points */}
                             <div className="space-y-2 border-t border-[var(--glass-border)] pt-4">
                               <div className="flex items-center justify-between">
                                 <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Key Accomplishments</label>
-                                <button onClick={() => { const updated = [...data.experience]; updated[idx].bullets = [...bulletsVal, ""]; setData((prev: any) => ({ ...prev, experience: updated })); }} className="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[10px] font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors">
+                                <button type="button" onClick={() => { const updated = [...data.experience]; updated[idx].bullets = [...bulletsVal, ""]; setData((prev: any) => ({ ...prev, experience: updated })); }} className="px-2 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[10px] font-semibold rounded-lg flex items-center gap-1 cursor-pointer transition-colors">
                                   <Plus className="w-3 h-3" /> Add Highlight
                                 </button>
                               </div>
@@ -2110,7 +2279,7 @@ export default function AdminDashboard() {
                                   <div key={bIdx} className="flex items-center gap-2">
                                     <span className="text-[9px] text-[var(--muted-foreground)] font-mono font-bold shrink-0 w-5 text-center">{bIdx + 1}.</span>
                                     <input type="text" value={bullet} onChange={(e) => { const updated = [...data.experience]; const newBullets = [...bulletsVal]; newBullets[bIdx] = e.target.value; updated[idx].bullets = newBullets; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="Describe a key achievement..." className="flex-1 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
-                                    <button onClick={() => { if (!window.confirm("Remove this highlight?")) return; const updated = [...data.experience]; updated[idx].bullets = bulletsVal.filter((_: any, i: number) => i !== bIdx); setData((prev: any) => ({ ...prev, experience: updated })); }} className="p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg cursor-pointer transition-colors">
+                                    <button type="button" aria-label={`Remove accomplishment ${bIdx + 1}`} onClick={() => { if (!window.confirm("Remove this highlight?")) return; const updated = [...data.experience]; updated[idx].bullets = bulletsVal.filter((_: any, i: number) => i !== bIdx); setData((prev: any) => ({ ...prev, experience: updated })); }} className="p-1.5 border border-[var(--glass-border)] hover:border-rose-500/20 text-[var(--muted-foreground)] hover:text-rose-500 rounded-lg cursor-pointer transition-colors">
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                   </div>
@@ -2126,6 +2295,7 @@ export default function AdminDashboard() {
                               {periodVal && <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[9px] font-bold rounded-full flex items-center gap-1"><Check className="w-2.5 h-2.5" /> Period</span>}
                               {descVal && <span className="px-2 py-0.5 bg-purple-500/10 text-purple-500 text-[9px] font-bold rounded-full flex items-center gap-1"><FileText className="w-2.5 h-2.5" /> Described</span>}
                               {bulletsVal.length > 0 && <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[9px] font-bold rounded-full flex items-center gap-1"><TrendingUp className="w-2.5 h-2.5" /> {bulletsVal.length} highlight{bulletsVal.length !== 1 ? "s" : ""}</span>}
+                              {linkedProjects.length > 0 && <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[9px] font-bold rounded-full flex items-center gap-1"><FolderGit2 className="w-2.5 h-2.5" /> {linkedProjects.length} project{linkedProjects.length !== 1 ? "s" : ""}</span>}
                             </div>
                           </div>
                         </div>
@@ -2136,7 +2306,7 @@ export default function AdminDashboard() {
               )}
 
 
-              {/* === PROJECTS GRID === */}
+              {/* === PROJECTS BY COMPANY === */}
               {activeTab === "projects" && data && (
                 <div className="space-y-6">
                   {/* Header */}
@@ -2146,8 +2316,8 @@ export default function AdminDashboard() {
                         <FolderGit2 className="w-5 h-5 text-indigo-500" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold font-display">Projects Grid</h2>
-                        <p className="text-xs text-[var(--muted-foreground)]">Manage your network engineering and research projects</p>
+                        <h2 className="text-xl font-bold font-display">Projects by Company</h2>
+                        <p className="text-xs text-[var(--muted-foreground)]">Link each project to the employer or institution where it was delivered</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -2155,13 +2325,14 @@ export default function AdminDashboard() {
                         {(data.projects || []).length} project{(data.projects || []).length !== 1 ? "s" : ""}
                       </span>
                       <button
+                        type="button"
+                        disabled={experienceCompanies.length === 0}
                         onClick={() => {
                           const newProj = { 
                             title: "", 
                             role: "", 
                             company: "", 
                             description: "", 
-                            icon: "FolderGit2", 
                             tags: [], 
                             githubUrl: "", 
                             github: "", 
@@ -2171,12 +2342,20 @@ export default function AdminDashboard() {
                           };
                           setData((prev: any) => ({ ...prev, projects: [newProj, ...(prev.projects || [])] }));
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+                        className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer transition-[box-shadow,opacity] duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={experienceCompanies.length === 0 ? "Add a Work & Education entry first" : "Add project"}
                       >
                         <Plus className="w-3.5 h-3.5" /> Add Project
                       </button>
                     </div>
                   </div>
+
+                  {experienceCompanies.length === 0 && (
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      Add at least one company or institution in Work &amp; Education before creating projects.
+                    </div>
+                  )}
 
                   {/* Empty State */}
                   {(data.projects || []).length === 0 && (
@@ -2194,11 +2373,16 @@ export default function AdminDashboard() {
                     {(data.projects || []).map((proj: any, idx: number) => {
                       const githubVal = proj.githubUrl || proj.github || "";
                       const websiteVal = proj.websiteUrl || proj.demo || "";
+                      const githubLink = safeHttpUrl(githubVal);
+                      const websiteLink = safeHttpUrl(websiteVal);
                       const companyVal = proj.company || "";
                       const roleVal = proj.role || "";
-                      const iconVal = proj.icon || "FolderGit2";
                       const tagsVal = Array.isArray(proj.tags) ? proj.tags.join(", ") : (typeof proj.tags === "string" ? proj.tags : "");
                       const impactVal = Array.isArray(proj.impact) ? proj.impact : [];
+                      const matchedCompany = experienceCompanies.find((company) =>
+                        companiesMatch(company, companyVal)
+                      );
+                      const companyLinked = Boolean(matchedCompany);
 
                       return (
                         <div key={idx} className="border border-[var(--glass-border)] bg-[var(--glass-bg)]/10 rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300">
@@ -2213,23 +2397,29 @@ export default function AdminDashboard() {
                                 {proj.title || "Untitled Project"}
                               </h4>
                               {companyVal && (
-                                <span className="hidden sm:inline-flex px-2 py-0.5 bg-indigo-500/10 text-indigo-500 text-[9px] font-bold uppercase rounded-full">
-                                  {companyVal}
+                                <span className={`hidden sm:inline-flex px-2 py-0.5 text-[9px] font-bold uppercase rounded-full ${
+                                  companyLinked
+                                    ? "bg-emerald-500/10 text-emerald-500"
+                                    : "bg-amber-500/10 text-amber-500"
+                                }`}>
+                                  {companyLinked ? companyVal : "Unlinked project"}
                                 </span>
                               )}
                             </div>
                             <div className="flex items-center gap-1.5">
-                              {githubVal && (
-                                <a href={githubVal} target="_blank" rel="noopener noreferrer" className="p-1.5 border border-[var(--glass-border)] hover:border-indigo-500/30 text-[var(--muted-foreground)] hover:text-indigo-500 rounded-lg transition-colors cursor-pointer" title="View Source Code">
+                              {githubLink && (
+                                <a href={githubLink} target="_blank" rel="noopener noreferrer" aria-label={`Open source code for ${proj.title || "project"}`} className="p-1.5 border border-[var(--glass-border)] hover:border-indigo-500/30 text-[var(--muted-foreground)] hover:text-indigo-500 rounded-lg transition-colors cursor-pointer" title="View Source Code">
                                   <Github className="w-3.5 h-3.5" />
                                 </a>
                               )}
-                              {websiteVal && (
-                                <a href={websiteVal} target="_blank" rel="noopener noreferrer" className="p-1.5 border border-[var(--glass-border)] hover:border-indigo-500/30 text-[var(--muted-foreground)] hover:text-indigo-500 rounded-lg transition-colors cursor-pointer" title="View Demo / Live Site">
+                              {websiteLink && (
+                                <a href={websiteLink} target="_blank" rel="noopener noreferrer" aria-label={`Open live website for ${proj.title || "project"}`} className="p-1.5 border border-[var(--glass-border)] hover:border-indigo-500/30 text-[var(--muted-foreground)] hover:text-indigo-500 rounded-lg transition-colors cursor-pointer" title="View Demo / Live Site">
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </a>
                               )}
                               <button
+                                type="button"
+                                aria-label={`Delete ${proj.title || `project ${idx + 1}`}`}
                                 onClick={() => {
                                   if (!window.confirm("Delete this project? This cannot be undone.")) return;
                                   const updated = data.projects.filter((_: any, i: number) => i !== idx);
@@ -2246,10 +2436,11 @@ export default function AdminDashboard() {
                           <div className="p-5 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                                <label htmlFor={`project-title-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                   <FolderGit2 className="w-3 h-3" /> Project Title
                                 </label>
                                 <input
+                                  id={`project-title-${idx}`}
                                   type="text"
                                   value={proj.title || ""}
                                   onChange={(e) => {
@@ -2262,74 +2453,67 @@ export default function AdminDashboard() {
                                 />
                               </div>
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                                <label htmlFor={`project-company-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                   <Briefcase className="w-3 h-3" /> Company / Client
                                 </label>
-                                <input
-                                  type="text"
-                                  value={companyVal}
+                                <select
+                                  id={`project-company-${idx}`}
+                                  value={matchedCompany || companyVal}
                                   onChange={(e) => {
                                     const updated = [...data.projects];
                                     updated[idx].company = e.target.value;
                                     setData((prev: any) => ({ ...prev, projects: updated }));
                                   }}
-                                  placeholder="e.g., Subisu Cablenet / R&D Division"
-                                  className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
-                                />
+                                  aria-label={`Company or institution for ${proj.title || `project ${idx + 1}`}`}
+                                  className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors cursor-pointer"
+                                >
+                                  <option value="">Select a company or institution</option>
+                                  {companyVal && !companyLinked && (
+                                    <option value={companyVal}>Unlinked: {companyVal}</option>
+                                  )}
+                                  {experienceCompanies.map((company) => (
+                                    <option key={company} value={company}>{company}</option>
+                                  ))}
+                                </select>
+                                <p className="text-[9px] text-[var(--muted-foreground)]">
+                                  This controls where the project appears in the public Work &amp; Education section.
+                                </p>
+                                {!companyLinked && companyVal && (
+                                  <p className="text-[9px] font-semibold text-amber-500">
+                                    Select a listed company before publishing.
+                                  </p>
+                                )}
                               </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                                <label htmlFor={`project-role-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                   <Shield className="w-3 h-3" /> Your Role in the Project
                                 </label>
                                 <input
+                                  id={`project-role-${idx}`}
                                   type="text"
                                   value={roleVal}
                                   onChange={(e) => {
                                     const updated = [...data.projects];
-                                    updated[idx].role = e.target.value;
+                                    updated[idx] = { ...updated[idx], role: e.target.value };
                                     setData((prev: any) => ({ ...prev, projects: updated }));
                                   }}
                                   placeholder="e.g., Lead Network Architect"
                                   className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
                                 />
                               </div>
-                              <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
-                                  <Layers className="w-3 h-3" /> Visual Icon Design
-                                </label>
-                                <select
-                                  value={iconVal}
-                                  onChange={(e) => {
-                                    const updated = [...data.projects];
-                                    updated[idx].icon = e.target.value;
-                                    setData((prev: any) => ({ ...prev, projects: updated }));
-                                  }}
-                                  className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors cursor-pointer"
-                                >
-                                  <option value="FolderGit2">Generic Folder / Git</option>
-                                  <option value="Router">Router & Switch</option>
-                                  <option value="Network">Network Topology</option>
-                                  <option value="Wifi">Broadband / Wi-Fi</option>
-                                  <option value="Tv">Broadband TV / Multicast</option>
-                                  <option value="ShieldCheck">Security / Lock</option>
-                                  <option value="Bell">Bell / Alarm Alert</option>
-                                  <option value="Search">Search / Lens</option>
-                                  <option value="Monitor">Monitor Screen</option>
-                                  <option value="Activity">Pulse Line / Telemetry</option>
-                                </select>
-                              </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                                <label htmlFor={`project-github-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                   <Github className="w-3 h-3" /> GitHub Link (Code)
                                 </label>
                                 <div className="flex items-center gap-2">
                                   <input
+                                    id={`project-github-${idx}`}
                                     type="url"
                                     value={githubVal}
                                     onChange={(e) => {
@@ -2341,19 +2525,20 @@ export default function AdminDashboard() {
                                     placeholder="https://github.com/..."
                                     className="flex-1 px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
                                   />
-                                  {githubVal && (
-                                    <a href={githubVal} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-indigo-500/20 hover:bg-indigo-500/10 text-indigo-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0">
+                                  {githubLink && (
+                                    <a href={githubLink} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-indigo-500/20 hover:bg-indigo-500/10 text-indigo-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0">
                                       <Github className="w-3 h-3" /> Code
                                     </a>
                                   )}
                                 </div>
                               </div>
                               <div className="space-y-1.5">
-                                <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                                <label htmlFor={`project-website-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                   <Link2 className="w-3 h-3" /> Live Demo / Website Link
                                 </label>
                                 <div className="flex items-center gap-2">
                                   <input
+                                    id={`project-website-${idx}`}
                                     type="url"
                                     value={websiteVal}
                                     onChange={(e) => {
@@ -2365,8 +2550,8 @@ export default function AdminDashboard() {
                                     placeholder="https://example.com"
                                     className="flex-1 px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
                                   />
-                                  {websiteVal && (
-                                    <a href={websiteVal} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-indigo-500/20 hover:bg-indigo-500/10 text-indigo-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0">
+                                  {websiteLink && (
+                                    <a href={websiteLink} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-indigo-500/20 hover:bg-indigo-500/10 text-indigo-500 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0">
                                       <ExternalLink className="w-3 h-3" /> Demo
                                     </a>
                                   )}
@@ -2375,15 +2560,16 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                              <label htmlFor={`project-tags-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                 <Hash className="w-3 h-3" /> Tags / Technologies (Comma-separated)
                               </label>
                               <input
+                                id={`project-tags-${idx}`}
                                 type="text"
                                 value={tagsVal}
                                 onChange={(e) => {
                                   const updated = [...data.projects];
-                                  updated[idx].tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                  updated[idx] = { ...updated[idx], tags: e.target.value };
                                   setData((prev: any) => ({ ...prev, projects: updated }));
                                 }}
                                 placeholder="e.g., Cisco ACI, OSPF, Terraform, AWS"
@@ -2399,10 +2585,11 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
+                              <label htmlFor={`project-description-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1">
                                 <FileText className="w-3 h-3" /> Project Overview Description
                               </label>
                               <textarea
+                                id={`project-description-${idx}`}
                                 rows={2}
                                 value={proj.description || ""}
                                 onChange={(e) => {
@@ -2422,6 +2609,7 @@ export default function AdminDashboard() {
                                   <TrendingUp className="w-3 h-3" /> Project Metrics & Impact Highlights
                                 </label>
                                 <button
+                                  type="button"
                                   onClick={() => {
                                     const updated = [...data.projects];
                                     updated[idx].impact = [...impactVal, ""];
@@ -2450,6 +2638,8 @@ export default function AdminDashboard() {
                                       className="flex-1 px-4 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
                                     />
                                     <button
+                                      type="button"
+                                      aria-label={`Remove impact metric ${mIdx + 1}`}
                                       onClick={() => {
                                         if (!window.confirm("Remove this impact metric?")) return;
                                         const updated = [...data.projects];

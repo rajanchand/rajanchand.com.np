@@ -4,6 +4,7 @@ import {
   verifyAdminPassword,
   verifyAdminUsername,
   getAdminPasswordHash,
+  isValidAdminPasswordHash,
   getSessionSecret,
   getAdminEmail,
   secureCookieOptions,
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     const targetHash = await getAdminPasswordHash();
     const sessionSecret = getSessionSecret();
 
-    if (!sessionSecret || !targetHash) {
+    if (!sessionSecret || !isValidAdminPasswordHash(targetHash)) {
       console.error("Admin login attempted but sessionSecret/targetHash could not be resolved");
       return NextResponse.json(
         { success: false, error: "Server misconfigured. Contact the site owner." },

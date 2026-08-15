@@ -73,6 +73,7 @@ const CREDENTIALS_PATH = path.join(process.cwd(), "src/lib/credentials.json");
 const DEFAULT_ADMIN_USERNAME = "admin";
 const DEFAULT_ADMIN_EMAIL = "rajanchand48@gmail.com";
 const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,32}$/;
+const PASSWORD_HASH_REGEX = /^[a-f0-9]{32}:[a-f0-9]{128}$/i;
 
 export type AdminCredentialsFile = {
   username?: string;
@@ -199,6 +200,10 @@ export function hashAdminPassword(password: string): string {
   return `${salt}:${derivedKey.toString("hex")}`;
 }
 
+export function isValidAdminPasswordHash(value: string | null | undefined): value is string {
+  return typeof value === "string" && PASSWORD_HASH_REGEX.test(value);
+}
+
 export function writeLocalCredentials(data: AdminCredentialsFile): boolean {
   try {
     const existing = readLocalCredentials() || {};
@@ -221,10 +226,10 @@ export function writeLocalCredentials(data: AdminCredentialsFile): boolean {
  */
 export async function verifyAdminPassword(password: string): Promise<boolean> {
   const targetHash = await getAdminPasswordHash();
-  if (!targetHash) return false;
+  if (!isValidAdminPasswordHash(targetHash)) return false;
 
   const [saltHex, keyHex] = targetHash.split(":");
-  if (!saltHex || !keyHex || keyHex.length % 2 !== 0) return false;
+  if (!saltHex || !keyHex) return false;
 
   const targetKey = Buffer.from(keyHex, "hex");
   const derivedKey = crypto.scryptSync(password, Buffer.from(saltHex, "hex"), targetKey.length);

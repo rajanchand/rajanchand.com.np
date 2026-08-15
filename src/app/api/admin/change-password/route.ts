@@ -46,6 +46,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!request.headers.get("content-type")?.includes("application/json")) {
+      return NextResponse.json({ error: "Invalid request format" }, { status: 400 });
+    }
+
     const rateCheck = await checkRateLimit();
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -58,7 +62,11 @@ export async function POST(request: Request) {
 
     const { currentPassword, newPassword, newUsername } = await request.json();
 
-    if (!currentPassword || typeof currentPassword !== "string") {
+    if (
+      !currentPassword ||
+      typeof currentPassword !== "string" ||
+      currentPassword.length > 200
+    ) {
       return NextResponse.json({ error: "Current password is required" }, { status: 400 });
     }
 
@@ -75,6 +83,13 @@ export async function POST(request: Request) {
     if (wantsPasswordChange && newPassword.length < 8) {
       return NextResponse.json(
         { error: "New password must be at least 8 characters long" },
+        { status: 400 }
+      );
+    }
+
+    if (wantsPasswordChange && newPassword.length > 200) {
+      return NextResponse.json(
+        { error: "New password must not exceed 200 characters" },
         { status: 400 }
       );
     }
@@ -97,11 +112,6 @@ export async function POST(request: Request) {
     const currentUsername = await getAdminUsername();
     const nextUsername = wantsUsernameChange ? newUsername.trim() : currentUsername;
     const nextHash = wantsPasswordChange ? hashAdminPassword(newPassword) : null;
-
-    const wroteLocal = writeLocalCredentials({
-      username: nextUsername,
-      ...(nextHash ? { passwordHash: nextHash } : {}),
-    });
 
     let dbError: unknown = null;
     try {
@@ -148,24 +158,21 @@ export async function POST(request: Request) {
         "Database update error for credentials:",
         dbError instanceof Error ? dbError.message : dbError
       );
-      // Local write alone is not enough in production (ephemeral FS). Fail closed.
-      if (!wroteLocal) {
-        return NextResponse.json(
-          {
-            error:
-              "Failed to update credentials in Supabase, and local credentials file is not writable. Check your database connection.",
-          },
-          { status: 500 }
-        );
-      }
       return NextResponse.json(
         {
           error:
-            "Credentials were saved locally but failed to sync to Supabase. On Vercel/serverless the local file may be lost on redeploy — fix the database connection and try again.",
+            "Failed to update credentials in Supabase. No credential changes were applied.",
         },
         { status: 500 }
       );
     }
+
+    // Supabase is the production source of truth. The local file is only a
+    // best-effort development mirror and must never be written first.
+    writeLocalCredentials({
+      username: nextUsername,
+      ...(nextHash ? { passwordHash: nextHash } : {}),
+    });
 
     const parts: string[] = [];
     if (wantsUsernameChange) parts.push("username");

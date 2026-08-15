@@ -9,7 +9,6 @@ const links = [
   {
     title: "Browse",
     items: [
-      { title: "Projects", href: "#projects" },
       { title: "Skills", href: "#skills" },
       { title: "Work Experience", href: "#experience" },
       { title: "Certifications", href: "#certifications" },

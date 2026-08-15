@@ -12,7 +12,13 @@ interface NavbarProps {
   siteConfig?: any;
 }
 
-const sectionIds = ["home", "skills", "experience", "projects", "certifications", "contact"];
+const sectionIds = ["home", "skills", "experience", "certifications", "contact"];
+const navItems = [
+  { id: "home", label: "Home", href: "#home" },
+  { id: "skills", label: "Skills", href: "#skills" },
+  { id: "experience", label: "Experience", href: "#experience" },
+  { id: "certifications", label: "Certifications", href: "#certifications" },
+];
 
 export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
   const siteConfig = customSiteConfig || defaultSiteConfig;
@@ -84,14 +90,6 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
     pathname?.startsWith("/blog") ||
     pathname?.startsWith("/dissertions") ||
     pathname?.startsWith("/admin");
-
-  const navItems = [
-    { id: "home", label: "Home", href: "#home" },
-    { id: "skills", label: "Skills", href: "#skills" },
-    { id: "experience", label: "Experience", href: "#experience" },
-    { id: "projects", label: "Projects", href: "#projects" },
-    { id: "certifications", label: "Certifications", href: "#certifications" },
-  ];
 
   const isActive = (id: string) => !isOffHome && activeSection === id;
 

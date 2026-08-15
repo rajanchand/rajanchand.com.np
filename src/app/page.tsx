@@ -3,7 +3,6 @@ import { Footer } from "@/components/footer";
 import { BackgroundOrbs } from "@/components/background-orbs";
 import { Hero } from "@/components/sections/hero";
 import { Experience } from "@/components/sections/experience";
-import { Projects } from "@/components/sections/projects";
 import { Skills } from "@/components/sections/skills";
 import { Certifications } from "@/components/sections/certifications";
 
@@ -26,8 +25,7 @@ export default async function Home() {
       <main>
         <Hero siteConfig={data?.siteConfig} />
         <Skills skills={data?.skills} />
-        <Experience experience={data?.experience} />
-        <Projects projects={data?.projects} />
+        <Experience experience={data?.experience} projects={data?.projects} />
         <Certifications certifications={data?.certifications} />
 
         <Articles blogPosts={data?.blogPosts} />

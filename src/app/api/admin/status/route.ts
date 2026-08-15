@@ -10,10 +10,26 @@ import { serverError } from "@/lib/api-response";
 export const dynamic = "force-dynamic";
 
 const statusRateLimiter = createRateLimiter({ max: 30, windowMs: 60 * 1000 });
+const DATA_JSON_PATH = path.join(process.cwd(), "src", "lib", "data.json");
+const CREDENTIALS_JSON_PATH = path.join(process.cwd(), "src", "lib", "credentials.json");
 
 async function checkRateLimit() {
   const clientIp = getClientIp(await headers());
   return statusRateLimiter(clientIp);
+}
+
+function checkFileWriteable(fullPath: string): { exists: boolean; writeable: boolean } {
+  const exists = fs.existsSync(fullPath);
+  let writeable = false;
+  if (exists) {
+    try {
+      fs.accessSync(fullPath, fs.constants.W_OK);
+      writeable = true;
+    } catch {
+      writeable = false;
+    }
+  }
+  return { exists, writeable };
 }
 
 export async function GET() {
@@ -74,35 +90,10 @@ export async function GET() {
       dbErrorMsg = e instanceof Error ? e.message : String(e);
     }
 
-    // 2. Check local files writeability
-    const checkFileWriteable = (filePath: string): { exists: boolean; writeable: boolean } => {
-      const fullPath = path.join(process.cwd(), filePath);
-      const exists = fs.existsSync(fullPath);
-      let writeable = false;
-      if (exists) {
-        try {
-          fs.accessSync(fullPath, fs.constants.W_OK);
-          writeable = true;
-        } catch {
-          writeable = false;
-        }
-      } else {
-        // Test if directory is writeable by trying to create and delete a temporary check file
-        try {
-          const dir = path.dirname(fullPath);
-          const tempFile = path.join(dir, `.write_test_${Math.random()}`);
-          fs.writeFileSync(tempFile, "test");
-          fs.unlinkSync(tempFile);
-          writeable = true;
-        } catch {
-          writeable = false;
-        }
-      }
-      return { exists, writeable };
-    };
-
-    const dataJsonStatus = checkFileWriteable("src/lib/data.json");
-    const credentialsJsonStatus = checkFileWriteable("src/lib/credentials.json");
+    // 2. Report local source-file status without creating probe files.
+    // Production/serverless filesystems are commonly read-only and ephemeral.
+    const dataJsonStatus = checkFileWriteable(DATA_JSON_PATH);
+    const credentialsJsonStatus = checkFileWriteable(CREDENTIALS_JSON_PATH);
 
     // 3. Environment status — session secret must be ≥32 chars (same rule as login)
     const envStatus = {

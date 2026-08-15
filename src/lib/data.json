@@ -138,10 +138,6 @@
       "label": "Experience"
     },
     {
-      "href": "#projects",
-      "label": "Projects"
-    },
-    {
       "href": "#articles",
       "label": "Blog"
     }
@@ -150,13 +146,13 @@
     {
       "icon": "Bell",
       "role": "Supervisor",
-      "image": "/images/project-monitoring.png",
       "tags": [
         "Python",
         "API Integration",
         "Nagios",
         "Chatbot"
       ],
+      "image": "/images/project-monitoring.png",
       "title": "Network Monitoring Integration with Chatbot, SMS & Viber",
       "impact": [
         "Reduced incident response time by 30%",
@@ -172,7 +168,6 @@
     {
       "icon": "Network",
       "role": "Outdoor Network management",
-      "image": "/images/project-network.png",
       "tags": [
         "OSPF",
         "BGP",
@@ -180,6 +175,7 @@
         "Load Balancing",
         "High Availability"
       ],
+      "image": "/images/project-network.png",
       "title": "Redundant Network Configuration",
       "impact": [
         "Achieved 99.9% network uptime",
@@ -209,7 +205,7 @@
         "Reduced Wi-Fi related customer complaints by 40%",
         "Improved remote troubleshooting capabilities"
       ],
-      "company": "WorldLink Communication Ltd",
+      "company": "WorldLink Communications Ltd.",
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
@@ -228,7 +224,7 @@
         "Achieved zero buffering metrics during peak hours",
         "Optimized multicast routing protocols"
       ],
-      "company": "WorldLink Communication Ltd",
+      "company": "WorldLink Communications Ltd.",
       "category": "Networking",
       "githubUrl": "",
       "websiteUrl": "",
@@ -237,20 +233,20 @@
     {
       "icon": "ShieldCheck",
       "role": "Student",
-      "image": "/images/project-zerotrust.png",
       "tags": [
         "Zero Trust",
         "Micro-segmentation",
         "IAM",
         "Security"
       ],
+      "image": "/images/project-zerotrust.png",
       "title": "Zero Trust Security in Remote work Environment",
       "impact": [
         "Reduced attack surface area by 80% in simulated environment",
         "Implemented continuous identity verification protocols",
         "Created comprehensive deployment blueprint for enterprise adoption"
       ],
-      "company": "University of the West of Scotland (MSc Research)",
+      "company": "University of the West of Scotland",
       "category": "Academic",
       "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
       "websiteUrl": "https://zero-trust-security.org/login",
@@ -460,40 +456,41 @@
   ],
   "certifications": [
     {
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
+      "date": "2024",
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
       "title": "DevOps & Cloud Systems Architecture",
       "issuer": "TechAxis",
-      "date": "2024",
-      "credentialId": "TA-DEVOPS-2024",
-      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/IMG_1300-JPG-1780340666925.jpg",
-      "description": "Hands-on training covering CI/CD pipelines, Docker containerization, infrastructure monitoring, and automated deployment."
+      "description": "Hands-on training covering CI/CD pipelines, Docker containerization, infrastructure monitoring, and automated deployment.",
+      "credentialId": "TA-DEVOPS-2024"
     },
     {
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
+      "date": "2023",
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
       "title": "Cybersecurity Awareness & Threat Mitigation",
       "issuer": "APNIC",
-      "date": "2023",
-      "credentialId": "APNIC-CYBER-2023",
-      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-07-13-PM-1780340867396.png",
-      "description": "Carrier-grade Internet registry security training focusing on BGP security, RPKI, and network threat defense."
+      "description": "Carrier-grade Internet registry security training focusing on BGP security, RPKI, and network threat defense.",
+      "credentialId": "APNIC-CYBER-2023"
     },
     {
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
+      "date": "2023",
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
       "title": "NSE 1 Network Security Associate",
       "issuer": "Fortinet",
-      "date": "2023",
-      "credentialId": "FT-NSE1-8849",
-      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-10-11-PM-1780341040429.png",
-      "description": "Comprehensive understanding of key network security threats, Fortinet Security Fabric, and firewall infrastructure."
+      "description": "Comprehensive understanding of key network security threats, Fortinet Security Fabric, and firewall infrastructure.",
+      "credentialId": "FT-NSE1-8849"
     },
     {
+      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
+      "date": "2022",
       "photo": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
       "title": "Network Devices and Initial Configurations",
       "issuer": "Cisco",
-      "date": "2022",
-      "credentialId": "CSCO-NDIC-2022",
-      "url": "https://lbcdoyfupxfdfcfqkiwc.supabase.co/storage/v1/object/public/images/Screenshot-2026-06-01-at-8-11-41-PM-1780341125878.png",
-      "description": "Cisco Networking Academy certification on switch/router IOS setup, VLAN configuration, and IPv4/IPv6 routing."
+      "description": "Cisco Networking Academy certification on switch/router IOS setup, VLAN configuration, and IPv4/IPv6 routing.",
+      "credentialId": "CSCO-NDIC-2022"
     }
-  ]
+  ],
+  "_adminPasswordHash": "eba675cf14903a611b41ed45645944fd:c8dd98f371e4ba50d12c17c1426778d13f4c2091914c3a4cde519236cb835075a96d35ce6cff754847e0c6f5397462057f316f76cf2e572e55fc0114db51cb21"
 }

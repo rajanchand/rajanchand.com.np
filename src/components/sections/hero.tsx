@@ -84,7 +84,7 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
               {/* Action Buttons to match subashcs layout */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4 sm:justify-start">
                 <a
-                  className="inline-flex items-center justify-center rounded-md shadow-md bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_25px_var(--glow-primary)] text-white font-semibold text-center text-sm py-3 px-6 hover:scale-105 transition-all duration-200 cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center rounded-md shadow-md bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] hover:shadow-[0_0_25px_var(--glow-primary)] text-white font-semibold text-center text-sm py-3 px-6 hover:scale-105 transition-[transform,box-shadow] duration-200 cursor-pointer w-full sm:w-auto"
                   href={siteConfig.resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -99,13 +99,13 @@ export function Hero({ siteConfig: customSiteConfig }: { siteConfig?: any } = {}
                 </a>
                 <a
                   className="inline-flex items-center justify-center rounded-md shadow-md border border-[var(--glass-border)] bg-[var(--glass-bg)] hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold text-center text-sm text-slate-700 dark:text-slate-200 py-3 px-6 hover:-translate-y-0.5 transition duration-200 cursor-pointer w-full sm:w-auto"
-                  href="#projects"
+                  href="#experience"
                   onClick={(e) => {
                     e.preventDefault();
-                    document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" });
+                    document.querySelector("#experience")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  Learn more
+                  View experience &amp; projects
                 </a>
               </div>
             </div>
