@@ -76,7 +76,12 @@ export function Certifications({ certifications: customCertifications }: { certi
                   
                   {/* Photo Thumbnail Header (if present) */}
                   {hasPhoto ? (
-                    <div className="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800/60 cursor-zoom-in" onClick={() => setSelectedPhoto(cert.photo ?? null)}>
+                    <button
+                      type="button"
+                      className="h-48 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800/60 cursor-zoom-in text-left"
+                      onClick={() => setSelectedPhoto(cert.photo ?? null)}
+                      aria-label={`View ${certTitle} certificate`}
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={cert.photo}
@@ -88,7 +93,7 @@ export function Certifications({ certifications: customCertifications }: { certi
                           <Eye className="w-3.5 h-3.5" /> View Certificate
                         </span>
                       </div>
-                    </div>
+                    </button>
                   ) : (
                     <div className="h-24 bg-gradient-to-tr from-[var(--primary)]/5 to-[var(--accent)]/5 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-center">
                       <Award className="w-8 h-8 text-[var(--primary)]/40" />
@@ -158,6 +163,9 @@ export function Certifications({ certifications: customCertifications }: { certi
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
           onClick={() => setSelectedPhoto(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Certificate preview"
         >
           <div
             className="relative max-w-4xl max-h-[90vh] bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"

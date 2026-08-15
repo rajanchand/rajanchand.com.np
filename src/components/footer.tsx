@@ -18,6 +18,7 @@ const links = [
   {
     title: "Content",
     items: [
+      { title: "Demo Websites", href: "/demos" },
       { title: "Blog Articles", href: "/blog" },
       { title: "Dissertations", href: "/dissertions" },
     ],
@@ -44,11 +45,12 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
   const socialLinks = customSocialLinks || defaultSocialLinks;
 
   return (
-    <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-zinc-950 z-10 relative">
+    <footer className="border-t border-[var(--glass-border)] bg-[var(--card)] z-10 relative overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/50 to-transparent" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-12 gap-4 gap-y-8 sm:gap-8 py-8 md:py-12">
+        <div className="grid grid-cols-2 gap-8 py-10 md:grid-cols-8 lg:grid-cols-10 md:py-14">
           {/* Column 1 — Brand info */}
-          <div className="col-span-12 lg:col-span-4">
+          <div className="col-span-2 md:col-span-8 lg:col-span-4">
             <div className="mb-2">
               <Link className="inline-block font-bold text-xl text-gray-900 dark:text-gray-100" href="/">
                 {siteConfig.name}
@@ -79,7 +81,7 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
 
           {/* Links lists */}
           {links.map(({ title, items }) => (
-            <div key={title} className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-2">
+            <div key={title} className="col-span-1 md:col-span-2">
               <div className="text-gray-800 dark:text-gray-300 font-bold text-sm mb-3">
                 {title}
               </div>
@@ -102,8 +104,8 @@ export function Footer({ siteConfig: customSiteConfig, socialLinks: customSocial
         </div>
 
         {/* Bottom Social bar & Copyright */}
-        <div className="md:flex md:items-center md:justify-between py-6 md:py-8 border-t border-gray-100 dark:border-slate-800/80">
-          <ul className="flex mb-4 md:order-1 -ml-2 md:ml-4 md:mb-0 gap-1.5">
+        <div className="flex flex-col gap-4 py-6 border-t border-[var(--glass-border)] sm:flex-row sm:items-center sm:justify-between md:py-8">
+          <ul className="flex sm:order-1 -ml-2 sm:ml-4 gap-1.5">
             {socialLinks.map((social) => {
               const Icon = getIcon(social.icon) || Mail;
               return (

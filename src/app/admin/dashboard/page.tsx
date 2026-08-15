@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BlogManager } from "@/components/admin/blog-manager";
+import { DemoManager } from "@/components/admin/demo-manager";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   canonicalizePortfolioContent,
@@ -203,6 +204,7 @@ export default function AdminDashboard() {
   const [analyticsRange, setAnalyticsRange] = useState("7d");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({});
   const [messages, setMessages] = useState<any[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const router = useRouter();
@@ -421,6 +423,7 @@ export default function AdminDashboard() {
             skills: Array.isArray(synced.skills) ? synced.skills : [],
             certifications: Array.isArray(synced.certifications) ? synced.certifications : [],
             dissertations: Array.isArray(synced.dissertations) ? synced.dissertations : [],
+            demos: Array.isArray(synced.demos) ? synced.demos : [],
             blogPosts: Array.isArray(synced.blogPosts) ? synced.blogPosts : [],
             socialLinks: Array.isArray(synced.socialLinks) ? synced.socialLinks : [],
           });
@@ -479,6 +482,7 @@ export default function AdminDashboard() {
           skills: Array.isArray(jsonData.skills) ? jsonData.skills : [],
           certifications: Array.isArray(jsonData.certifications) ? jsonData.certifications : [],
           dissertations: Array.isArray(jsonData.dissertations) ? jsonData.dissertations : [],
+          demos: Array.isArray(jsonData.demos) ? jsonData.demos : [],
           blogPosts: Array.isArray(jsonData.blogPosts) ? jsonData.blogPosts : [],
           socialLinks: Array.isArray(jsonData.socialLinks) ? jsonData.socialLinks : [],
         });
@@ -542,24 +546,58 @@ export default function AdminDashboard() {
 
   const handleExperienceCompanyChange = (index: number, nextCompany: string) => {
     setData((previous: any) => {
-      const currentCompany = previous.experience?.[index]?.company || "";
-      const companyUsedByAnotherEntry = (previous.experience || []).some(
-        (entry: any, entryIndex: number) =>
-          entryIndex !== index && companiesMatch(entry.company, currentCompany)
-      );
-
       return {
         ...previous,
         experience: (previous.experience || []).map((entry: any, entryIndex: number) =>
           entryIndex === index ? { ...entry, company: nextCompany } : entry
         ),
-        projects: companyUsedByAnotherEntry
-          ? previous.projects
-          : (previous.projects || []).map((project: any) =>
-              companiesMatch(project.company, currentCompany)
-                ? { ...project, company: nextCompany }
-                : project
-            ),
+      };
+    });
+  };
+
+  const commitTagDraft = (kind: "experience" | "project", index: number) => {
+    const key = `${kind}-${index}`;
+    const draft = tagDrafts[key];
+    if (draft === undefined) return;
+    const tags = Array.from(new Set(draft.split(",").map((tag) => tag.trim()).filter(Boolean)));
+
+    setData((previous: any) => {
+      const collection = kind === "experience" ? "experience" : "projects";
+      return {
+        ...previous,
+        [collection]: (previous[collection] || []).map((item: any, itemIndex: number) =>
+          itemIndex === index ? { ...item, tags } : item
+        ),
+      };
+    });
+    setTagDrafts((previous) => {
+      const updated = { ...previous };
+      delete updated[key];
+      return updated;
+    });
+  };
+
+  const handleExperienceCompanyCommit = (
+    index: number,
+    previousCompany: string,
+    nextCompany: string
+  ) => {
+    if (!previousCompany || companiesMatch(previousCompany, nextCompany)) return;
+
+    setData((previous: any) => {
+      const companyUsedByAnotherEntry = (previous.experience || []).some(
+        (entry: any, entryIndex: number) =>
+          entryIndex !== index && companiesMatch(entry.company, previousCompany)
+      );
+      if (companyUsedByAnotherEntry) return previous;
+
+      return {
+        ...previous,
+        projects: (previous.projects || []).map((project: any) =>
+          companiesMatch(project.company, previousCompany)
+            ? { ...project, company: nextCompany }
+            : project
+        ),
       };
     });
   };
@@ -610,7 +648,22 @@ export default function AdminDashboard() {
     setSaveStatus({ success: false, message: "" });
 
     try {
-      const payload = canonicalizePortfolioContent({ ...data });
+      const dataWithTagDrafts = {
+        ...data,
+        experience: (data.experience || []).map((entry: any, index: number) => ({
+          ...entry,
+          ...(tagDrafts[`experience-${index}`] !== undefined
+            ? { tags: tagDrafts[`experience-${index}`] }
+            : {}),
+        })),
+        projects: (data.projects || []).map((project: any, index: number) => ({
+          ...project,
+          ...(tagDrafts[`project-${index}`] !== undefined
+            ? { tags: tagDrafts[`project-${index}`] }
+            : {}),
+        })),
+      };
+      const payload = canonicalizePortfolioContent(dataWithTagDrafts);
 
       const res = await fetch("/api/admin", {
         method: "POST",
@@ -622,6 +675,7 @@ export default function AdminDashboard() {
 
       if (res.ok) {
         setData(payload);
+        setTagDrafts({});
         setSaveStatus({ success: true, message: resData.message || "Saved successfully!" });
         setTimeout(() => setSaveStatus({ success: false, message: "" }), 4000);
       } else {
@@ -675,6 +729,9 @@ export default function AdminDashboard() {
   const experienceCompanies = getExperienceCompanies(data);
   const contentValidationIssues = getPortfolioValidationIssues(data);
   const duplicateExperienceCompanies = getDuplicateExperienceCompanies(data);
+  const linkedProjectCount = (data.projects || []).filter((project: any) =>
+    experienceCompanies.some((company) => companiesMatch(company, project.company))
+  ).length;
 
   // Sparkline coordinates
   const visitsPoints = analyticsData?.chartData ? analyticsData.chartData.map((d: any) => d.visits) : [0, 0];
@@ -716,6 +773,14 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`hidden md:flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-bold ${
+              contentValidationIssues.length === 0
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                : "border-amber-500/20 bg-amber-500/10 text-amber-500"
+            }`}>
+              {contentValidationIssues.length === 0 ? <ShieldCheck className="h-3.5 w-3.5" /> : <AlertTriangle className="h-3.5 w-3.5" />}
+              {contentValidationIssues.length === 0 ? "Ready to publish" : `${contentValidationIssues.length} to fix`}
+            </div>
             <a
               href="/"
               target="_blank"
@@ -753,7 +818,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-10 relative z-10">
         {saveStatus.message && (
           <div
             role="status"
@@ -778,13 +843,14 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Navigation Card (Original) */}
-          <div className="lg:col-span-1 space-y-2 no-print lg:sticky lg:top-24 lg:self-start">
-            <div className="glass rounded-2xl p-2 lg:p-4 flex lg:block gap-1 lg:space-y-1 overflow-x-auto bg-[var(--card)] border border-[var(--glass-border)]">
+          <div className="lg:col-span-1 space-y-2 no-print sticky top-16 z-20 -mx-3 px-3 py-2 bg-[var(--background)]/90 backdrop-blur-md lg:mx-0 lg:px-0 lg:py-0 lg:top-24 lg:self-start lg:bg-transparent">
+            <div role="tablist" aria-label="Admin console sections" className="glass rounded-2xl p-2 lg:p-4 flex lg:block gap-1 lg:space-y-1 overflow-x-auto bg-[var(--card)] border border-[var(--glass-border)] [scrollbar-width:none]">
               {[
                 { id: "overview", label: "Console Overview", icon: Grid },
                 { id: "profile", label: "Profile Info", icon: User },
                 { id: "experience", label: "Work & Education", icon: Briefcase },
                 { id: "projects", label: "Projects by Company", icon: Layers },
+                { id: "demos", label: "Demo Websites", icon: Globe },
                 { id: "skills", label: "Technical Skills", icon: Activity },
                 { id: "blogs", label: "Blog Articles", icon: BookOpen },
                 { id: "certifications", label: "Certifications", icon: Award },
@@ -800,7 +866,10 @@ export default function AdminDashboard() {
                     type="button"
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    aria-pressed={active}
+                    id={`admin-tab-${tab.id}`}
+                    role="tab"
+                    aria-selected={active}
+                    aria-controls="admin-tab-panel"
                     className={`min-w-max lg:w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-[color,background-color,box-shadow] ${
                       active
                         ? "bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white shadow-md"
@@ -810,20 +879,28 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <TabIcon className="w-4 h-4" /> {tab.label}
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="hidden lg:block w-3.5 h-3.5" />
                   </button>
                 );
               })}
             </div>
 
-            <div className="p-4 bg-[var(--primary)]/5 border border-[var(--primary)]/10 rounded-2xl text-[10px] leading-relaxed text-[var(--muted-foreground)]">
-              💡 <strong>Publishing tip</strong>: Link every project to a company or institution from Work &amp; Education, then click <strong>Save Changes</strong> to publish.
+            <div className="hidden lg:block p-4 bg-[var(--primary)]/5 border border-[var(--primary)]/10 rounded-2xl text-[10px] leading-relaxed text-[var(--muted-foreground)]">
+              <strong className="text-[var(--foreground)]">Publishing guide</strong>
+              <span className="mt-1 block">{linkedProjectCount} of {(data.projects || []).length} projects are linked. Connect every project to Work &amp; Education, then save to publish.</span>
             </div>
           </div>
 
           {/* Right Workspace Card */}
           <div className="lg:col-span-3">
-            <div className="glass rounded-3xl p-6 md:p-8 space-y-6 bg-[var(--card)] border border-[var(--glass-border)] shadow-sm">
+            <div className="glass rounded-3xl p-4 sm:p-6 md:p-8 bg-[var(--card)] border border-[var(--glass-border)] shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+              <div
+                key={activeTab}
+                id="admin-tab-panel"
+                role="tabpanel"
+                aria-labelledby={`admin-tab-${activeTab}`}
+                className="surface-enter space-y-6"
+              >
               {/* === CONSOLE OVERVIEW TAB === */}
               {activeTab === "overview" && (
                 <div className="space-y-6">
@@ -930,6 +1007,10 @@ export default function AdminDashboard() {
                         <div className="p-3 bg-[var(--glass-bg)]/20 rounded-xl text-center space-y-1">
                           <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">Projects</span>
                           <p className="text-lg font-bold">{data?.projects?.length ?? 0}</p>
+                        </div>
+                        <div className="p-3 bg-[var(--glass-bg)]/20 rounded-xl text-center space-y-1">
+                          <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">Demos</span>
+                          <p className="text-lg font-bold">{data?.demos?.length ?? 0}</p>
                         </div>
                         <div className="p-3 bg-[var(--glass-bg)]/20 rounded-xl text-center space-y-1">
                           <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold">Blog Posts</span>
@@ -2238,7 +2319,24 @@ export default function AdminDashboard() {
                             <div className="grid grid-cols-1 gap-4">
                               <div className="space-y-1.5">
                                 <label htmlFor={`experience-company-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Globe className="w-3 h-3" /> Company / Institution</label>
-                                <input id={`experience-company-${idx}`} type="text" value={companyVal} onChange={(e) => handleExperienceCompanyChange(idx, e.target.value)} placeholder="e.g., Subisu Cablenet Pvt. Ltd." className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                                <input
+                                  id={`experience-company-${idx}`}
+                                  type="text"
+                                  value={companyVal}
+                                  onFocus={(e) => {
+                                    e.currentTarget.dataset.originalCompany = companyVal;
+                                  }}
+                                  onChange={(e) => handleExperienceCompanyChange(idx, e.target.value)}
+                                  onBlur={(e) =>
+                                    handleExperienceCompanyCommit(
+                                      idx,
+                                      e.currentTarget.dataset.originalCompany || "",
+                                      e.currentTarget.value
+                                    )
+                                  }
+                                  placeholder="e.g., Subisu Cablenet Pvt. Ltd."
+                                  className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
+                                />
                               </div>
                               <div className="space-y-1.5">
                                 <label htmlFor={`experience-company-url-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Link2 className="w-3 h-3" /> Company Website URL</label>
@@ -2253,7 +2351,15 @@ export default function AdminDashboard() {
 
                             <div className="space-y-1.5">
                               <label htmlFor={`experience-tags-${idx}`} className="text-[9px] uppercase font-bold text-[var(--muted-foreground)] flex items-center gap-1"><Hash className="w-3 h-3" /> Skills / Tags (Comma-separated)</label>
-                              <input id={`experience-tags-${idx}`} type="text" value={tagsVal} onChange={(e) => { const updated = [...data.experience]; updated[idx] = { ...updated[idx], tags: e.target.value }; setData((prev: any) => ({ ...prev, experience: updated })); }} placeholder="e.g., Cisco, OSPF, BGP, Network Administration" className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40" />
+                              <input
+                                id={`experience-tags-${idx}`}
+                                type="text"
+                                value={tagDrafts[`experience-${idx}`] ?? tagsVal}
+                                onChange={(e) => setTagDrafts((previous) => ({ ...previous, [`experience-${idx}`]: e.target.value }))}
+                                onBlur={() => commitTagDraft("experience", idx)}
+                                placeholder="e.g., Cisco, OSPF, BGP, Network Administration"
+                                className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-blue-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
+                              />
                               {tagsVal && (
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {tagsVal.split(",").map((t: string, i: number) => t.trim() && <span key={i} className="px-2 py-0.5 bg-blue-500/10 text-blue-500 text-[9px] font-bold rounded-full">{t.trim()}</span>)}
@@ -2566,12 +2672,9 @@ export default function AdminDashboard() {
                               <input
                                 id={`project-tags-${idx}`}
                                 type="text"
-                                value={tagsVal}
-                                onChange={(e) => {
-                                  const updated = [...data.projects];
-                                  updated[idx] = { ...updated[idx], tags: e.target.value };
-                                  setData((prev: any) => ({ ...prev, projects: updated }));
-                                }}
+                                value={tagDrafts[`project-${idx}`] ?? tagsVal}
+                                onChange={(e) => setTagDrafts((previous) => ({ ...previous, [`project-${idx}`]: e.target.value }))}
+                                onBlur={() => commitTagDraft("project", idx)}
                                 placeholder="e.g., Cisco ACI, OSPF, Terraform, AWS"
                                 className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500/40 transition-colors placeholder:text-[var(--muted-foreground)]/40"
                               />
@@ -2822,6 +2925,14 @@ export default function AdminDashboard() {
                     })}
                   </div>
                 </div>
+              )}
+
+              {/* === DEMO WEBSITES === */}
+              {activeTab === "demos" && data && (
+                <DemoManager
+                  demos={data.demos || []}
+                  onUpdateDemos={(updated) => setData((prev: any) => ({ ...prev, demos: updated }))}
+                />
               )}
 
               {/* === BLOG ARTICLES === */}
@@ -3344,6 +3455,7 @@ export default function AdminDashboard() {
                   )}
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>

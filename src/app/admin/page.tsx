@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw, User } from "lucide-react";
+import { Lock, ArrowRight, ShieldAlert, CheckCircle, KeyRound, Mail, ArrowLeft, RefreshCw, User, Database, ShieldCheck, Home } from "lucide-react";
 import { BackgroundOrbs } from "@/components/background-orbs";
 
 export default function AdminLogin() {
@@ -30,12 +31,17 @@ export default function AdminLogin() {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Unable to verify credentials");
+        setLoading(false);
+        return;
+      }
 
       if (data.success && data.requireOtp) {
         setStep("otp");
         setInfoMsg(
           data.hasResendKey === false
-            ? "OTP generated. Email delivery is not configured (RESEND_API_KEY missing) — check the server console for the 6-digit code."
+            ? "OTP generated, but email delivery is not configured (RESEND_API_KEY missing). In development the code is printed to the server console; in production set the key to receive it by email."
             : `A 6-digit OTP code has been sent to ${data.email || "your email"}.`
         );
         setLoading(false);
@@ -67,6 +73,11 @@ export default function AdminLogin() {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Unable to verify the code");
+        setLoading(false);
+        return;
+      }
 
       if (data.success) {
         setSuccess(true);
@@ -95,6 +106,10 @@ export default function AdminLogin() {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Failed to resend OTP");
+        return;
+      }
       if (data.success && data.requireOtp) {
         setInfoMsg(`A new 6-digit OTP code has been sent to your email.`);
       } else {
@@ -108,21 +123,45 @@ export default function AdminLogin() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative flex items-center justify-center p-4 overflow-hidden">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       <BackgroundOrbs />
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="glass rounded-3xl p-8 md:p-10 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-[var(--glass-border)]">
+      <div className="relative z-10 w-full max-w-5xl grid lg:grid-cols-[0.9fr_1.1fr] overflow-hidden rounded-[2rem] border border-[var(--glass-border)] bg-[var(--card)]/80 shadow-[0_30px_90px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+        <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/15" />
+          <div className="absolute -bottom-28 -left-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative">
+            <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur">
+              <Database className="h-6 w-6" />
+            </div>
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-white/70">Portfolio CMS</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight font-[family-name:var(--font-outfit)]">
+              Keep your portfolio current and publish-ready.
+            </h2>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-white/75">
+              Manage Work &amp; Education, company-linked projects, credentials, articles, messages, and site analytics in one secure console.
+            </p>
+          </div>
+          <div className="relative space-y-3 text-xs font-medium text-white/80">
+            <p className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Two-step administrator verification</p>
+            <p className="flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Content readiness checks before publishing</p>
+          </div>
+        </aside>
+
+        <div className="relative p-6 sm:p-8 md:p-10 lg:p-12">
           {/* Decorative radial gradient glow */}
           <div className="absolute -top-1/2 -right-1/4 w-[300px] h-[300px] bg-[var(--primary)] rounded-full opacity-[0.05] blur-[80px] pointer-events-none" />
 
           {/* Logo / Brand Header */}
-          <div className="text-center mb-8">
+          <Link href="/" className="absolute left-6 top-6 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--muted-foreground)] transition-colors hover:text-[var(--primary)] sm:left-8 sm:top-8 lg:left-12">
+            <Home className="h-3.5 w-3.5" /> Portfolio
+          </Link>
+          <div className="text-center mb-8 mt-10">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[var(--primary)] to-[var(--accent)] flex items-center justify-center mx-auto mb-4 shadow-[0_0_30px_var(--glow-primary)]">
               {step === "password" ? (
                 <Lock className="w-7 h-7 text-white" />
               ) : (
-                <KeyRound className="w-7 h-7 text-white animate-bounce" />
+                <KeyRound className="w-7 h-7 text-white" />
               )}
             </div>
             <h1 className="text-2xl font-extrabold font-[family-name:var(--font-outfit)] tracking-tight">
@@ -133,6 +172,10 @@ export default function AdminLogin() {
                 ? "Rajan Prakash Chand Portfolio CMS"
                 : "Enter the 6-digit OTP code sent to your email"}
             </p>
+            <div className="mt-5 flex items-center justify-center gap-2" aria-label={`Authentication step ${step === "password" ? "1" : "2"} of 2`}>
+              <span className="h-1.5 w-10 rounded-full bg-[var(--primary)]" />
+              <span className={`h-1.5 w-10 rounded-full transition-colors ${step === "otp" ? "bg-[var(--accent)]" : "bg-[var(--glass-border)]"}`} />
+            </div>
           </div>
 
           {/* Step 1: Enter Password */}
@@ -171,14 +214,14 @@ export default function AdminLogin() {
               </div>
 
               {error && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3 text-sm text-rose-500">
+                <div role="alert" className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3 text-sm text-rose-500 surface-enter">
                   <ShieldAlert className="w-5 h-5 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               {success && (
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500">
+                <div role="status" className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500 surface-enter">
                   <CheckCircle className="w-5 h-5 shrink-0" />
                   <span>Password Verified! Requesting 2FA Code...</span>
                 </div>
@@ -203,7 +246,7 @@ export default function AdminLogin() {
 
           {/* Step 2: 2FA OTP Code Verification */}
           {step === "otp" && (
-            <form onSubmit={handleOtpSubmit} className="space-y-6">
+            <form onSubmit={handleOtpSubmit} className="space-y-6 surface-enter">
               {infoMsg && (
                 <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3 text-xs text-blue-500 font-medium leading-relaxed">
                   <Mail className="w-4 h-4 shrink-0 mt-0.5" />
@@ -232,14 +275,14 @@ export default function AdminLogin() {
               </div>
 
               {error && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3 text-sm text-rose-500">
+                <div role="alert" className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3 text-sm text-rose-500 surface-enter">
                   <ShieldAlert className="w-5 h-5 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               {success && (
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500">
+                <div role="status" className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3 text-sm text-emerald-500 surface-enter">
                   <CheckCircle className="w-5 h-5 shrink-0" />
                   <span>2FA Verified! Access Granted...</span>
                 </div>

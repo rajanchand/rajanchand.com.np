@@ -266,8 +266,13 @@ export async function sendOtpEmailNotification(
     }
   } else {
     console.warn(`[SECURITY WARNING] RESEND_API_KEY is not configured in environment variables. Email to ${adminEmail} skipped.`);
-    console.log(`[OTP DISPATCH] To: ${adminEmail} | 6-Digit OTP: ${otpCode}`);
-    console.log(`[DETAILS] IP: ${deviceInfo.ip} | ISP: ${deviceInfo.isp} | OS: ${deviceInfo.os} | Location: ${locationStr}`);
+    // Printing the code is a local development affordance; production logs must never carry it.
+    if (process.env.NODE_ENV === "production") {
+      console.warn("[OTP DISPATCH] Code withheld from logs in production. Configure RESEND_API_KEY to receive it by email.");
+    } else {
+      console.log(`[OTP DISPATCH] To: ${adminEmail} | 6-Digit OTP: ${otpCode}`);
+      console.log(`[DETAILS] IP: ${deviceInfo.ip} | ISP: ${deviceInfo.isp} | OS: ${deviceInfo.os} | Location: ${locationStr}`);
+    }
   }
 }
 

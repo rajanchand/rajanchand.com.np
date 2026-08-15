@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { skills as defaultSkills } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -122,37 +121,6 @@ const defaultCategoryConfig = {
   }
 };
 
-// Animated progress bar that fills when visible
-function AnimatedBar({ width, barColor, delay }: { width: number; barColor: string; delay: number }) {
-  const [animated, setAnimated] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setAnimated(true), delay * 100);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800/60 overflow-hidden mt-2">
-      <div
-        className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-1000 ease-out`}
-        style={{ width: animated ? `${width}%` : "0%" }}
-      />
-    </div>
-  );
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Skills({ skills: customSkills }: { skills?: any[] } = {}) {
   const skills = customSkills || defaultSkills;
@@ -235,9 +203,8 @@ export function Skills({ skills: customSkills }: { skills?: any[] } = {}) {
                         </p>
                       </div>
 
-                      {/* Skill count badge */}
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 rounded-full px-2.5 py-1 shrink-0">
-                        {items.length} skills
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-full px-2.5 py-1 shrink-0">
+                        {items.length}
                       </span>
                     </div>
 
@@ -261,22 +228,6 @@ export function Skills({ skills: customSkills }: { skills?: any[] } = {}) {
                       })}
                     </div>
 
-                    {/* Animated Proficiency Bar */}
-                    <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-800/60">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                          Proficiency
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                          {items.length} / {config.skillCount + items.length} technologies
-                        </span>
-                      </div>
-                      <AnimatedBar
-                        width={Math.min(95, 60 + items.length * 7)}
-                        barColor={classes.barColor}
-                        delay={i}
-                      />
-                    </div>
                   </div>
 
                 </div>

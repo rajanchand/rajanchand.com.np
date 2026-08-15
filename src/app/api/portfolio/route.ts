@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { supabase } from "@/lib/supabase";
 import fs from "fs";
 import path from "path";
-import { getClientIp } from "@/lib/auth";
+import { getClientIp, stripAdminSecrets } from "@/lib/auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { serverError } from "@/lib/api-response";
 
@@ -30,10 +30,7 @@ export async function GET() {
       .maybeSingle();
 
     if (!error && dbData && dbData.content) {
-      const content = { ...dbData.content };
-      delete content._adminPasswordHash;
-      delete content._adminUsername;
-      return NextResponse.json(content);
+      return NextResponse.json(stripAdminSecrets(dbData.content));
     }
 
     if (error) {
@@ -56,7 +53,7 @@ export async function GET() {
         }
       }
 
-      return NextResponse.json(localData);
+      return NextResponse.json(stripAdminSecrets(localData));
     }
 
     return NextResponse.json({ error: "Data source not found" }, { status: 404 });

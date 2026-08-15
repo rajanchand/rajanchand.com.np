@@ -138,8 +138,29 @@
       "label": "Experience"
     },
     {
+      "href": "/demos",
+      "label": "Demos"
+    },
+    {
       "href": "#articles",
       "label": "Blog"
+    }
+  ],
+  "demos": [
+    {
+      "title": "Zero Trust Security Demo",
+      "summary": "Interactive demo for Zero Trust access in remote work environments.",
+      "about": "A hands-on Zero Trust security demonstration that continuously validates user identity, device posture, and contextual risk before granting access — reducing the attack surface compared with traditional perimeter VPNs.",
+      "websiteUrl": "https://zero-trust-security.org/login",
+      "githubUrl": "https://github.com/rajanchand/zerotrustsecurity-demo.git",
+      "docUrl": "https://github.com/rajanchand/zerotrustsecurity-demo#readme",
+      "docs": "## Overview\n\nThis demo shows continuous verification for remote access instead of one-time VPN trust.\n\n## Try it\n1. Open the live demo URL\n2. Sign in with a test account\n3. Observe posture and session checks\n\n## Source\nFull code and setup notes are in the GitHub repository.",
+      "tags": [
+        "Zero Trust",
+        "Security",
+        "Remote Work"
+      ],
+      "status": "live"
     }
   ],
   "projects": [
@@ -398,6 +419,7 @@
     "title": "Network Engineer & MSc IT Researcher",
     "github": "https://github.com/rajanchand",
     "linkedin": "https://www.linkedin.com/in/rajanprakashchand/",
+    "whatsappNumber": "447570731478",
     "location": "Scotland, UK",
     "resumeUrl": "https://docs.google.com/document/d/13QEIluf0chCM3Tj_uF8Q3L-sUYlWhoP9Q601qw6dC54/export?format=pdf",
     "shortName": "RC",

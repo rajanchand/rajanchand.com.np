@@ -180,6 +180,7 @@ export async function POST(request: Request) {
     // Force revalidation of all site pages
     revalidatePath("/");
     revalidatePath("/blog");
+    revalidatePath("/demos");
     revalidatePath("/dissertions");
     
     // Also revalidate dynamic slug posts

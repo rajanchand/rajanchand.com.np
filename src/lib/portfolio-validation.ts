@@ -92,6 +92,13 @@ export function canonicalizePortfolioContent<T>(data: T): T {
           }),
         }
       : {}),
+    ...(Array.isArray(data.demos)
+      ? {
+          demos: data.demos.map((demo) =>
+            isRecord(demo) ? { ...demo, tags: normalizeTags(demo.tags) } : demo
+          ),
+        }
+      : {}),
   } as T;
 }
 
@@ -168,6 +175,33 @@ export function getPortfolioValidationIssues(data: unknown): string[] {
       issues.push(`${title || `Project ${index + 1}`} has an invalid website URL.`);
     }
   });
+
+  if (Array.isArray(data.demos)) {
+    data.demos.forEach((demo, index) => {
+      if (!isRecord(demo)) {
+        issues.push(`Demo website ${index + 1} is invalid.`);
+        return;
+      }
+
+      const title = text(demo.title);
+      if (!title) issues.push(`Demo website ${index + 1} needs a title.`);
+      if (!text(demo.summary) && !text(demo.about)) {
+        issues.push(`${title || `Demo website ${index + 1}`} needs a summary or about text.`);
+      }
+      if (!text(demo.websiteUrl) && !text(demo.githubUrl)) {
+        issues.push(`${title || `Demo website ${index + 1}`} needs a live URL or GitHub link.`);
+      }
+      if (!isHttpUrl(demo.websiteUrl)) {
+        issues.push(`${title || `Demo website ${index + 1}`} has an invalid website URL.`);
+      }
+      if (!isHttpUrl(demo.githubUrl)) {
+        issues.push(`${title || `Demo website ${index + 1}`} has an invalid GitHub URL.`);
+      }
+      if (!isHttpUrl(demo.docUrl)) {
+        issues.push(`${title || `Demo website ${index + 1}`} has an invalid documentation URL.`);
+      }
+    });
+  }
 
   return issues;
 }

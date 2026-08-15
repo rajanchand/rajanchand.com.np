@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Menu, X, ChevronDown, Github, FileText, BookOpen, Award } from "lucide-react";
+import { Menu, X, ChevronDown, Github, FileText, BookOpen, Award, Globe } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { siteConfig as defaultSiteConfig, socialLinks } from "@/lib/data";
 import Link from "next/link";
@@ -16,7 +16,7 @@ const sectionIds = ["home", "skills", "experience", "certifications", "contact"]
 const navItems = [
   { id: "home", label: "Home", href: "#home" },
   { id: "skills", label: "Skills", href: "#skills" },
-  { id: "experience", label: "Experience", href: "#experience" },
+  { id: "experience", label: "Work & Projects", href: "#experience" },
   { id: "certifications", label: "Certifications", href: "#certifications" },
 ];
 
@@ -89,6 +89,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
   const isOffHome =
     pathname?.startsWith("/blog") ||
     pathname?.startsWith("/dissertions") ||
+    pathname?.startsWith("/demos") ||
     pathname?.startsWith("/admin");
 
   const isActive = (id: string) => !isOffHome && activeSection === id;
@@ -110,7 +111,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
       id="header"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="pt-2.5 pb-2.5 px-3 mx-auto w-full md:flex md:justify-between max-w-7xl md:px-4 items-center">
+      <div className="pt-2.5 pb-2.5 px-3 mx-auto w-full lg:flex lg:justify-between max-w-7xl sm:px-4 items-center">
         <div className="flex justify-between items-center gap-2">
           <Link className="flex items-center gap-2 min-h-11 touch-manipulation" href="/" onClick={closeMobile}>
             <svg
@@ -137,7 +138,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
             </span>
           </Link>
 
-          <div className="flex items-center md:hidden gap-1">
+          <div className="flex items-center lg:hidden gap-1">
             <ThemeToggle />
             <button
               type="button"
@@ -154,7 +155,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
 
         {/* Desktop Navigation */}
         <nav
-          className="items-center w-full md:w-auto hidden md:flex text-gray-600 dark:text-slate-200"
+          className="items-center w-full lg:w-auto hidden lg:flex text-gray-600 dark:text-slate-200"
           aria-label="Main navigation"
         >
           <ul className="flex flex-row self-center w-auto text-sm lg:text-base items-center gap-0.5">
@@ -176,6 +177,16 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                className={`font-medium px-3 lg:px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer ${
+                  pathname?.startsWith("/demos") ? "text-[var(--primary)]" : "hover:text-gray-900 dark:hover:text-white"
+                }`}
+                href="/demos"
+              >
+                Demos
+              </Link>
+            </li>
             <li>
               <Link
                 className={`font-medium px-3 lg:px-4 py-3 flex items-center transition duration-150 ease-in-out cursor-pointer ${
@@ -232,6 +243,14 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
                   </li>
                   <li>
                     <Link
+                      href="/demos"
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:text-[var(--primary)] hover:bg-gray-100 dark:hover:bg-zinc-800 transition duration-150"
+                    >
+                      <Globe className="w-4 h-4 shrink-0" /> Demo Websites
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       href="/dissertions"
                       className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:text-[var(--primary)] hover:bg-gray-100 dark:hover:bg-zinc-800 transition duration-150"
                     >
@@ -270,7 +289,7 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
       {/* Mobile Menu */}
       <div
         id="mobile-nav"
-        className={`md:hidden fixed inset-0 top-[calc(3.5rem+env(safe-area-inset-top))] z-50 transition-all duration-300 ease-out ${
+        className={`lg:hidden fixed inset-0 top-[calc(3.5rem+env(safe-area-inset-top))] z-50 transition-all duration-300 ease-out ${
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
@@ -304,6 +323,19 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href="/demos"
+                onClick={closeMobile}
+                className={`flex items-center min-h-12 px-4 rounded-xl transition-colors touch-manipulation ${
+                  pathname?.startsWith("/demos")
+                    ? "bg-[var(--primary)]/10 text-[var(--primary)]"
+                    : "active:bg-gray-100 dark:active:bg-zinc-800"
+                }`}
+              >
+                Demos
+              </Link>
+            </li>
             <li>
               <Link
                 href="/blog"
@@ -344,6 +376,13 @@ export function Navbar({ siteConfig: customSiteConfig }: NavbarProps = {}) {
               >
                 <FileText className="w-4 h-4 text-[var(--primary)]" /> Resume / CV
               </a>
+              <Link
+                href="/demos"
+                onClick={closeMobile}
+                className="flex items-center gap-3 min-h-12 px-4 rounded-xl active:bg-gray-100 dark:active:bg-zinc-800 touch-manipulation"
+              >
+                <Globe className="w-4 h-4 text-[var(--primary)]" /> Demo websites
+              </Link>
               <Link
                 href="/dissertions"
                 onClick={closeMobile}

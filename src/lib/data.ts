@@ -37,6 +37,7 @@ export const certifications = [...(data.certifications || [])];
 export const testimonials = [...(data.testimonials || [])];
 export const blogPosts = [...(data.blogPosts || [])];
 export const dissertions = [...(data.dissertations || [])];
+export const demos = [...(((data as { demos?: unknown[] }).demos) || [])] as Array<Record<string, unknown>>;
 export const socialLinks = [...(data.socialLinks || [])];
 export const navLinks = [...(data.navLinks || [])];
 
@@ -71,6 +72,7 @@ export function updatePortfolioData(newData: any) {
   if (newData.testimonials) syncArray(testimonials, newData.testimonials);
   if (newData.blogPosts) syncArray(blogPosts, newData.blogPosts);
   if (newData.dissertations) syncArray(dissertions, newData.dissertations);
+  if (newData.demos) syncArray(demos, newData.demos);
   if (newData.socialLinks) syncArray(socialLinks, newData.socialLinks);
   if (newData.navLinks) syncArray(navLinks, newData.navLinks);
 }

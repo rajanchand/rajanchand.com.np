@@ -47,6 +47,10 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Couldn't send your message. Please try again.");
+        return;
+      }
 
       if (data.success) {
         setSuccess(true);
@@ -66,11 +70,11 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
     <section id="contact" className="relative z-10 py-10 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
-          <div className="glass rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
+          <div className="glass rounded-3xl p-5 sm:p-8 md:p-12 lg:p-14 relative overflow-hidden shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
             {/* Decorative glow */}
             <div className="absolute -top-1/2 -right-1/4 w-[400px] h-[400px] bg-[var(--primary)] rounded-full opacity-[0.04] blur-[100px] pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 lg:gap-16">
               {/* Left — Info */}
               <div>
                 <SectionHeader
@@ -83,7 +87,7 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                   Have a project in mind or an opportunity to discuss? I&apos;d love to hear from you. Let&apos;s build something great together.
                 </p>
 
-                <div className="space-y-5 mb-8">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 mb-8">
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center shrink-0">
                       <Mail className="w-5 h-5 text-[var(--primary)]" />
@@ -102,7 +106,10 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                     </div>
                     <div>
                       <span className="text-xs text-[var(--muted-foreground)] block">Location</span>
-                      <span className="text-sm font-medium">{siteConfig.location}</span>
+                      <span className="text-sm font-medium">
+                        {siteConfig.location}
+                        {siteConfig.locationOrigin ? ` · Originally from ${siteConfig.locationOrigin}` : ""}
+                      </span>
                     </div>
                   </div>
 
@@ -118,16 +125,6 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                     </div>
                   </div>
 
-                  {/* Origin Location */}
-                  <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center shrink-0">
-                      <MapPin className="w-5 h-5 text-[var(--primary)]" />
-                    </div>
-                    <div>
-                      <span className="text-xs text-[var(--muted-foreground)] block">Originally From</span>
-                      <span className="text-sm font-medium">{siteConfig.locationOrigin || "Nepal"}</span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Availability Status */}
@@ -173,7 +170,7 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
               </div>
 
               {/* Right — Form */}
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)]/40 p-4 sm:p-6" aria-label="Contact form">
                 {/* Honeypot — invisible to real visitors, bots fill every field */}
                 <input
                   type="text"
@@ -184,42 +181,54 @@ export function Contact({ siteConfig: customSiteConfig, socialLinks: customSocia
                   className="absolute -left-[9999px] w-px h-px opacity-0"
                 />
                 <div>
+                  <label htmlFor="contact-name" className="mb-2 block text-xs font-semibold text-[var(--foreground)]">
+                    Name
+                  </label>
                   <input
                     type="text"
                     name="name"
                     id="contact-name"
-                    placeholder="Your Name"
+                    placeholder="Your name"
                     required
                     disabled={loading}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
+                  <label htmlFor="contact-email" className="mb-2 block text-xs font-semibold text-[var(--foreground)]">
+                    Email address
+                  </label>
                   <input
                     type="email"
                     name="email"
                     id="contact-email"
-                    placeholder="Your Email"
+                    placeholder="you@example.com"
                     required
                     disabled={loading}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
+                  <label htmlFor="contact-subject" className="mb-2 block text-xs font-semibold text-[var(--foreground)]">
+                    Subject <span className="font-normal text-[var(--muted-foreground)]">(optional)</span>
+                  </label>
                   <input
                     type="text"
                     name="subject"
                     id="contact-subject"
-                    placeholder="Subject"
+                    placeholder="What would you like to discuss?"
                     disabled={loading}
                     className="w-full px-5 py-3.5 bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-xl text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] transition-colors disabled:opacity-60"
                   />
                 </div>
                 <div>
+                  <label htmlFor="contact-message" className="mb-2 block text-xs font-semibold text-[var(--foreground)]">
+                    Message
+                  </label>
                   <textarea
                     name="message"
                     id="contact-message"
-                    placeholder="Your Message"
+                    placeholder="Share a few details about your project or opportunity..."
                     required
                     disabled={loading}
                     rows={5}

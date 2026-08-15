@@ -7,9 +7,9 @@ import { ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 
 const gradients = [
-  "from-[#6d28d9] to-[#06b6d4]",
-  "from-[#06b6d4] to-[#10b981]",
-  "from-[#a855f7] to-[#ec4899]",
+  "from-[var(--primary)] to-[var(--accent)]",
+  "from-[var(--accent)] to-cyan-500",
+  "from-blue-700 to-[var(--primary)]",
 ];
 
 function formatDate(dateStr: string) {
@@ -37,8 +37,16 @@ export function Articles({ blogPosts: customBlogPosts }: { blogPosts?: any[] } =
           />
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogPosts.map((post, i) => (
+        {blogPosts.length === 0 ? (
+          <div className="glass rounded-2xl border-dashed p-10 text-center">
+            <p className="text-sm font-semibold">New articles are on the way.</p>
+            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+              Check back soon for practical notes on networks, security, and IT research.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogPosts.map((post, i) => (
             <ScrollReveal key={post.slug} delay={i * 0.12}>
               <Link href={`/blog/${post.slug}`} className="block h-full">
               <article className="group glass rounded-2xl overflow-hidden hover:-translate-y-2 hover:border-[var(--accent)]/30 hover:shadow-[0_20px_50px_var(--glow-accent)] transition-all duration-500 h-full flex flex-col">
@@ -89,8 +97,9 @@ export function Articles({ blogPosts: customBlogPosts }: { blogPosts?: any[] } =
               </article>
               </Link>
             </ScrollReveal>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -75,7 +75,7 @@ export default async function DissertionsListing() {
     }));
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 selection:bg-[var(--primary)]/30 relative overflow-hidden transition-colors duration-300">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)]/30 relative overflow-hidden transition-colors duration-300">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: "/" },
@@ -85,7 +85,7 @@ export default async function DissertionsListing() {
       <BackgroundOrbs />
       <Navbar siteConfig={data?.siteConfig} />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 md:pb-28">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 md:pb-24">
         <ScrollReveal>
           <div className="mb-4">
             <Link
@@ -108,7 +108,7 @@ export default async function DissertionsListing() {
         <div className="space-y-8 mt-10">
           {dataList.length === 0 ? (
             <ScrollReveal>
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center">
+                <div className="glass rounded-3xl p-8 sm:p-12 text-center">
                 <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                 <h3 className="text-lg font-bold">No publications found</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -119,7 +119,7 @@ export default async function DissertionsListing() {
           ) : (
             dataList.map((doc, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
-                <div className="bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:border-[var(--primary)]/30 transition-all duration-300 rounded-3xl p-6 md:p-8 relative overflow-hidden backdrop-blur-md">
+                <article className="glass shadow-sm hover:shadow-md hover:border-[var(--primary)]/30 transition-[box-shadow,border-color,transform] duration-300 rounded-3xl p-5 sm:p-6 md:p-8 relative overflow-hidden hover:-translate-y-0.5">
                   <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--primary)]/5 rounded-full blur-[80px] pointer-events-none" />
 
                   <div className="space-y-5">
@@ -163,7 +163,7 @@ export default async function DissertionsListing() {
                           href={doc.pdfUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
+                          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary)]/90 active:scale-95 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
                         >
                           View Document
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -175,7 +175,7 @@ export default async function DissertionsListing() {
                           href={doc.websiteUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
+                          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--foreground)] rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 transition-all duration-150 cursor-pointer"
                         >
                           <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           Website
@@ -188,7 +188,7 @@ export default async function DissertionsListing() {
                           href={doc.githubUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-slate-200 dark:border-slate-800 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-150 cursor-pointer"
+                          className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--foreground)] rounded-xl text-xs font-semibold hover:border-[var(--primary)]/30 transition-all duration-150 cursor-pointer"
                         >
                           <GitBranch className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           GitHub
@@ -197,7 +197,7 @@ export default async function DissertionsListing() {
                       )}
                     </div>
                   </div>
-                </div>
+                </article>
               </ScrollReveal>
             ))
           )}
