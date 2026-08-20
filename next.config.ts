@@ -13,6 +13,17 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Redirects
+  async redirects() {
+    return [
+      {
+        source: "/login",
+        destination: "/admin",
+        permanent: false,
+      },
+    ];
+  },
+
   // Security headers for all responses
   async headers() {
     return [
